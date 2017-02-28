@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from collective.contact.importexport import _
-
 from plone import api
 from plone.app.textfield.value import RichTextValue
 from plone.dexterity.interfaces import IDexterityFTI
@@ -9,17 +8,16 @@ from plone.namedfile.field import NamedFile
 from plone.supermodel.interfaces import FIELDSETS_KEY
 from plone.supermodel.utils import mergedTaggedValueList
 from Products.CMFPlone.utils import safe_unicode
-from zope.component.interface import nameToInterface
+from z3c.form import button
 from zope import schema
 from zope.component import getUtility
+from zope.component.interface import nameToInterface
 from zope.schema import getFieldsInOrder
-from z3c.form import button
 
-import StringIO
-import copy
 import csv
 import logging
-import unicodedata
+import StringIO
+
 
 logger = logging.getLogger('collective.context.importexport import')
 
@@ -117,7 +115,7 @@ class ImportForm(form.SchemaForm):
     def process_csv(self, data, portal_type):
         """
         """
-        # TODO sort and order organizations
+        # sort and order organizations
         io = StringIO.StringIO(data)
         reader = csv.reader(io, delimiter=';', dialect='excel', quotechar='"')
         headers = reader.next()
@@ -162,15 +160,18 @@ class ImportForm(form.SchemaForm):
                     if key == 'activity':
                         activity.append(value.encode('utf8'))
                     setattr(obj, key, value.encode('utf8'))
-                    logger.info('Set {} for {}'.format(key, obj.title))
+                    logger.info('Set {0} for {1}'.format(
+                        key, obj.get('title')
+                    ))
                     # import ipdb; ipdb.set_trace()
                 activity.append('</p>')
-                obj.activity = RichTextValue(unicode(''.join(activity), 'utf8'))
+                obj.activity = RichTextValue(
+                                    unicode(''.join(activity), 'utf8'))
 
                 updated += 1
                 api.content.transition(obj=obj, to_state=self.next_state)
                 obj.reindexObject()
-                logger.info("{}/{}: {} added".format(
+                logger.info('{0}/{1}: {2} added'.format(
                     updated,
                     row_count,
                     obj.title.encode('utf8'))
@@ -189,25 +190,27 @@ class ImportForm(form.SchemaForm):
             organizations_file = data['organizations_file'].data
             number = self.process_csv(organizations_file, 'organization')
             if number is not None:
-                self.status = "File uploaded. {} new organizations created.".format(number)
+                self.status = 'File uploaded. {0} new organizations created.'.format(number)  # noqa
 
         # if data.get('persons_file'):
         #     persons_file = data['persons_file'].data
         #     number = self.process_csv(persons_file)
         #     if number is not None:
-        #         self.status = "File uploaded. {} new persons created.".format(number)
+        #         self.status = "File uploaded. {} new persons created.".format(number)  # noqa
+
         #
         # if data.get('functions_file'):
         #     functions_file = data['functions_file'].data
         #     number = self.process_csv(functions_file)
         #     if number is not None:
-        #         self.status = "File uploaded. {} new functions created.".format(number)
+        #         self.status = "File uploaded. {} new functions created.".format(number)  # noqa
+
         #
         # if data.get('occupied_functions_file'):
         #     occupied_functions_file = data['occupied_functions_file'].data
         #     number = self.process_csv(occupied_functions_file)
         #     if number is not None:
-        #         self.status = "File uploaded. {} new occupied functions created.".format(number)
+        #         self.status = "File uploaded. {} new occupied functions created.".format(number)  # noqa
 
 
 def get_all_fields_from(portal_type):

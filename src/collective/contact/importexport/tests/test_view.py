@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from collective.contact.importexport.testing import COLLECTIVE_CONTACT_IMPORTEXPORT_INTEGRATION_TESTING  # noqa
 from plone import api
-from plone.app.testing import TEST_USER_ID
 from plone.app.testing import setRoles
+from plone.app.testing import TEST_USER_ID
+
 import unittest
 
 

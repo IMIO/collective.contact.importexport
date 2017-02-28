@@ -3,11 +3,13 @@ from collective.contact.importexport.browser.import_view import are_headers_in_f
 from collective.contact.importexport.testing import COLLECTIVE_CONTACT_IMPORTEXPORT_INTEGRATION_TESTING  # noqa
 from io import BytesIO
 from plone import api
-from plone.app.testing import TEST_USER_ID
 from plone.app.testing import setRoles
-from ZPublisher.HTTPRequest import ZopeFieldStorage, FileUpload
-import unittest
+from plone.app.testing import TEST_USER_ID
+from ZPublisher.HTTPRequest import FileUpload
+from ZPublisher.HTTPRequest import ZopeFieldStorage
+
 import os
+import unittest
 
 
 class TestImport(unittest.TestCase):

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<object name="directory" meta_type="Dexterity FTI" i18n:domain="collective.contact.core"
+   xmlns:i18n="http://xml.zope.org/namespaces/i18n">
+  <action title="Import" action_id="collective_contact_import"
+     category="object" condition_expr=""
+     url_expr="string:${object_url}/collective_contact_importexport_import_view"
+     visible="True">
+     <permission value="Modify portal content" />
+  </action>
+</object>

@@ -1,0 +1,55 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2017-02-28 08:22+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Language-Code: en\n"
+"Language-Name: English\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: DOMAIN\n"
+
+#: ../browser/import_view.py:180
+msgid "Import"
+msgstr ""
+
+#: ../browser/import_view.py:109
+msgid "Import contacts"
+msgstr ""
+
+#: ../browser/import_view.py:87
+msgid "Import csv organizations file"
+msgstr ""
+
+#: ../configure.zcml:21
+msgid "Installs the collective.contact.importexport add-on."
+msgstr ""
+
+#: ../browser/import_view.py:86
+msgid "Organizations file"
+msgstr ""
+
+#: ../browser/import_view.py:79
+msgid "Please select state for objects created."
+msgstr ""
+
+#: ../browser/import_view.py:78
+msgid "State after creation"
+msgstr ""
+
+#: ../configure.zcml:30
+msgid "Uninstalls the collective.contact.importexport add-on."
+msgstr ""
+
+#: ../configure.zcml:21
+msgid "collective.contact.importexport"
+msgstr ""
+
+#: ../configure.zcml:30
+msgid "collective.contact.importexport (uninstall)"
+msgstr ""

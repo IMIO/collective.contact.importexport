@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layers>
+  <layer
+      name="collective.contact.importexport"
+      interface="collective.contact.importexport.interfaces.ICollectiveContactImportexportLayer"
+      />
+</layers>

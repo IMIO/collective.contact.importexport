@@ -146,8 +146,15 @@ class ImportForm(form.SchemaForm):
         updated = 0
         for row in data:
             contents = {}
-            for field in fields:
-                contents[field] = get_cell(row, field)
+            activity = ['<p>']
+            for head in headers:
+                if head in fields:
+                    contents[head] = get_cell(row, safe_unicode(head))
+                else:
+                    activity.append(get_cell(
+                        row,
+                        safe_unicode(head)
+                    ).encode('utf8'))
             # do not get empty lines/title of csv
             if contents.get('title', False):
                 obj = api.content.create(
@@ -155,7 +162,6 @@ class ImportForm(form.SchemaForm):
                     type=portal_type,
                     title=contents['title']
                 )
-                activity = ['<p>']
                 for key, value in contents.items():
                     if key == 'activity':
                         activity.append(value.encode('utf8'))
@@ -166,7 +172,7 @@ class ImportForm(form.SchemaForm):
                     # import ipdb; ipdb.set_trace()
                 activity.append('</p>')
                 obj.activity = RichTextValue(
-                                    unicode(''.join(activity), 'utf8'))
+                                    unicode('<br />'.join(activity), 'utf8'))
 
                 updated += 1
                 api.content.transition(obj=obj, to_state=self.next_state)

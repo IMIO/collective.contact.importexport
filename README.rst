@@ -6,20 +6,24 @@
 collective.contact.importexport
 ===============================
 
-Tell me what your product does
+Import and export organizations and persons with csv files, there are 4 csv files:
+- organizations
+- persons
+- functions_file
+- occupied_functions_file
+
+! This is a WIP, only flat organizations can be imported for now.
 
 Features
 --------
 
-- Can be bullet points
+- Import flat organizations list
 
 
-Examples
---------
+Examples of csv files
+---------------------
 
-This add-on can be seen in action at the following sites:
-- Is there a page on the internet where everybody can see the features?
-
+ https://github.com/IMIO/collective.contact.importexport/blob/master/src/collective/contact/importexport/tests/data/organizations.csv
 
 Documentation
 -------------
@@ -32,7 +36,8 @@ Translations
 
 This product has been translated into
 
-- Klingon (thanks, K'Plai)
+- French
+- English
 
 
 Installation
@@ -54,16 +59,14 @@ and then running ``bin/buildout``
 Contribute
 ----------
 
-- Issue Tracker: https://github.com/collective/collective.contact.importexport/issues
-- Source Code: https://github.com/collective/collective.contact.importexport
-- Documentation: https://docs.plone.org/foo/bar
+- Issue Tracker: https://github.com/IMIO/collective.contact.importexport/issues
+- Source Code: https://github.com/IMIO/collective.contact.importexport
 
 
 Support
 -------
 
-If you are having issues, please let us know.
-We have a mailing list located at: project@example.com
+If you are having issues, please let us know in github issues tracker.
 
 
 License

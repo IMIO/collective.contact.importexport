@@ -14,7 +14,7 @@ long_description = '\n\n'.join([
 
 setup(
     name='collective.contact.importexport',
-    version='1.0a1',
+    version='0.1',
     description="An add-on for Plone for collective.contact suite",
     long_description=long_description,
     # Get more from https://pypi.python.org/pypi?%3Aaction=list_classifiers

@@ -22,26 +22,26 @@ import StringIO
 logger = logging.getLogger('collective.context.importexport import')
 
 
-fields = (
-    u'title',
-    u'description',
-    u'activity',
-    # u'subtitle',
-    u'street',
-    u'number',
-    u'additional_address_details'
-    u'zip_code',
-    u'city',
-    u'phone',
-    u'cell_phone',
-    u'fax',
-    u'email',
-    u'website',
-    u'region',
-    u'country',
-)
+# fields = (
+#     u'title',
+#     u'description',
+#     u'activity',
+#     # u'subtitle',
+#     u'street',
+#     u'number',
+#     u'additional_address_details'
+#     u'zip_code',
+#     u'city',
+#     u'phone',
+#     u'cell_phone',
+#     u'fax',
+#     u'email',
+#     u'website',
+#     u'region',
+#     u'country',
+# )
 
-help_text = u"""
+help_text = _(u"""
 <p>
 You can import organization from a csv file. This file should contains headers:
 If you have a flat list of organizations, let id and id_parent fields empty.
@@ -64,9 +64,10 @@ If you have a flat list of organizations, let id and id_parent fields empty.
     <li>region</li>
     <li>country</li>
 </ul>
-Other column will be added into content.
+Other column will be added into activity field.
+If a header match with a organization field, it will be added in field.
 </p>
-"""
+""")
 
 
 class IImportForm(form.Schema):

@@ -161,31 +161,34 @@ class ImportForm(form.SchemaForm):
                     ))
             # do not get empty lines/title of csv
             if contents.get('title', False):
-                obj = api.content.create(
-                    container=self.context,
-                    type=portal_type,
-                    title=contents['title']
-                )
-                for key, value in contents.items():
-                    if key == 'activity':
-                        activity.append(value)
-                    setattr(obj, key, value)
-                    logger.info('Set {0} for {1}'.format(
-                        key, obj.get('title')
-                    ))
-                    # import ipdb; ipdb.set_trace()
-                activity.append(u'</p>')
-                obj.activity = RichTextValue(u'<br />'.join(activity))
+                from plone.i18n.normalizer.interfaces import IURLNormalizer
+                futur_name = getUtility(
+                    IURLNormalizer).normalize(contents['title'])
+                if futur_name not in self.context.contentIds():
+                    obj = api.content.create(
+                        container=self.context,
+                        type=portal_type,
+                        title=contents['title']
+                    )
+                    for key, value in contents.items():
+                        if key == 'activity':
+                            activity.append(value)
+                        setattr(obj, key, value)
+                    activity.append(u'</p>')
+                    obj.activity = RichTextValue(u'<br />'.join(activity))
 
-                updated += 1
-                api.content.transition(obj=obj, to_state=self.next_state)
-                # import ipdb; ipdb.set_trace()
-                obj.reindexObject()
-                logger.info('{0}/{1}: {2} added'.format(
-                    updated,
-                    row_count,
-                    obj.title.encode('utf8'))
-                )
+                    updated += 1
+                    api.content.transition(obj=obj, to_state=self.next_state)
+                    obj.reindexObject()
+                    logger.info('{0}/{1}: {2} added'.format(
+                        updated,
+                        row_count,
+                        obj.title.encode('utf8'))
+                    )
+                else:
+                    logger.info('{0} already exists'.format(
+                        contents['title'].encode('utf8'))
+                    )
         return updated
 
     @button.buttonAndHandler(_(u'Import'), name='import')

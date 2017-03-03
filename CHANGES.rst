@@ -5,6 +5,9 @@ Changelog
 0.2 (unreleased)
 ----------------
 
+- Do not add duplicates.
+  [bsuttor]
+
 - Fix import with accent in title and add tests.
   [bsuttor]
 

@@ -6,6 +6,12 @@
 collective.contact.importexport
 ===============================
 
+.. image:: https://travis-ci.org/IMIO/collective.contact.importexport.png
+    :target: http://travis-ci.org/IMIO/collective.contact.importexport
+
+.. image:: https://coveralls.io/repos/github/IMIO/collective.contact.importexport/badge.svg?branch=master
+    :target: https://coveralls.io/github/IMIO/collective.contact.importexport?branch=master
+
 Import and export organizations and persons with csv files, there are 4 csv files:
 - organizations
 - persons

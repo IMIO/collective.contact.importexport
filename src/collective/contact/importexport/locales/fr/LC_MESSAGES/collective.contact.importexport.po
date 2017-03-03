@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2017-02-28 08:22+0000\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI +ZONE\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,15 +14,15 @@ msgstr ""
 "Preferred-Encodings: utf-8 latin1\n"
 "Domain: DOMAIN\n"
 
-#: ../browser/import_view.py:180
+#: ../browser/import_view.py:188
 msgid "Import"
 msgstr "Import"
 
-#: ../browser/import_view.py:109
+#: ../browser/import_view.py:108
 msgid "Import contacts"
 msgstr "Import des contacts"
 
-#: ../browser/import_view.py:87
+#: ../browser/import_view.py:86
 msgid "Import csv organizations file"
 msgstr "Importer un fichier csv avec des organisations"
 
@@ -30,15 +30,15 @@ msgstr "Importer un fichier csv avec des organisations"
 msgid "Installs the collective.contact.importexport add-on."
 msgstr "Installer le package collective.contact.importexport."
 
-#: ../browser/import_view.py:86
+#: ../browser/import_view.py:85
 msgid "Organizations file"
 msgstr "Fichier des organisations"
 
-#: ../browser/import_view.py:79
+#: ../browser/import_view.py:78
 msgid "Please select state for objects created."
 msgstr "Veuillez sélectionner l'état des objets qui seront crées"
 
-#: ../browser/import_view.py:78
+#: ../browser/import_view.py:77
 msgid "State after creation"
 msgstr "Etat après la création"
 

@@ -150,12 +150,15 @@ class ImportForm(form.SchemaForm):
             activity = ['<p>']
             for head in headers:
                 if head in fields:
-                    contents[head] = get_cell(row, safe_unicode(head))
+                    contents[head] = get_cell(
+                        row,
+                        safe_unicode(head)
+                    )
                 else:
                     activity.append(get_cell(
                         row,
                         safe_unicode(head)
-                    ).encode('utf8'))
+                    ))
             # do not get empty lines/title of csv
             if contents.get('title', False):
                 obj = api.content.create(
@@ -165,18 +168,18 @@ class ImportForm(form.SchemaForm):
                 )
                 for key, value in contents.items():
                     if key == 'activity':
-                        activity.append(value.encode('utf8'))
-                    setattr(obj, key, value.encode('utf8'))
+                        activity.append(value)
+                    setattr(obj, key, value)
                     logger.info('Set {0} for {1}'.format(
                         key, obj.get('title')
                     ))
                     # import ipdb; ipdb.set_trace()
-                activity.append('</p>')
-                obj.activity = RichTextValue(
-                                    unicode('<br />'.join(activity), 'utf8'))
+                activity.append(u'</p>')
+                obj.activity = RichTextValue(u'<br />'.join(activity))
 
                 updated += 1
                 api.content.transition(obj=obj, to_state=self.next_state)
+                # import ipdb; ipdb.set_trace()
                 obj.reindexObject()
                 logger.info('{0}/{1}: {2} added'.format(
                     updated,

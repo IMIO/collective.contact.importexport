@@ -98,3 +98,19 @@ IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelle;Activi
         self.assertIn(
             'Intercommunale de Mutualisation Informatique et Organisationnelle',  # noqa
             activity.raw)
+
+    def test_import_orga_with_accents(self):
+        view_name = 'collective_contact_importexport_import_view'
+        form = self.directory.restrictedTraverse(view_name)
+        form.update()
+        data = """title;id;id_parent;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
+IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+"""  # noqa
+        ofile = ofile = self._create_test_file_field('test.csv', data)
+        form.request.form['form.widgets.organizations_file'] = ofile
+        form.request.form['form.widgets.state'] = 'active'
+        self.assertEqual(len(self.directory.contentValues()), 0)
+        form.handleApply(form, form.request.form)
+        self.assertEqual(len(self.directory.contentValues()), 1)
+        title = self.directory.contentValues()[0].title
+        self.assertEqual(title, u'IMIO\xe9')

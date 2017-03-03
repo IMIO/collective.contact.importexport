@@ -5,7 +5,8 @@ Changelog
 0.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fix import with accent in title and add tests.
+  [bsuttor]
 
 
 0.1 (2017-03-02)

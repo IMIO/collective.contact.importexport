@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.3 (unreleased)
+0.3 (2017-04-25)
 ----------------
 
 - You can now add use_parent_address field.

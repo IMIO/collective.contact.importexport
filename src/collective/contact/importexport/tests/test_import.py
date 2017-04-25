@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from collective.contact.importexport.browser.import_view import are_headers_in_fields  # noqa
+# from collective.contact.importexport.browser.import_view import are_headers_in_fields  # noqa
 from collective.contact.importexport.testing import COLLECTIVE_CONTACT_IMPORTEXPORT_INTEGRATION_TESTING  # noqa
 from io import BytesIO
 from plone import api
@@ -56,14 +56,14 @@ class TestImport(unittest.TestCase):
         form.handleApply(form, form.request.form)
         self.assertEqual(len(self.directory.contentValues()), 1)
 
-    def test_are_headers_in_fields(self):
-        headers = ['id', 'field1', 'field2']
-        fields = ['field1', 'field2']
-        poral_type = 'organizations'
-        self.assertTrue(are_headers_in_fields(headers, fields, poral_type))
-        fields = ['field1', 'field2', 'fields3']
-        headers = ['id', 'field1', 'field2', 'fields4']
-        self.assertFalse(are_headers_in_fields(headers, fields, poral_type))
+    # def test_are_headers_in_fields(self):
+    #     headers = ['id', 'field1', 'field2']
+    #     fields = ['field1', 'field2']
+    #     poral_type = 'organizations'
+    #     self.assertTrue(are_headers_in_fields(headers, fields, poral_type))
+    #     fields = ['field1', 'field2', 'fields3']
+    #     headers = ['id', 'field1', 'field2', 'fields4']
+    #     self.assertFalse(are_headers_in_fields(headers, fields, poral_type))
 
     def test_import_orga_with_header_not_in_order(self):
         view_name = 'collective_contact_importexport_import_view'
@@ -72,7 +72,7 @@ class TestImport(unittest.TestCase):
         data = """title;id;id_parent;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
 IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelle;Activité;Avenue Thomas Edison;2;;7000;Mons;065/32.96.70;;;contact@imio.be;http://www.imio.be;;;
 """  # noqa
-        ofile = ofile = self._create_test_file_field('test.csv', data)
+        ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.organizations_file'] = ofile
         form.request.form['form.widgets.state'] = 'active'
         self.assertEqual(len(self.directory.contentValues()), 0)
@@ -88,7 +88,7 @@ IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelle;Activi
         data = """id;id_parent;title;noinfield;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
 1;;IMIO;Intercommunale de Mutualisation Informatique et Organisationnelle;Activité;Avenue Thomas Edison;2;;7000;Mons;065/32.96.70;;;contact@imio.be;http://www.imio.be;;;
 """  # noqa
-        ofile = ofile = self._create_test_file_field('test.csv', data)
+        ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.organizations_file'] = ofile
         form.request.form['form.widgets.state'] = 'active'
         self.assertEqual(len(self.directory.contentValues()), 0)
@@ -106,7 +106,7 @@ IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelle;Activi
         data = """title;id;id_parent;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
 IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
 """  # noqa
-        ofile = ofile = self._create_test_file_field('test.csv', data)
+        ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.organizations_file'] = ofile
         form.request.form['form.widgets.state'] = 'active'
         self.assertEqual(len(self.directory.contentValues()), 0)
@@ -122,15 +122,46 @@ IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Ac
         data = """title;id;id_parent;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
 IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
 """  # noqa
-        ofile = ofile = self._create_test_file_field('test.csv', data)
+        ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.organizations_file'] = ofile
         form.request.form['form.widgets.state'] = 'active'
         self.assertEqual(len(self.directory.contentValues()), 0)
         form.handleApply(form, form.request.form)
         self.assertEqual(len(self.directory.contentValues()), 1)
-        # import transaction
-        # transaction.commit()
         form.handleApply(form, form.request.form)
         self.assertEqual(len(self.directory.contentValues()), 1)
         title = self.directory.contentValues()[0].title
         self.assertEqual(title, u'IMIO\xe9')
+
+    def test_import_bool_value(self):
+        view_name = 'collective_contact_importexport_import_view'
+        form = self.directory.restrictedTraverse(view_name)
+        form.update()
+        data = """title;use_parent_address;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
+IMIOé;False;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+"""  # noqa
+        ofile = self._create_test_file_field('test.csv', data)
+        form.request.form['form.widgets.organizations_file'] = ofile
+        form.request.form['form.widgets.state'] = 'active'
+        self.assertEqual(len(self.directory.contentValues()), 0)
+        form.handleApply(form, form.request.form)
+        self.assertEqual(len(self.directory.contentValues()), 1)
+        form.handleApply(form, form.request.form)
+        self.assertEqual(len(self.directory.contentValues()), 1)
+        # import ipdb; ipdb.set_trace()
+        use_parent_address = self.directory.contentValues()[0].use_parent_address  # noqa
+        self.assertFalse(use_parent_address)
+
+    def test_import_person(self):
+        view_name = 'collective_contact_importexport_import_view'
+        form = self.directory.restrictedTraverse(view_name)
+        form.update()
+        data = """title;use_parent_address;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
+IMIOé;False;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+"""  # noqa
+        ofile = self._create_test_file_field('test.csv', data)
+        form.request.form['form.widgets.persons_file'] = ofile
+        form.request.form['form.widgets.state'] = 'active'
+        self.assertEqual(len(self.directory.contentValues()), 0)
+        form.handleApply(form, form.request.form)
+        self.assertEqual(len(self.directory.contentValues()), 1)

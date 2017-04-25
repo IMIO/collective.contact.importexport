@@ -5,13 +5,12 @@ from plone.app.textfield.value import RichTextValue
 from plone.dexterity.interfaces import IDexterityFTI
 from plone.directives import form
 from plone.namedfile.field import NamedFile
-from plone.supermodel.interfaces import FIELDSETS_KEY
-from plone.supermodel.utils import mergedTaggedValueList
 from Products.CMFPlone.utils import safe_unicode
 from z3c.form import button
 from zope import schema
 from zope.component import getUtility
 from zope.component.interface import nameToInterface
+from zope.component.interfaces import ComponentLookupError
 from zope.schema import getFieldsInOrder
 
 import csv
@@ -42,6 +41,7 @@ logger = logging.getLogger('collective.context.importexport import')
 # )
 
 help_text = _(u"""
+<h2>Organization</h2>
 <p>
 You can import organization from a csv file. This file should contains headers:
 If you have a flat list of organizations, let id and id_parent fields empty.
@@ -63,11 +63,68 @@ If you have a flat list of organizations, let id and id_parent fields empty.
     <li>website</li>
     <li>region</li>
     <li>country</li>
+    <li>use_parent_address</li>
 </ul>
 Other column will be added into activity field.
-If a header match with a organization field, it will be added in field.
+If a header match with a organization field, it will be added in this field.
+
+<h2>Person</h2>
+You can import person from a csv file. This file should contains headers:
+<ul>
+  <li>additional_address_details</li>
+  <li>cell_phone</li>
+  <li>city</li>
+  <li>country</li>
+  <li>email</li>
+  <li>fax</li>
+  <li>firstname</li>
+  <li>gender</li>
+  <li>lastname</li>
+  <li>number</li>
+  <li>parent_address</li>
+  <li>person_title</li>
+  <li>phone</li>
+  <li>region</li>
+  <li>street</li>
+  <li>title</li>
+  <li>use_parent_address</li>
+  <li>website</li>
+  <li>zip_code</li>
+</ul>
 </p>
 """)
+
+
+def to_string(value):
+    return safe_unicode(value)
+
+
+def to_bool(value):
+    return value.lower() in ('yes', 'true', 't', '1')
+
+
+def to_int(value):
+    if not value:
+        return u''
+    return int(value)
+
+
+def to_float(value):
+    if not value:
+        return u''
+    return float(value)
+
+
+mapping_field_type = {
+    'NamedImage': to_string,
+    'Text': to_string,
+    'Choice': to_string,
+    'MasterSelectBoolField': to_bool,
+    'TextLine': to_string,
+    'RichText': to_string,
+    'Int': to_int,
+    'Float': to_float,
+}
 
 
 class IImportForm(form.Schema):
@@ -86,11 +143,11 @@ class IImportForm(form.Schema):
         description=_(u'Import csv organizations file'),
         required=False
     )
-    # persons_file = NamedFile(
-    #     title=_(u"Persons file"),
-    #     description=_(u'Import xls persons file'),
-    #     required=False
-    # )
+    persons_file = NamedFile(
+        title=_(u"Persons file"),
+        description=_(u'Import xls persons file'),
+        required=False
+    )
     # functions_file = NamedFile(
     #     title=_(u"Functions file"),
     #     description=_(u'Import xls functions file'),
@@ -124,7 +181,7 @@ class ImportForm(form.SchemaForm):
         data = list(reader)
         row_count = len(data)
 
-        def get_cell(row, name):
+        def get_cell(row, name, field_type):
             """ Read one cell on a
             @param row: CSV row as list
             @param name: Column name: 1st row cell content value, header
@@ -139,27 +196,33 @@ class ImportForm(form.SchemaForm):
                 logger.info('CSV data does not have column:' + name)
                 return u''
             else:
-                return row[index].decode('utf-8')
+                if field_type in mapping_field_type.keys():
+                    return mapping_field_type[field_type](
+                        row[index].decode('utf-8'))
+                else:
+                    return safe_unicode(row[index].decode('utf-8'))
 
-        fields = get_all_fields_from(portal_type)
-
-        are_headers_in_fields(headers, fields, portal_type)
+        fields = get_all_fields_from(portal_type, self.context)
+        # are_headers_in_fields(headers, fields.keys(), portal_type)
         updated = 0
         for row in data:
             contents = {}
             activity = ['<p>']
+            # Parse csv
             for head in headers:
-                if head in fields:
+                if head in fields.keys():
                     contents[head] = get_cell(
                         row,
-                        safe_unicode(head)
+                        safe_unicode(head),
+                        fields[head]
                     )
                 else:
                     activity.append(get_cell(
                         row,
-                        safe_unicode(head)
+                        safe_unicode(head),
+                        'TextLine'
                     ))
-            # do not get empty lines/title of csv
+            # Add into Plon and not get empty lines/title of csv
             if contents.get('title', False):
                 from plone.i18n.normalizer.interfaces import IURLNormalizer
                 futur_name = getUtility(
@@ -171,8 +234,6 @@ class ImportForm(form.SchemaForm):
                         title=contents['title']
                     )
                     for key, value in contents.items():
-                        if key == 'activity':
-                            activity.append(value)
                         setattr(obj, key, value)
                     activity.append(u'</p>')
                     obj.activity = RichTextValue(u'<br />'.join(activity))
@@ -205,11 +266,11 @@ class ImportForm(form.SchemaForm):
             if number is not None:
                 self.status = 'File uploaded. {0} new organizations created.'.format(number)  # noqa
 
-        # if data.get('persons_file'):
-        #     persons_file = data['persons_file'].data
-        #     number = self.process_csv(persons_file)
-        #     if number is not None:
-        #         self.status = "File uploaded. {} new persons created.".format(number)  # noqa
+        if data.get('persons_file'):
+            persons_file = data['persons_file'].data
+            number = self.process_csv(persons_file, 'person')
+            if number is not None:
+                self.status = "File uploaded. {} new persons created.".format(number)  # noqa
 
         #
         # if data.get('functions_file'):
@@ -226,36 +287,32 @@ class ImportForm(form.SchemaForm):
         #         self.status = "File uploaded. {} new occupied functions created.".format(number)  # noqa
 
 
-def get_all_fields_from(portal_type):
+def get_all_fields_from(portal_type, context):
     portal_types = api.portal.get_tool('portal_types')
-    portal = api.portal.get()
     schema = getUtility(IDexterityFTI, name=portal_type).lookupSchema()
-    fields = []
+    fields = {}
     for name, field in getFieldsInOrder(schema):
-        fields.append(name)
+        if name not in fields.keys():
+            fields[safe_unicode(name)] = field.__class__.__name__
     pt = getattr(portal_types, portal_type)
     behaviors = set(pt.behaviors)
     for behavior in behaviors:
-        interface = nameToInterface(portal, behavior)
-        fieldsets = mergedTaggedValueList(interface, FIELDSETS_KEY)
-        for name, field in getFieldsInOrder(interface):
-            if not fieldsets:
-                fields.append(name)
-            else:
-                for fieldset in fieldsets:
-                    fields = fields + list(fieldset.fields)
-    # Remove duplicates
-    fields = list(set(fields))
-    # Set unicode
-    return [safe_unicode(field) for field in fields]
+        try:
+            interface = nameToInterface(context, behavior)
+            for name, field in getFieldsInOrder(interface):
+                if name not in fields.keys():
+                    fields[safe_unicode(name)] = field.__class__.__name__
+        except ComponentLookupError:
+            pass
+    return fields
 
 
-def are_headers_in_fields(headers, plone_fields, portal_type):
-    """ All headers field from CSV file should be a plone field
-    portal_type used to log """
-    exclude = ['id', 'id_parent']
-    result = True
-    for header in headers:
-        if header not in exclude and header not in plone_fields:
-            result = False
-    return result
+# def are_headers_in_fields(headers, plone_fields, portal_type):
+#     """ All headers field from CSV file should be a plone field
+#     portal_type used to log """
+#     exclude = ['id', 'id_parent']
+#     result = True
+#     for header in headers:
+#         if header not in exclude and header not in plone_fields:
+#             result = False
+#     return result

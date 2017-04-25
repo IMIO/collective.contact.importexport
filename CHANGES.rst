@@ -5,7 +5,8 @@ Changelog
 0.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- You can now add use_parent_address field.
+  [bsuttor]
 
 
 0.2 (2017-03-03)

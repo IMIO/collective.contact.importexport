@@ -2,8 +2,8 @@ Changelog
 =========
 
 
-0.4 (unreleased)
-----------------
+0.3.1 (2017-06-01)
+------------------
 
 - If IContactDetails is an heritage of anther behavior, IContactDetails fields can now be imported too.
   [bsuttor]

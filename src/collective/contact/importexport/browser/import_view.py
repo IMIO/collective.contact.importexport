@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from collective.contact.core.behaviors import IBirthday
+from collective.contact.core.behaviors import IContactDetails
 from collective.contact.importexport import _
 from plone import api
 from plone.app.textfield.value import RichTextValue
@@ -6,6 +8,7 @@ from plone.dexterity.interfaces import IDexterityFTI
 from plone.directives import form
 from plone.namedfile.field import NamedFile
 from Products.CMFPlone.utils import safe_unicode
+from profilehooks import profile
 from z3c.form import button
 from zope import schema
 from zope.component import getUtility
@@ -19,7 +22,10 @@ import StringIO
 
 
 logger = logging.getLogger('collective.context.importexport import')
-
+CONTACT_BASE_BEHAVIORS = [
+    'collective.contact.core.behaviors.IContactDetails',
+    'collective.contact.core.behaviors.IBirthday'
+]
 
 # fields = (
 #     u'title',
@@ -139,23 +145,23 @@ class IImportForm(form.Schema):
     )
 
     organizations_file = NamedFile(
-        title=_(u"Organizations file"),
+        title=_(u'Organizations file'),
         description=_(u'Import csv organizations file'),
         required=False
     )
     persons_file = NamedFile(
-        title=_(u"Persons file"),
-        description=_(u'Import xls persons file'),
+        title=_(u'Persons file'),
+        description=_(u'Import csv persons file'),
         required=False
     )
     # functions_file = NamedFile(
     #     title=_(u"Functions file"),
-    #     description=_(u'Import xls functions file'),
+    #     description=_(u'Import csv functions file'),
     #     required=False
     # )
     # occupied_functions_file = NamedFile(
     #     title=_(u"Occupied functions file"),
-    #     description=_(u'Import xls occupied functions file'),
+    #     description=_(u'Import csv occupied functions file'),
     #     required=False
     # )
 
@@ -170,6 +176,7 @@ class ImportForm(form.SchemaForm):
 
     description = help_text
 
+    @profile(immediate=True)
     def process_csv(self, data, portal_type):
         """
         """
@@ -203,7 +210,7 @@ class ImportForm(form.SchemaForm):
                     return safe_unicode(row[index].decode('utf-8'))
 
         fields = get_all_fields_from(portal_type, self.context)
-        # are_headers_in_fields(headers, fields.keys(), portal_type)
+        import ipdb; ipdb.set_trace()
         updated = 0
         for row in data:
             contents = {}
@@ -296,6 +303,9 @@ def get_all_fields_from(portal_type, context):
             fields[safe_unicode(name)] = field.__class__.__name__
     pt = getattr(portal_types, portal_type)
     behaviors = set(pt.behaviors)
+    for contact_base_behavior in CONTACT_BASE_BEHAVIORS:
+        if contact_base_behavior not in behaviors:
+            behaviors.add(contact_base_behavior)
     for behavior in behaviors:
         try:
             interface = nameToInterface(context, behavior)
@@ -305,14 +315,3 @@ def get_all_fields_from(portal_type, context):
         except ComponentLookupError:
             pass
     return fields
-
-
-# def are_headers_in_fields(headers, plone_fields, portal_type):
-#     """ All headers field from CSV file should be a plone field
-#     portal_type used to log """
-#     exclude = ['id', 'id_parent']
-#     result = True
-#     for header in headers:
-#         if header not in exclude and header not in plone_fields:
-#             result = False
-#     return result

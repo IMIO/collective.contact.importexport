@@ -14,31 +14,39 @@ msgstr ""
 "Preferred-Encodings: utf-8 latin1\n"
 "Domain: DOMAIN\n"
 
-#: ../browser/import_view.py:188
+#: ../browser/import_view.py:262
 msgid "Import"
 msgstr "Import"
 
-#: ../browser/import_view.py:108
+#: ../browser/import_view.py:171
 msgid "Import contacts"
 msgstr "Import des contacts"
 
-#: ../browser/import_view.py:86
+#: ../browser/import_view.py:149
 msgid "Import csv organizations file"
-msgstr "Importer un fichier csv avec des organisations"
+msgstr "Importer un fichier csv contenant des organisations"
+
+#: ../browser/import_view.py:154
+msgid "Import csv persons file"
+msgstr "Importer un fichier csv contenant des personnes"
 
 #: ../configure.zcml:21
 msgid "Installs the collective.contact.importexport add-on."
 msgstr "Installer le package collective.contact.importexport."
 
-#: ../browser/import_view.py:85
+#: ../browser/import_view.py:148
 msgid "Organizations file"
 msgstr "Fichier des organisations"
 
-#: ../browser/import_view.py:78
+#: ../browser/import_view.py:153
+msgid "Persons file"
+msgstr "Fichier des personnes"
+
+#: ../browser/import_view.py:141
 msgid "Please select state for objects created."
 msgstr "Veuillez sélectionner l'état des objets qui seront crées"
 
-#: ../browser/import_view.py:77
+#: ../browser/import_view.py:140
 msgid "State after creation"
 msgstr "Etat après la création"
 

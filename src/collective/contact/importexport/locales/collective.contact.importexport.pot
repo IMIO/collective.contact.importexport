@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2017-03-03 09:24+0000\n"
+"POT-Creation-Date: 2017-06-01 07:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,8 +17,9 @@ msgstr ""
 "Preferred-Encodings: utf-8 latin1\n"
 "Domain: collective.contact.importexport\n"
 
-#: ../browser/import_view.py:44
+#: ../browser/import_view.py:49
 msgid "
+<h2>Organization</h2>
 <p>
 You can import organization from a csv file. This file should contains headers:
 If you have a flat list of organizations, let id and id_parent fields empty.
@@ -40,38 +41,71 @@ If you have a flat list of organizations, let id and id_parent fields empty.
     <li>website</li>
     <li>region</li>
     <li>country</li>
+    <li>use_parent_address</li>
 </ul>
 Other column will be added into activity field.
-If a header match with a organization field, it will be added in field.
+If a header match with a organization field, it will be added in this field.
+
+<h2>Person</h2>
+You can import person from a csv file. This file should contains headers:
+<ul>
+  <li>additional_address_details</li>
+  <li>cell_phone</li>
+  <li>city</li>
+  <li>country</li>
+  <li>email</li>
+  <li>fax</li>
+  <li>firstname</li>
+  <li>gender</li>
+  <li>lastname</li>
+  <li>number</li>
+  <li>parent_address</li>
+  <li>person_title</li>
+  <li>phone</li>
+  <li>region</li>
+  <li>street</li>
+  <li>title</li>
+  <li>use_parent_address</li>
+  <li>website</li>
+  <li>zip_code</li>
+</ul>
 </p>
 "
 msgstr ""
 
-#: ../browser/import_view.py:188
+#: ../browser/import_view.py:262
 msgid "Import"
 msgstr ""
 
-#: ../browser/import_view.py:108
+#: ../browser/import_view.py:171
 msgid "Import contacts"
 msgstr ""
 
-#: ../browser/import_view.py:86
+#: ../browser/import_view.py:149
 msgid "Import csv organizations file"
+msgstr ""
+
+#: ../browser/import_view.py:154
+msgid "Import csv persons file"
 msgstr ""
 
 #: ../configure.zcml:21
 msgid "Installs the collective.contact.importexport add-on."
 msgstr ""
 
-#: ../browser/import_view.py:85
+#: ../browser/import_view.py:148
 msgid "Organizations file"
 msgstr ""
 
-#: ../browser/import_view.py:78
+#: ../browser/import_view.py:153
+msgid "Persons file"
+msgstr ""
+
+#: ../browser/import_view.py:141
 msgid "Please select state for objects created."
 msgstr ""
 
-#: ../browser/import_view.py:77
+#: ../browser/import_view.py:140
 msgid "State after creation"
 msgstr ""
 

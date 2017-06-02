@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from collective.contact.core.behaviors import IBirthday
-from collective.contact.core.behaviors import IContactDetails
 from collective.contact.importexport import _
 from plone import api
 from plone.app.textfield.value import RichTextValue
@@ -208,7 +206,6 @@ class ImportForm(form.SchemaForm):
                     return safe_unicode(row[index].decode('utf-8'))
 
         fields = get_all_fields_from(portal_type, self.context)
-        import ipdb; ipdb.set_trace()
         updated = 0
         for row in data:
             contents = {}

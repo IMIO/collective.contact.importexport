@@ -5,7 +5,8 @@ Changelog
 0.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Remove profilehook.
+  [bsuttor]
 
 
 0.3.1 (2017-06-01)

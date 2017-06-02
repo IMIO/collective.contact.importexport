@@ -8,7 +8,6 @@ from plone.dexterity.interfaces import IDexterityFTI
 from plone.directives import form
 from plone.namedfile.field import NamedFile
 from Products.CMFPlone.utils import safe_unicode
-from profilehooks import profile
 from z3c.form import button
 from zope import schema
 from zope.component import getUtility
@@ -176,7 +175,6 @@ class ImportForm(form.SchemaForm):
 
     description = help_text
 
-    @profile(immediate=True)
     def process_csv(self, data, portal_type):
         """
         """

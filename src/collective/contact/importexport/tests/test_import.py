@@ -54,7 +54,7 @@ class TestImport(unittest.TestCase):
         form.request.form['form.widgets.state'] = 'active'
         self.assertEqual(len(self.directory.contentValues()), 0)
         form.handleApply(form, form.request.form)
-        self.assertEqual(len(self.directory.contentValues()), 1)
+        self.assertEqual(len(self.directory.contentValues()), 2)
 
     # def test_are_headers_in_fields(self):
     #     headers = ['id', 'field1', 'field2']
@@ -95,9 +95,10 @@ IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelle;Activi
         form.handleApply(form, form.request.form)
         self.assertEqual(len(self.directory.contentValues()), 1)
         activity = self.directory.contentValues()[0].activity
-        self.assertIn(
+        self.assertNotIn(
             'Intercommunale de Mutualisation Informatique et Organisationnelle',  # noqa
             activity.raw)
+        self.assertIn(u'Activit\xe9', activity.raw)
 
     def test_import_orga_with_accents(self):
         view_name = 'collective_contact_importexport_import_view'
@@ -156,8 +157,8 @@ IMIOé;False;Intercommunale de Mutualisation Informatique et Organisationnelleé
         view_name = 'collective_contact_importexport_import_view'
         form = self.directory.restrictedTraverse(view_name)
         form.update()
-        data = """title;use_parent_address;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
-IMIOé;False;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+        data = """use_parent_address;lastname;firstname;gender;person_title;phone;cell_phone;fax;email;website;street;number;additional_address_details;zip_code;city
+False;Bond;James;M;Monsieur;+3281/58.61.12;;;james@bond.co.uk;https://james.bond.co.uk; Avenue Thomas édison;2;;7000;Mons
 """  # noqa
         ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.persons_file'] = ofile
@@ -165,3 +166,4 @@ IMIOé;False;Intercommunale de Mutualisation Informatique et Organisationnelleé
         self.assertEqual(len(self.directory.contentValues()), 0)
         form.handleApply(form, form.request.form)
         self.assertEqual(len(self.directory.contentValues()), 1)
+        self.assertEqual(self.directory.contentValues()[0].id, 'james-bond')

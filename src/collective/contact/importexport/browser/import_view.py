@@ -4,6 +4,7 @@ from plone import api
 from plone.app.textfield.value import RichTextValue
 from plone.dexterity.interfaces import IDexterityFTI
 from plone.directives import form
+from plone.i18n.normalizer.interfaces import IURLNormalizer
 from plone.namedfile.field import NamedFile
 from Products.CMFPlone.utils import safe_unicode
 from z3c.form import button
@@ -68,7 +69,6 @@ If you have a flat list of organizations, let id and id_parent fields empty.
     <li>country</li>
     <li>use_parent_address</li>
 </ul>
-Other column will be added into activity field.
 If a header match with a organization field, it will be added in this field.
 
 <h2>Person</h2>
@@ -163,13 +163,26 @@ class IImportForm(form.Schema):
     # )
 
 
+def get_title(contents):
+    keys = contents.keys()
+    if 'title' in keys:
+        return contents.get('title')
+    elif 'firstname' in keys and 'lastname' in keys:
+        firstname = contents['firstname']
+        lastname = contents['lastname']
+        title = u' '.join([x for x in (firstname, lastname) if x])
+        return title
+    else:
+        return None
+
+
 class ImportForm(form.SchemaForm):
     """ Define Form handling """
-    name = _(u"Import contacts")
+    name = _(u'Import contacts')
     schema = IImportForm
     ignoreContext = True
 
-    label = u"Import contacts from CSV files"
+    label = u'Import contacts from CSV files'
 
     description = help_text
 
@@ -209,7 +222,6 @@ class ImportForm(form.SchemaForm):
         updated = 0
         for row in data:
             contents = {}
-            activity = ['<p>']
             # Parse csv
             for head in headers:
                 if head in fields.keys():
@@ -218,31 +230,36 @@ class ImportForm(form.SchemaForm):
                         safe_unicode(head),
                         fields[head]
                     )
-                else:
-                    activity.append(get_cell(
-                        row,
-                        safe_unicode(head),
-                        'TextLine'
-                    ))
-            # Add into Plon and not get empty lines/title of csv
-            if contents.get('title', False):
-                from plone.i18n.normalizer.interfaces import IURLNormalizer
-                futur_name = getUtility(
-                    IURLNormalizer).normalize(contents['title'])
-                if futur_name not in self.context.contentIds():
+                # else:
+                #     activity.append(get_cell(
+                #         row,
+                #         safe_unicode(head),
+                #         'TextLine'
+                #     ))
+
+            # Add into Plone and not get empty lines/title of cs
+            title = get_title(contents)
+            if title:
+                utility = getUtility(IURLNormalizer)
+                if utility.normalize(title) not in self.context.contentIds():
                     obj = api.content.create(
                         container=self.context,
                         type=portal_type,
-                        title=contents['title']
+                        title=title
                     )
                     for key, value in contents.items():
-                        setattr(obj, key, value)
-                    activity.append(u'</p>')
-                    obj.activity = RichTextValue(u'<br />'.join(activity))
+                        if key == 'activity':
+                            activity = ['<p>']
+                            activity.append(value)
+                            activity.append(u'</p>')
+                            obj.activity = RichTextValue(u' '.join(activity))
+                        else:
+                            setattr(obj, key, value)
 
                     updated += 1
                     api.content.transition(obj=obj, to_state=self.next_state)
                     obj.reindexObject()
+
                     logger.info('{0}/{1}: {2} added'.format(
                         updated,
                         row_count,
@@ -250,7 +267,7 @@ class ImportForm(form.SchemaForm):
                     )
                 else:
                     logger.info('{0} already exists'.format(
-                        contents['title'].encode('utf8'))
+                        title.encode('utf8'))
                     )
         return updated
 

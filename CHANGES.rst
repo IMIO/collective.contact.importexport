@@ -5,7 +5,11 @@ Changelog
 0.3.3 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add import person.
+  [bsuttor]
+
+- Do not add all not known field into activity.
+  [bsuttor]
 
 
 0.3.2 (2017-06-02)

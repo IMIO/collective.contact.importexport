@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.3.4 (unreleased)
+0.3.4 (2017-12-18)
 ------------------
 
 - Import become faster.

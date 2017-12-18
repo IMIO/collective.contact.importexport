@@ -19,7 +19,7 @@ import logging
 import StringIO
 
 
-logger = logging.getLogger('collective.context.importexport import')
+logger = logging.getLogger('collective.contact.importexport import')
 CONTACT_BASE_BEHAVIORS = [
     'collective.contact.core.behaviors.IContactDetails',
     'collective.contact.core.behaviors.IBirthday'
@@ -241,12 +241,19 @@ class ImportForm(form.SchemaForm):
             title = get_title(contents)
             if title:
                 utility = getUtility(IURLNormalizer)
-                if utility.normalize(title) not in self.context.contentIds():
-                    obj = api.content.create(
-                        container=self.context,
-                        type=portal_type,
-                        title=title
+                safe_id = utility.normalize(title)
+                if safe_id not in self.context.contentIds():
+                    self.context.invokeFactory(
+                        portal_type,
+                        safe_id,
+                        title=title,
+                        safe_id=safe_id,
+                        street=contents.get('street', None),
+                        number=contents.get('number', None),
+                        zip_code=contents.get('zip_code', None),
+                        city=contents.get('city', None)
                     )
+                    obj = self.context[safe_id]
                     for key, value in contents.items():
                         if key == 'activity':
                             activity = ['<p>']

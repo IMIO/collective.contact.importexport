@@ -5,7 +5,8 @@ Changelog
 0.3.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Import become faster.
+  [bsuttor]
 
 
 0.3.3 (2017-09-29)

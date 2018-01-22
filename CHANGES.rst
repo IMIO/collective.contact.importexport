@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.3.5 (unreleased)
+0.3.5 (2018-01-22)
 ------------------
 
 - Add collective.geo importer, you can now use latitude and longitude field in your files to import.

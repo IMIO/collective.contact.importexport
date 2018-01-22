@@ -3,6 +3,7 @@ from collective.contact.importexport import _
 from plone import api
 from plone.app.textfield.value import RichTextValue
 from plone.dexterity.interfaces import IDexterityFTI
+from plone.dexterity.utils import safe_utf8
 from plone.directives import form
 from plone.i18n.normalizer.interfaces import IURLNormalizer
 from plone.namedfile.field import NamedFile
@@ -24,25 +25,6 @@ CONTACT_BASE_BEHAVIORS = [
     'collective.contact.core.behaviors.IContactDetails',
     'collective.contact.core.behaviors.IBirthday'
 ]
-
-# fields = (
-#     u'title',
-#     u'description',
-#     u'activity',
-#     # u'subtitle',
-#     u'street',
-#     u'number',
-#     u'additional_address_details'
-#     u'zip_code',
-#     u'city',
-#     u'phone',
-#     u'cell_phone',
-#     u'fax',
-#     u'email',
-#     u'website',
-#     u'region',
-#     u'country',
-# )
 
 help_text = _(u"""
 <h2>Organization</h2>
@@ -68,6 +50,8 @@ If you have a flat list of organizations, let id and id_parent fields empty.
     <li>region</li>
     <li>country</li>
     <li>use_parent_address</li>
+    <li>latitude</li>
+    <li>longitude</li>
 </ul>
 If a header match with a organization field, it will be added in this field.
 
@@ -219,6 +203,11 @@ class ImportForm(form.SchemaForm):
                     return safe_unicode(row[index].decode('utf-8'))
 
         fields = get_all_fields_from(portal_type, self.context)
+        if 'coordinates' in fields:
+            del fields['coordinates']
+            fields['latitude'] = 'TextLine'
+            fields['longitude'] = 'TextLine'
+
         updated = 0
         for row in data:
             contents = {}
@@ -237,7 +226,7 @@ class ImportForm(form.SchemaForm):
                 #         'TextLine'
                 #     ))
 
-            # Add into Plone and not get empty lines/title of cs
+            # Add into Plone and not get empty lines/title of CSV
             title = get_title(contents)
             if title:
                 utility = getUtility(IURLNormalizer)
@@ -254,15 +243,27 @@ class ImportForm(form.SchemaForm):
                         city=contents.get('city', None)
                     )
                     obj = self.context[safe_id]
+                    coord = {}
                     for key, value in contents.items():
                         if key == 'activity':
                             activity = ['<p>']
                             activity.append(value)
                             activity.append(u'</p>')
                             obj.activity = RichTextValue(u' '.join(activity))
+                        if key in ['latitude', 'longitude']:
+                            coord[key] = value
                         else:
                             setattr(obj, key, value)
-
+                    if len(coord.keys()) == 2:
+                        coord = u'POINT({0} {1})'.format(
+                            coord['longitude'],
+                            coord['latitude']
+                        )
+                        from collective.geo.behaviour.interfaces import ICoordinates
+                        try:
+                            ICoordinates(obj).coordinates = safe_utf8(coord)
+                        except:
+                            pass
                     updated += 1
                     api.content.transition(obj=obj, to_state=self.next_state)
                     obj.reindexObject()

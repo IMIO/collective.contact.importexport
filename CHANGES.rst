@@ -5,7 +5,8 @@ Changelog
 0.3.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add collective.geo importer, you can now use latitude and longitude field in your files to import.
+  [bsuttor]
 
 
 0.3.4 (2017-12-18)

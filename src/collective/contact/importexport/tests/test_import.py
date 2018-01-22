@@ -5,6 +5,8 @@ from io import BytesIO
 from plone import api
 from plone.app.testing import setRoles
 from plone.app.testing import TEST_USER_ID
+from plone.dexterity.interfaces import IDexterityFTI
+from zope.component import queryUtility
 from ZPublisher.HTTPRequest import FileUpload
 from ZPublisher.HTTPRequest import ZopeFieldStorage
 
@@ -167,3 +169,26 @@ False;Bond;James;M;Monsieur;+3281/58.61.12;;;james@bond.co.uk;https://james.bond
         form.handleApply(form, form.request.form)
         self.assertEqual(len(self.directory.contentValues()), 1)
         self.assertEqual(self.directory.contentValues()[0].id, 'james-bond')
+
+    def test_import_latitude_longitude(self):
+        from collective.geo.behaviour.interfaces import ICoordinates
+        fti = queryUtility(IDexterityFTI, name='organization')
+        behaviors = list(fti.behaviors)
+        behaviors.append(ICoordinates.__identifier__)
+        fti._updateProperty('behaviors', tuple(behaviors))
+        view_name = 'collective_contact_importexport_import_view'
+        form = self.directory.restrictedTraverse(view_name)
+        form.update()
+        data = """latitude;longitude;title;id;id_parent;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
+50.498890;4.719404;IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+"""  # noqa
+        ofile = self._create_test_file_field('test.csv', data)
+        form.request.form['form.widgets.organizations_file'] = ofile
+        form.request.form['form.widgets.state'] = 'active'
+        self.assertEqual(len(self.directory.contentValues()), 0)
+        form.handleApply(form, form.request.form)
+        self.assertEqual(len(self.directory.contentValues()), 1)
+        self.assertEqual(
+            ICoordinates(self.directory['imio']).coordinates,
+            'POINT (4.719404 50.49889)'
+        )

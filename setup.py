@@ -43,6 +43,7 @@ setup(
         'setuptools',
         'z3c.jbot',
         'collective.contact.core',
+        'plone.directives.form',
     ],
     extras_require={
         'test': [
@@ -53,6 +54,7 @@ setup(
             'plone.testing',
             'plone.app.contenttypes',
             'plone.app.robotframework[debug]',
+            'collective.geo.behaviour',
         ],
     },
     entry_points="""

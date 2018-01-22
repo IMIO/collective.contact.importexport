@@ -18,7 +18,7 @@ class CollectiveContactImportexportLayer(PloneSandboxLayer):
         # Load any other ZCML that is required for your tests.
         # The z3c.autoinclude feature is disabled in the Plone fixture base
         # layer.
-        self.loadZCML(package=collective.contact.importexport)
+        self.loadZCML(name='testing.zcml', package=collective.contact.importexport)
 
     def setUpPloneSite(self, portal):
         applyProfile(portal, 'collective.contact.importexport:default')
@@ -29,6 +29,7 @@ COLLECTIVE_CONTACT_IMPORTEXPORT_FIXTURE = CollectiveContactImportexportLayer()
 
 COLLECTIVE_CONTACT_IMPORTEXPORT_INTEGRATION_TESTING = IntegrationTesting(
     bases=(COLLECTIVE_CONTACT_IMPORTEXPORT_FIXTURE,),
+
     name='CollectiveContactImportexportLayer:IntegrationTesting'
 )
 

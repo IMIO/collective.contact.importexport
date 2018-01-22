@@ -9,6 +9,8 @@
   <includeDependencies package="." />
 
   <include package="collective.contact.core" />
+  <include package="collective.geo.behaviour" />
+
   <include package=".browser" />
 
   <genericsetup:registerProfile

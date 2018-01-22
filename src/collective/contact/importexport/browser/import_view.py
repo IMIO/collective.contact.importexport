@@ -170,7 +170,7 @@ class ImportForm(form.SchemaForm):
 
     description = help_text
 
-    def process_csv(self, data, portal_type):
+    def process_csv(self, data, portal_type):  # noqa
         """
         """
         # sort and order organizations
@@ -232,7 +232,7 @@ class ImportForm(form.SchemaForm):
                 utility = getUtility(IURLNormalizer)
                 safe_id = utility.normalize(title)
                 if safe_id not in self.context.contentIds():
-                    self.context.invokeFactory(
+                    self.context.invokeFactory(   # noqa
                         portal_type,
                         safe_id,
                         title=title,
@@ -259,10 +259,10 @@ class ImportForm(form.SchemaForm):
                             coord['longitude'],
                             coord['latitude']
                         )
-                        from collective.geo.behaviour.interfaces import ICoordinates
+                        from collective.geo.behaviour.interfaces import ICoordinates  # noqa
                         try:
                             ICoordinates(obj).coordinates = safe_utf8(coord)
-                        except:
+                        except:  # noqa
                             pass
                     updated += 1
                     api.content.transition(obj=obj, to_state=self.next_state)

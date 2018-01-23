@@ -250,7 +250,7 @@ class ImportForm(form.SchemaForm):
                             activity.append(value)
                             activity.append(u'</p>')
                             obj.activity = RichTextValue(u' '.join(activity))
-                        if key in ['latitude', 'longitude']:
+                        elif key in ['latitude', 'longitude']:
                             coord[key] = value
                         else:
                             setattr(obj, key, value)

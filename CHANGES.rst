@@ -5,7 +5,8 @@ Changelog
 0.3.6 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Improve importer, bug fix activity importer.
+  [bsuttor]
 
 
 0.3.5 (2018-01-22)

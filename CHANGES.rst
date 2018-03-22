@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.3.7 (unreleased)
+0.3.7 (2018-03-22)
 ------------------
 
 - Use plone.api instead of invokefactory.

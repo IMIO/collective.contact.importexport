@@ -5,7 +5,8 @@ Changelog
 0.3.7 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Use plone.api instead of invokefactory.
+  [bsuttor]
 
 
 0.3.6 (2018-02-08)

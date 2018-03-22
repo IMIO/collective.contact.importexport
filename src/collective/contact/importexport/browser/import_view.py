@@ -232,11 +232,11 @@ class ImportForm(form.SchemaForm):
                 utility = getUtility(IURLNormalizer)
                 safe_id = utility.normalize(title)
                 if safe_id not in self.context.contentIds():
-                    self.context.invokeFactory(   # noqa
-                        portal_type,
-                        safe_id,
+                    api.content.create(
+                        type=portal_type,
+                        id=safe_id,
+                        container=self.context,
                         title=title,
-                        safe_id=safe_id,
                         street=contents.get('street', None),
                         number=contents.get('number', None),
                         zip_code=contents.get('zip_code', None),

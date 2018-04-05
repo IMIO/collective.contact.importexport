@@ -5,7 +5,8 @@ Changelog
 0.3.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Remove title from import person doc.
+  [bsuttor]
 
 
 0.3.7 (2018-03-22)

@@ -73,7 +73,6 @@ You can import person from a csv file. This file should contains headers:
   <li>phone</li>
   <li>region</li>
   <li>street</li>
-  <li>title</li>
   <li>use_parent_address</li>
   <li>website</li>
   <li>zip_code</li>
@@ -201,7 +200,6 @@ class ImportForm(form.SchemaForm):
                         row[index].decode('utf-8'))
                 else:
                     return safe_unicode(row[index].decode('utf-8'))
-
         fields = get_all_fields_from(portal_type, self.context)
         if 'coordinates' in fields:
             del fields['coordinates']

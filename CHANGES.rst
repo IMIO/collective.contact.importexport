@@ -5,6 +5,9 @@ Changelog
 0.3.8 (unreleased)
 ------------------
 
+- Get use_parent_address from file before import obj.
+  [bsuttor]
+
 - Remove title from import person doc.
   [bsuttor]
 

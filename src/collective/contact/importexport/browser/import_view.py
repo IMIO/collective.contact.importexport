@@ -238,7 +238,8 @@ class ImportForm(form.SchemaForm):
                         street=contents.get('street', None),
                         number=contents.get('number', None),
                         zip_code=contents.get('zip_code', None),
-                        city=contents.get('city', None)
+                        city=contents.get('city', None),
+                        use_parent_address=contents.get('use_parent_address', False),  # noqa
                     )
                     obj = self.context[safe_id]
                     coord = {}

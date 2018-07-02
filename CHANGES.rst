@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.3.8 (unreleased)
+0.3.8 (2018-07-02)
 ------------------
 
 - Get use_parent_address from file before import obj.

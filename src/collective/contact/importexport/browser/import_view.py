@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
+from Acquisition import aq_parent
 from collective.contact.importexport import _
+from collective.taxonomy.interfaces import ITaxonomy
 from plone import api
 from plone.app.textfield.value import RichTextValue
+from plone.behavior.interfaces import IBehavior
 from plone.dexterity.interfaces import IDexterityFTI
 from plone.dexterity.utils import safe_utf8
 from plone.directives import form
 from plone.i18n.normalizer.interfaces import IURLNormalizer
 from plone.namedfile.field import NamedFile
+from Products.CMFPlone.interfaces import IPloneSiteRoot
 from Products.CMFPlone.utils import safe_unicode
 from z3c.form import button
 from zope import schema
 from zope.component import getUtility
-from zope.component.interface import nameToInterface
+from zope.component import queryUtility
 from zope.component.interfaces import ComponentLookupError
 from zope.schema import getFieldsInOrder
 
@@ -52,8 +56,16 @@ If you have a flat list of organizations, let id and id_parent fields empty.
     <li>use_parent_address</li>
     <li>latitude</li>
     <li>longitude</li>
+    <li><i>taxonomy_id</i></li>
 </ul>
 If a header match with a organization field, it will be added in this field.
+Latitude and longitude should be a value like 50.49889 (latitude) and 4.719404
+ (longitude).
+
+taxonomy_id is the name of the field from your organization content type
+ (example taxonomy_typesdorganisations).
+ Value should be separate by a comma (,) and have same value of taxonomy value
+ (Book Collecting, Information Science, ...)
 
 <h2>Person</h2>
 You can import person from a csv file. This file should contains headers:
@@ -251,6 +263,20 @@ class ImportForm(form.SchemaForm):
                             obj.activity = RichTextValue(u' '.join(activity))
                         elif key in ['latitude', 'longitude']:
                             coord[key] = value
+                        elif is_taxonomy_field(key, obj):
+                            taxonomy_ids = []
+                            for taxonomy_value in contents.get(key).split(','):
+                                tax_name = get_taxonomy_name_from_field_name(
+                                    key
+                                )
+                                taxonomy_id = get_taxonomy_id_from_value(
+                                    tax_name,
+                                    taxonomy_value,
+                                    get_language(obj)
+                                )
+                                # taxonomy_ids.append(taxonomy_id)
+                                taxonomy_ids += [taxonomy_id] if taxonomy_id else []  # noqa
+                            setattr(obj, key, taxonomy_ids)
                         else:
                             setattr(obj, key, value)
                     if len(coord.keys()) == 2:
@@ -264,6 +290,7 @@ class ImportForm(form.SchemaForm):
                         except:  # noqa
                             pass
                     updated += 1
+
                     api.content.transition(obj=obj, to_state=self.next_state)
                     obj.reindexObject()
 
@@ -327,10 +354,44 @@ def get_all_fields_from(portal_type, context):
             behaviors.add(contact_base_behavior)
     for behavior in behaviors:
         try:
-            interface = nameToInterface(context, behavior)
+            interface = queryUtility(IBehavior, name=behavior).interface
             for name, field in getFieldsInOrder(interface):
                 if name not in fields.keys():
                     fields[safe_unicode(name)] = field.__class__.__name__
         except ComponentLookupError:
             pass
     return fields
+
+
+def is_taxonomy_field(key, obj):
+    if key.startswith('taxonomy_'):
+        return True
+    return False
+
+
+def get_taxonomy_name_from_field_name(field_name):
+    taxonomy_name = 'collective.taxonomy.{0}'.format(
+            field_name.replace('taxonomy_', '')
+        )
+    return taxonomy_name
+
+
+def get_language(obj):
+    lang = getattr(obj, 'language', None)
+    if lang:
+        return lang
+    elif not IPloneSiteRoot.providedBy(obj):
+        lang = get_language(aq_parent(obj))
+    else:
+        lang = api.portal.get_default_language()
+    return lang
+
+
+def get_taxonomy_id_from_value(taxonomy_name, taxonomy_value, lang='en'):
+    taxonomy_id = ''
+    taxonomy = queryUtility(ITaxonomy, name=taxonomy_name)
+    # import ipdb; ipdb.set_trace()
+    for (key, value) in taxonomy.inverted_data[lang].items():
+        if taxonomy_value.strip() in value:
+            taxonomy_id = key
+    return taxonomy_id

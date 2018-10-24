@@ -5,7 +5,11 @@ Changelog
 0.3.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Now you can import taxonomy from collective.taxonomy.
+  [bsuttor]
+
+- Add collective.taxonomy dependency.
+  [bsuttor]
 
 
 0.3.8 (2018-07-02)

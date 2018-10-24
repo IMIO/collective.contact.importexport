@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-# from collective.contact.importexport.browser.import_view import are_headers_in_fields  # noqa
 from collective.contact.importexport.testing import COLLECTIVE_CONTACT_IMPORTEXPORT_INTEGRATION_TESTING  # noqa
+from collective.taxonomy.interfaces import ITaxonomy
 from io import BytesIO
 from plone import api
+from plone.app.testing import applyProfile
 from plone.app.testing import setRoles
 from plone.app.testing import TEST_USER_ID
+from plone.behavior.interfaces import IBehavior
 from plone.dexterity.interfaces import IDexterityFTI
 from zope.component import queryUtility
 from ZPublisher.HTTPRequest import FileUpload
@@ -107,7 +109,7 @@ IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelle;Activi
         form = self.directory.restrictedTraverse(view_name)
         form.update()
         data = """title;id;id_parent;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
-IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Rue Léon Morel;1;;5032;Isnes;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
 """  # noqa
         ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.organizations_file'] = ofile
@@ -123,7 +125,7 @@ IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Ac
         form = self.directory.restrictedTraverse(view_name)
         form.update()
         data = """title;id;id_parent;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
-IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Rue Léon Morel;1;;5032;Isnes;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
 """  # noqa
         ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.organizations_file'] = ofile
@@ -141,7 +143,7 @@ IMIOé;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Ac
         form = self.directory.restrictedTraverse(view_name)
         form.update()
         data = """title;use_parent_address;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
-IMIOé;False;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+IMIOé;False;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Rue Léon Morel;1;;5032;Isnes;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
 """  # noqa
         ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.organizations_file'] = ofile
@@ -160,7 +162,7 @@ IMIOé;False;Intercommunale de Mutualisation Informatique et Organisationnelleé
         form = self.directory.restrictedTraverse(view_name)
         form.update()
         data = """use_parent_address;lastname;firstname;gender;person_title;phone;cell_phone;fax;email;website;street;number;additional_address_details;zip_code;city
-False;Bond;James;M;Monsieur;+3281/58.61.12;;;james@bond.co.uk;https://james.bond.co.uk; Avenue Thomas édison;2;;7000;Mons
+False;Bond;James;M;Monsieur;+3281/58.61.12;;;james@bond.co.uk;https://james.bond.co.uk; Rue Léon Morel;1;;5032;Isnes
 """  # noqa
         ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.persons_file'] = ofile
@@ -180,7 +182,7 @@ False;Bond;James;M;Monsieur;+3281/58.61.12;;;james@bond.co.uk;https://james.bond
         form = self.directory.restrictedTraverse(view_name)
         form.update()
         data = """latitude;longitude;title;id;id_parent;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
-50.498890;4.719404;IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Avenue Thomas édison;2;;7000;Mons;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+50.49819;4.719404;IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Rue Léon Morel;1;;5032;Isnes;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
 """  # noqa
         ofile = self._create_test_file_field('test.csv', data)
         form.request.form['form.widgets.organizations_file'] = ofile
@@ -190,5 +192,29 @@ False;Bond;James;M;Monsieur;+3281/58.61.12;;;james@bond.co.uk;https://james.bond
         self.assertEqual(len(self.directory.contentValues()), 1)
         self.assertEqual(
             ICoordinates(self.directory['imio']).coordinates,
-            'POINT (4.719404 50.49889)'
+            'POINT (4.719404 50.49819)'
         )
+
+    def test_import_taxonomy(self):
+        applyProfile(api.portal.get(), 'collective.taxonomy:default')
+        applyProfile(api.portal.get(), 'collective.taxonomy:examples')
+        taxonomy = queryUtility(ITaxonomy, name='collective.taxonomy.test')
+        behavior = queryUtility(IBehavior, name=taxonomy.getGeneratedName())
+        fti = queryUtility(IDexterityFTI, name='organization')
+        behaviors = list(fti.behaviors)
+        behaviors.append(behavior.name)
+        fti._updateProperty('behaviors', tuple(behaviors))
+        view_name = 'collective_contact_importexport_import_view'
+        form = self.directory.restrictedTraverse(view_name)
+        form.update()
+        data = """taxonomy_test;latitude;longitude;title;id;id_parent;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
+Book Collecting, Information Science;50.498890;4.719404;IMIO;1;;Intercommunale de Mutualisation Informatique et Organisationnelleé;Activité;Rue Léon Morel;1;;5032;Isnes;065/32.96.70;;;contacté@imio.be;http://www.imio.be;;;
+"""  # noqa
+        ofile = self._create_test_file_field('test.csv', data)
+        form.request.form['form.widgets.organizations_file'] = ofile
+        form.request.form['form.widgets.state'] = 'active'
+        self.assertEqual(len(self.directory.contentValues()), 0)
+        form.handleApply(form, form.request.form)
+        orga = self.directory.contentValues()[0]
+        # import ipdb; ipdb.set_trace()
+        self.assertEqual(orga.taxonomy_test, ['2', '5'])

@@ -6,6 +6,7 @@
 
   <include file="configure.zcml" />
   <include package="collective.geo.behaviour" />
+  <include package="collective.taxonomy" file="testing.zcml"/>
 
 
 </configure>

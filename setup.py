@@ -44,6 +44,7 @@ setup(
         'z3c.jbot',
         'collective.contact.core',
         'plone.directives.form',
+        'collective.taxonomy',
     ],
     extras_require={
         'test': [

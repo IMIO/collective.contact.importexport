@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.3.9 (unreleased)
+0.3.9 (2018-10-26)
 ------------------
 
 - Now you can import taxonomy from collective.taxonomy.

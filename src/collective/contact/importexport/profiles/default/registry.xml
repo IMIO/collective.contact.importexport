@@ -1,3 +1,18 @@
 <?xml version="1.0"?>
-<registry>
+<registry xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+          i18n:domain="collective.contact.importexport">
+
+  <record interface="collective.contact.importexport.interfaces.IPipelineConfiguration"
+          name="collective.contact.importexport.pipeline">
+      <field type="plone.registry.field.Text">
+          <title i18n:translate="">Pipeline to use to import contacts</title>
+          <key_type type="plone.registry.field.Text" />
+          <value_type type="plone.registry.field.Text" />
+      </field>
+<value>
+[transmogrifier]
+pipeline =
+</value>
+  </record>
+
 </registry>

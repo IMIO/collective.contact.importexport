@@ -45,6 +45,9 @@ setup(
         'collective.contact.core',
         'plone.directives.form',
         'collective.taxonomy',
+        'plone.app.transmogrifier',
+        'collective.transmogrifier',
+        'mr.migrator',
     ],
     extras_require={
         'test': [

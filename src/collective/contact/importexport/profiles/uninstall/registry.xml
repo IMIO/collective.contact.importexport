@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<registry>
+
+  <record interface="collective.contact.importexport.interfaces.IPipelineConfiguration"
+          name="collective.contact.importexport.pipeline"
+          remove="True">
+
+</registry>

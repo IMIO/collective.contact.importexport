@@ -5,7 +5,8 @@ Changelog
 0.3.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Start to use transmogrifier to import contacts
+  [laulaz]
 
 
 0.3.9 (2018-10-26)

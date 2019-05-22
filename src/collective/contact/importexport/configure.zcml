@@ -10,6 +10,7 @@
 
   <include package="collective.contact.core" />
   <include package="collective.geo.behaviour" />
+  <include package="plone.app.transmogrifier" />
 
   <include package=".browser" />
 
@@ -30,6 +31,10 @@
       provides="Products.GenericSetup.interfaces.EXTENSION"
       post_handler=".setuphandlers.uninstall"
       />
+
+  <subscriber for="collective.contact.importexport.interfaces.IPipelineConfiguration
+                   plone.registry.interfaces.IRecordModifiedEvent"
+              handler=".event.modified_pipeline" />
 
   <utility
       factory=".setuphandlers.HiddenProfiles"

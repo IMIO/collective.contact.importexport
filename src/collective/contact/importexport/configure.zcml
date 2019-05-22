@@ -9,10 +9,7 @@
   <includeDependencies package="." />
 
   <include package="collective.contact.core" />
-  <include package="collective.geo.behaviour" />
   <include package="plone.app.transmogrifier" />
-
-  <include package=".browser" />
 
   <genericsetup:registerProfile
       name="default"

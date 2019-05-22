@@ -41,10 +41,7 @@ setup(
         'plone.api',
         'Products.GenericSetup>=1.8.2',
         'setuptools',
-        'z3c.jbot',
         'collective.contact.core',
-        'plone.directives.form',
-        'collective.taxonomy',
         'plone.app.transmogrifier',
         'collective.transmogrifier',
         'mr.migrator',
@@ -58,7 +55,6 @@ setup(
             'plone.testing',
             'plone.app.contenttypes',
             'plone.app.robotframework[debug]',
-            'collective.geo.behaviour',
         ],
     },
     entry_points="""

@@ -12,6 +12,37 @@
 <value>
 [transmogrifier]
 pipeline =
+    csvsource
+    csvcleaner
+    portaltypeinserter
+    pathinserter
+    constructor
+    logger
+
+[csvsource]
+blueprint = collective.transmogrifier.sections.csvsource
+filename = /Users/laurent/csvsource.csv
+fieldnames = societe_id Parent nom_court desc type upa adresse Num Compl cp LOCALITE Téléphone Portable fax email_general site_web Région Pays UID Contact_intene
+
+[csvcleaner]
+blueprint = collective.contact.importexport.csvcleaner
+remove-header = true
+
+[portaltypeinserter]
+blueprint = collective.transmogrifier.sections.inserter
+key = string:_type
+value = string:organization
+
+[pathinserter]
+blueprint = collective.contact.importexport.pathinserter
+
+[constructor]
+blueprint = collective.transmogrifier.sections.constructor
+
+[logger]
+blueprint = collective.transmogrifier.sections.logger
+name = logger
+level = INFO
 </value>
   </record>
 

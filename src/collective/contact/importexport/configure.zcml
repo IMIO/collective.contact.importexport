@@ -9,7 +9,10 @@
   <includeDependencies package="." />
 
   <include package="collective.contact.core" />
+  <include package="collective.transmogrifier" file="meta.zcml" />
   <include package="plone.app.transmogrifier" />
+
+  <include package=".blueprints" />
 
   <genericsetup:registerProfile
       name="default"

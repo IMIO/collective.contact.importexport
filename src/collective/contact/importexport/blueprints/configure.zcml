@@ -1,0 +1,16 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope">
+
+  <utility
+    component=".csv.CSVCleaner"
+    name="collective.contact.importexport.csvcleaner"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
+    component=".path.PathInserter"
+    name="collective.contact.importexport.pathinserter"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+</configure>

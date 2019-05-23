@@ -44,6 +44,7 @@ setup(
         'collective.contact.core',
         'plone.app.transmogrifier',
         'collective.transmogrifier',
+        'transmogrify.dexterity',
     ],
     extras_require={
         'test': [

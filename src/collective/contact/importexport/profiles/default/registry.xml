@@ -17,12 +17,13 @@ pipeline =
     portaltypeinserter
     pathinserter
     constructor
+    schemaupdater
     logger
 
 [csvsource]
 blueprint = collective.transmogrifier.sections.csvsource
 filename = /Users/laurent/csvsource.csv
-fieldnames = societe_id Parent nom_court desc type upa adresse Num Compl cp LOCALITE Téléphone Portable fax email_general site_web Région Pays UID Contact_intene
+fieldnames = societe_id Parent title description organization_type use_parent_address_bool street number additional_address_details zip_code city phone cell_phone fax email website region country UID Contact_intene
 
 [csvcleaner]
 blueprint = collective.contact.importexport.csvcleaner
@@ -38,6 +39,9 @@ blueprint = collective.contact.importexport.pathinserter
 
 [constructor]
 blueprint = collective.transmogrifier.sections.constructor
+
+[schemaupdater]
+blueprint = transmogrify.dexterity.schemaupdater
 
 [logger]
 blueprint = collective.transmogrifier.sections.logger

@@ -16,6 +16,7 @@ class PathInserter(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
+        self.title_key = options.get('title-key', 'title')
         self.directory_path = ""
         brains = api.content.find(portal_type="directory")
         if brains:
@@ -25,7 +26,7 @@ class PathInserter(object):
     def __iter__(self):
         idnormalizer = getUtility(IIDNormalizer)
         for item in self.previous:
-            title = item.get('nom_court', None)
+            title = item.get(self.title_key, None)
             if not title:
                 continue
             new_id = idnormalizer.normalize(safe_encode(title))

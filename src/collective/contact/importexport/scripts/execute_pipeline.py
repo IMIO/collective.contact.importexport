@@ -3,6 +3,7 @@
 from collective.transmogrifier.transmogrifier import Transmogrifier
 from collective.transmogrifier.transmogrifier import configuration_registry
 from zope.component.hooks import setSite
+import transaction
 import sys
 
 PIPELINE_ID = "collective.contact.importexport.pipeline"
@@ -34,3 +35,4 @@ if "app" in locals():
     portal = app.get(plone_id)
     setSite(portal)
     execute_pipeline(portal, pipeline_filepath)
+    transaction.commit()

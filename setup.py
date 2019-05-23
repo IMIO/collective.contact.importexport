@@ -44,7 +44,6 @@ setup(
         'collective.contact.core',
         'plone.app.transmogrifier',
         'collective.transmogrifier',
-        'mr.migrator',
     ],
     extras_require={
         'test': [

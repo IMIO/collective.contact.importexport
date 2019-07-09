@@ -35,7 +35,6 @@ class Source1(object):
             logger.info('{0} yield elem'.format(self.name))
             yield elem
         logger.info('{0} after elem loop'.format(self.name))
-        self.storage['Finished'] = True
 
 
 class Source2(object):
@@ -55,11 +54,10 @@ class Source2(object):
             logger.info('{0} yield previous'.format(self.name))
             yield item
         logger.info('{0} after previous loop'.format(self.name))
-        if self.storage.get('Finished', False):
-            for elem in self.source_list:
-                logger.info('{0} yield elem'.format(self.name))
-                yield elem
-            logger.info('{0} after elem loop'.format(self.name))
+        for elem in self.source_list:
+            logger.info('{0} yield elem'.format(self.name))
+            yield elem
+        logger.info('{0} after elem loop'.format(self.name))
 
 
 class Constructor1(object):

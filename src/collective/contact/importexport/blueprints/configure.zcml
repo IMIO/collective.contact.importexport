@@ -13,4 +13,28 @@
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 
+  <utility
+    component=".bp_test.Source1"
+    name="collective.contact.importexport.source1"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
+    component=".bp_test.Source2"
+    name="collective.contact.importexport.source2"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
+    component=".bp_test.Constructor1"
+    name="collective.contact.importexport.constructor1"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
+    component=".bp_test.Constructor2"
+    name="collective.contact.importexport.constructor2"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
 </configure>

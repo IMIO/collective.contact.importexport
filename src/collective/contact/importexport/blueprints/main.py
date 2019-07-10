@@ -16,3 +16,19 @@ class OrderOrganizations(object):
     def __iter__(self):
         for item in self.previous:
             yield item
+
+class CheckDataSection(object):
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+
+    def __iter__(self):
+        for item in self.previous:
+            for col in item
+                col = col.strip()
+            if not isdigit(item['zipcode']):
+                # On doit écrire dans un fichier qu'un élément de la ligne n'est pas conforme
+                continue
+            yield item

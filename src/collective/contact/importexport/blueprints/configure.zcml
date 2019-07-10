@@ -14,6 +14,12 @@
     />
 
   <utility
+    component=".various.CheckDataSection"
+    name="collective.contact.importexport.checkdata"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
     component=".path.PathInserter"
     name="collective.contact.importexport.pathinserter"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"

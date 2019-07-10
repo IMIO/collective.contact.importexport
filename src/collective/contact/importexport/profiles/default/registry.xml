@@ -12,22 +12,32 @@
 <value>
 [transmogrifier]
 pipeline =
-    csvsource
-    csvcleaner
-    portaltypeinserter
-    pathinserter
-    constructor
-    schemaupdater
+    organizationscsv
+    counter
+    skipfirstline
+#    breakpoint
+#    portaltypeinserter
+#    pathinserter
+#    constructor
+#    schemaupdater
     logger
 
-[csvsource]
+[organizationscsv]
 blueprint = collective.transmogrifier.sections.csvsource
-filename = /Users/laurent/csvsource.csv
-fieldnames = societe_id Parent title description organization_type use_parent_address_bool street number additional_address_details zip_code city phone cell_phone fax email website region country UID Contact_intene
+filename = /srv/instances/dmsmail/Extensions/organizations-test.csv
+fieldnames = _oid _pid title description organization_type use_parent_address_bool street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 
-[csvcleaner]
-blueprint = collective.contact.importexport.csvcleaner
-remove-header = true
+[counter]
+blueprint = collective.contact.importexport.counter
+keyname = _c
+
+[skipfirstline]
+blueprint = collective.transmogrifier.sections.condition
+condition = python:item['_c'] != 0
+
+[breakpoint]
+blueprint = collective.contact.importexport.breakpoint
+condition = python:item['_c'] < 3
 
 [portaltypeinserter]
 blueprint = collective.transmogrifier.sections.inserter

@@ -37,7 +37,7 @@ condition = python:item['_c'] != 0
 
 [breakpoint]
 blueprint = collective.contact.importexport.breakpoint
-condition = python:item['_c'] < 3
+condition = python:item['_c'] == 1
 
 [portaltypeinserter]
 blueprint = collective.transmogrifier.sections.inserter

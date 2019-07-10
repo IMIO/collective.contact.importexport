@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from collective.contact.importexport.utils import get_main_path
+
 import logging
 import os
 
@@ -9,8 +11,8 @@ logger = logging.getLogger('collective.contact.importexport')
 def modified_pipeline(obj, event):
     if event.oldValue == event.newValue:
         return
-    CLIENT_HOME = os.environ['CLIENT_HOME']
-    pipeline_path = os.path.join(CLIENT_HOME, 'pipeline.cfg')
+    path = get_main_path()
+    pipeline_path = os.path.join(path, 'pipeline.cfg')
     fd = open(pipeline_path, "w")
     fd.writelines(event.newValue)
     fd.close()

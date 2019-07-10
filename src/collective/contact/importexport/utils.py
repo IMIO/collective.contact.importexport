@@ -1,7 +1,22 @@
-def safe_encode(value, encoding='utf-8'):
+# -*- coding: utf-8 -*-
+
+import os
+import re
+
+
+def get_main_path(path='', subpath=''):
     """
-        Converts a value to encoding, even if it is already encoded.
+        Return path/subpath if it exists.
+        If path is empty, return buildout path.
     """
-    if isinstance(value, unicode):
-        return value.encode(encoding)
-    return value
+    if not path:
+        # Are we in a classic buildout
+        INSTANCE_HOME = os.getenv('INSTANCE_HOME')  # to avoid getting pyflakes error on INSTANCE_HOME
+        match = re.match('(.+)/parts/.+', INSTANCE_HOME)
+        if match:
+            path = match.group(1)
+    if subpath:
+        path = os.path.join(path, subpath)
+    if os.path.exists(path):
+        return path
+    return None

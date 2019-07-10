@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from collective.contact.importexport.utils import safe_encode
+from imio.helpers.content import safe_encode
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from plone import api

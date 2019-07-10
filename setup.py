@@ -45,6 +45,7 @@ setup(
         'plone.app.transmogrifier',
         'collective.transmogrifier',
         'transmogrify.dexterity',
+        'imio.helpers'
     ],
     extras_require={
         'test': [

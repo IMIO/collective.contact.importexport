@@ -2,6 +2,12 @@
     xmlns="http://namespaces.zope.org/zope">
 
   <utility
+    component=".main.Initialization"
+    name="collective.contact.importexport.init"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
     component=".various.AddCounter"
     name="collective.contact.importexport.counter"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"

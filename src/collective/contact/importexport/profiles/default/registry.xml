@@ -15,8 +15,8 @@ pipeline =
     initialization
     organizationscsv
     counter
-    skipfirstline
-#    checkdata
+    csvfirstline
+#    skipfirstline
 #    breakpoint
 #    portaltypeinserter
 #    pathinserter
@@ -36,6 +36,10 @@ blueprint = collective.transmogrifier.sections.csvsource
 filename = /srv/instances/dmsmail/Extensions/organizations-test.csv
 fmtparam-strict = python:True
 fieldnames = _oid _pid title description organization_type use_parent_address_bool street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
+
+[csvfirstline]
+blueprint = collective.contact.importexport.csvfirstline
+section = organizationscsv
 
 [counter]
 blueprint = collective.contact.importexport.counter

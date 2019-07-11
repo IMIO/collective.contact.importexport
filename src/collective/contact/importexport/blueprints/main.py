@@ -10,6 +10,7 @@ import logging
 import os
 
 e_logger = logging.getLogger('ccie-transmo')
+e_logger.setLevel(logging.INFO)
 
 
 class Initialization(object):
@@ -21,7 +22,7 @@ class Initialization(object):
         self.workingpath = get_main_path(options.get('basepath', ''), options.get('subpath', ''))
         lfh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors.log'), mode='w')
         lfh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
-        lfh.setLevel(logging.WARN)
+        lfh.setLevel(logging.INFO)
         e_logger.addHandler(lfh)
 
     def __iter__(self):
@@ -39,6 +40,7 @@ class OrderOrganizations(object):
     def __iter__(self):
         for item in self.previous:
             yield item
+
 
 class CheckData(object):
     classProvides(ISectionBlueprint)

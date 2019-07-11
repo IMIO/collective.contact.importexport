@@ -26,6 +26,12 @@
     />
 
   <utility
+    component=".various.CsvFirstLine"
+    name="collective.contact.importexport.csvfirstline"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
     component=".path.PathInserter"
     name="collective.contact.importexport.pathinserter"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"

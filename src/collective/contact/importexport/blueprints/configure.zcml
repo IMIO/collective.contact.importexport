@@ -14,6 +14,12 @@
     />
 
   <utility
+    component=".main.CheckData"
+    name="collective.contact.importexport.checkdata"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
     component=".various.BreakpointSection"
     name="collective.contact.importexport.breakpoint"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"

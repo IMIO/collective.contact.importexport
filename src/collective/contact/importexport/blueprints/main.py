@@ -39,3 +39,14 @@ class OrderOrganizations(object):
     def __iter__(self):
         for item in self.previous:
             yield item
+
+class CheckData(object):
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+
+    def __iter__(self):
+        for item in self.previous:
+            yield item

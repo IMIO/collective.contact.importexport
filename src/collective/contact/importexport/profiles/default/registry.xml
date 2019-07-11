@@ -12,6 +12,7 @@
 <value>
 [transmogrifier]
 pipeline =
+    initialization
     organizationscsv
     counter
     skipfirstline
@@ -22,9 +23,17 @@ pipeline =
 #    schemaupdater
     logger
 
+[initialization]
+blueprint = collective.contact.importexport.init
+# basepath is an absolute directory. If empty, buildout dir will be used
+basepath =
+# if subpath, it will be appended to basepath
+subpath = imports
+
 [organizationscsv]
 blueprint = collective.transmogrifier.sections.csvsource
 filename = /srv/instances/dmsmail/Extensions/organizations-test.csv
+fmtparam-strict = python:True
 fieldnames = _oid _pid title description organization_type use_parent_address_bool street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 
 [counter]

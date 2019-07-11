@@ -16,4 +16,4 @@ def modified_pipeline(obj, event):
     fd = open(pipeline_path, "w")
     fd.writelines(event.newValue)
     fd.close()
-    logger.info("New pipeline.cfg file was placed in var/instance")
+    logger.info("Pipeline was placed in {}".format(pipeline_path))

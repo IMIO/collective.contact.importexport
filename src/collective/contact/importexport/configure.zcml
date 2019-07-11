@@ -37,6 +37,10 @@
                    plone.registry.interfaces.IRecordModifiedEvent"
               handler=".event.modified_pipeline" />
 
+  <subscriber for="collective.contact.importexport.interfaces.IPipelineConfiguration
+                   plone.registry.interfaces.IRecordAddedEvent"
+              handler=".event.modified_pipeline" />
+
   <utility
       factory=".setuphandlers.HiddenProfiles"
       name="collective.contact.importexport-hiddenprofiles" />

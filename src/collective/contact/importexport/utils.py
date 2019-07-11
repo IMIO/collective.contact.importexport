@@ -19,7 +19,8 @@ def get_main_path(path='', subpath=''):
         path = os.path.join(path, subpath)
     if os.path.exists(path):
         return path
-    return None
+    raise Exception("Path '{}' doesn't exist".format(path))
+
 
 def digit(phone):
     # filter with str.isdigit or unicode.isdigit

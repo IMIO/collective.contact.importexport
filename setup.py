@@ -45,7 +45,8 @@ setup(
         'plone.app.transmogrifier',
         'collective.transmogrifier',
         'transmogrify.dexterity',
-        'imio.helpers'
+        'imio.helpers',
+        'ipdb'
     ],
     extras_require={
         'test': [

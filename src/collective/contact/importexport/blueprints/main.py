@@ -19,7 +19,7 @@ class Initialization(object):
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.workingpath = get_main_path(options.get('basepath', ''), options.get('subpath', ''))
-        lfh = logging.FileHandler(os.path.join(self.workingpath, 'ie.log'), mode='w')
+        lfh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors.log'), mode='w')
         lfh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         lfh.setLevel(logging.WARN)
         e_logger.addHandler(lfh)

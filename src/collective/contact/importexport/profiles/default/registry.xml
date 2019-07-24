@@ -17,6 +17,7 @@ pipeline =
     counter
     csvfirstline
 #    skipfirstline
+    checkorgdata
 #    breakpoint
 #    portaltypeinserter
 #    pathinserter

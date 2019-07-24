@@ -2,6 +2,7 @@
 
 import os
 import re
+import phonenumbers
 
 
 def get_main_path(path='', subpath=''):
@@ -22,24 +23,18 @@ def get_main_path(path='', subpath=''):
     raise Exception("Path '{}' doesn't exist".format(path))
 
 
-def digit(phone):
-    # filter with str.isdigit or unicode.isdigit
-    return filter(type(phone).isdigit, phone)
+def is_valid_zip(zipc, country):
+    if not zipc:
+        return False
+    elif zipc and zipc.isdigit and len(zipc) != 4 and not country:
+        return False
+    else:
+        return True
 
-def is_zip(zipc, line, typ, country):
-    ozipc = zipc
-    zipc = digit(zipc)
-    if ozipc != zipc:
-        out.append("!! %s: line %d, zip code contains non digit chars: %s" % (typ, line, zipc))
-    if zipc and len(zipc) != 4 and not country:
-        out.append("!! %s: line %d, zip code length not 4: %s" % (typ, line, zipc))
-    if zipc in ['0']:
-        return ''
-    return zipc
 
-def check_phone(phone, line, typ, country):
+def is_valid_phone(phone, country):
     if not phone:
-        return phone
+        return False
     country = country.lower()
     countries = {'belgique': 'BE', 'france': 'FR'}
     if not country:
@@ -47,14 +42,11 @@ def check_phone(phone, line, typ, country):
     elif country in countries:
         ctry = countries[country]
     else:
-        out.append("!! %s: line %d, country not detected '%s', phone number: '%s'" % (typ, line, country, phone))
-        return phone
+        return False
     try:
         number = phonenumbers.parse(phone, ctry)
     except phonenumbers.NumberParseException:
-        out.append("!! %s: line %d, bad phone number: %s" % (typ, line, phone))
-        return ''
+        return False
     if not phonenumbers.is_valid_number(number):
-        out.append("!! %s: line %d, invalid phone number: %s" % (typ, line, phone))
-        return ''
-    return phone
+        return False
+    return True

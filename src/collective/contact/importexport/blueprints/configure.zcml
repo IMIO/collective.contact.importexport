@@ -14,8 +14,8 @@
     />
 
   <utility
-    component=".main.CheckData"
-    name="collective.contact.importexport.checkdata"
+    component=".main.CheckOrgData"
+    name="collective.contact.importexport.checkorgdata"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 

@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from collective.contact.importexport.utils import get_main_path
+from collective.contact.importexport.utils import is_valid_zip
+from collective.contact.importexport.utils import is_valid_phone
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
+from zope.annotation.interfaces import IAnnotations
 from zope.interface import classProvides
 from zope.interface import implements
 
@@ -42,13 +45,28 @@ class OrderOrganizations(object):
             yield item
 
 
-class CheckData(object):
+class CheckOrgData(object):
     classProvides(ISectionBlueprint)
     implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
+        self.storage = IAnnotations(transmogrifier)
         self.previous = previous
 
     def __iter__(self):
+        msg_output = "ORGA <%s> '%s' is not a valid %s"
         for item in self.previous:
+            for field in self.storage['csv']['fields']:
+                item[field] = item[field].strip()
+            # on vérifie que le code postal est valide
+            if not is_valid_zip(item['zip_code'], item['country']):
+                msg_output = msg_output % (item['_oid'], item['zip_code'], 'zip code')
+                e_logger.warning(msg_output)
+                item['zip_code'] = ''
+            # on vérifie le num tél
+            if not is_valid_phone():
+                msg_output = msg_output % (item['_oid'], item['phone'], 'phone number')
+                e_logger.warning(msg_output)
+                item['phone'] = ''
+
             yield item

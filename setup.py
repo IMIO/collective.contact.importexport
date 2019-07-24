@@ -46,7 +46,8 @@ setup(
         'collective.transmogrifier',
         'transmogrify.dexterity',
         'imio.helpers',
-        'ipdb'
+        'ipdb',
+        'phonenumbers'
     ],
     extras_require={
         'test': [

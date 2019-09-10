@@ -1,0 +1,7 @@
+"ID","ID Parent","Intitulé","Description","Type (sa, cpas, etc)","Util adr parent 1, 0, vide","Rue","Numéro","Complément d'adresse","Code postal","Localité","Tél","Tél portable","Fax","Courriel","Site web","Région","Pays","UID"
+1,,"Electrabel renommé",,"SA",0,"Rue de l'électron",1,,20,"E-ville",,,,,,,,"38f368b8a00e4b509fef0b3a8606ea15"
+2,1,"Travaux 1",,,1,,,,,,,,,,,,,"184b8e621467455e99c9126f312b3021"
+3,,"Mon organisation",,"Commune",0,"Rue Léon Morel",1,,5032,"Isnes",,,,,,,,"09730195e713465d9a6af8463b29a5b4"
+4,3,"Collège communal",,"Département",1,,,,,,,,,,,,,"61e7c1f465644b298aab884fa2a52eda"
+5,3,"Département culturel",,"Département",1,,,,,,,,,,,,,"dedd4cdbe0474a298337d573c71d3207"
+6,5,"Culture-loisirs",,"Service",1,,,,,,,,,,,,,"6ae53f0119a4484497793191930329cd"

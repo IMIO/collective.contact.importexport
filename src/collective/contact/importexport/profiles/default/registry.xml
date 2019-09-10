@@ -13,17 +13,24 @@
 [transmogrifier]
 pipeline =
     initialization
-    organizationscsv
-    counter
-    csvfirstline
-#    skipfirstline
-    checkorgdata
+    csvcontactsource
+    linescounter
+    dependencysorter
 #    breakpoint
-#    portaltypeinserter
 #    pathinserter
+#    directorymanipulator
 #    constructor
 #    schemaupdater
     logger
+
+[config]
+organizations_filename = organizations-test.csv
+organizations_fieldnames = _oid _pid title description organization_type use_parent_address_bool street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
+persons_filename = persons-test.csv
+persons_fieldnames =
+positions_filename = positions-test.csv
+positions_fieldnames =
+csv_headers = python:True
 
 [initialization]
 blueprint = collective.contact.importexport.init
@@ -32,35 +39,25 @@ basepath =
 # if subpath, it will be appended to basepath
 subpath = imports
 
-[organizationscsv]
-blueprint = collective.transmogrifier.sections.csvsource
-filename = /srv/instances/dmsmail/Extensions/organizations-test.csv
+[csvcontactsource]
+blueprint = collective.contact.importexport.csvcontactsource
+organization_filename = ${config:organizations_filename}
+organization_fieldnames = ${config:organizations_fieldnames}
 fmtparam-strict = python:True
-fieldnames = _oid _pid title description organization_type use_parent_address_bool street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
+csv_headers = ${config:csv_headers}
 
-[csvfirstline]
-blueprint = collective.contact.importexport.csvfirstline
-section = organizationscsv
-
-[counter]
-blueprint = collective.contact.importexport.counter
+[linescounter]
+blueprint = collective.contact.importexport.linescounter
 keyname = _c
 
-[skipfirstline]
-blueprint = collective.transmogrifier.sections.condition
-condition = python:item['_c'] != 0
-
-[breakpoint]
-blueprint = collective.contact.importexport.breakpoint
-condition = python:item['_c'] == 1
-
-[portaltypeinserter]
-blueprint = collective.transmogrifier.sections.inserter
-key = string:_type
-value = string:organization
+[dependencysorter]
+blueprint = collective.contact.importexport.dependencysorter
 
 [pathinserter]
 blueprint = collective.contact.importexport.pathinserter
+
+[directorymanipulator]
+blueprint = collective.contact.importexport.directorymanipulator
 
 [constructor]
 blueprint = collective.transmogrifier.sections.constructor
@@ -72,6 +69,10 @@ blueprint = transmogrify.dexterity.schemaupdater
 blueprint = collective.transmogrifier.sections.logger
 name = logger
 level = INFO
+
+[breakpoint]
+blueprint = collective.contact.importexport.breakpoint
+condition = python:item['_c'] == 1
 </value>
   </record>
 

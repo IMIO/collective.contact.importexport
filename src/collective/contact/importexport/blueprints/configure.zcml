@@ -8,26 +8,26 @@
     />
 
   <utility
-    component=".various.AddCounter"
-    name="collective.contact.importexport.counter"
+    component=".contactcsv.CSVContactSourceSection"
+    name="collective.contact.importexport.csvcontactsource"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 
   <utility
-    component=".main.CheckOrgData"
-    name="collective.contact.importexport.checkorgdata"
+    component=".various.AddLineNumber"
+    name="collective.contact.importexport.linescounter"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
+    component=".dependency.DependencySorter"
+    name="collective.contact.importexport.dependencysorter"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 
   <utility
     component=".various.BreakpointSection"
     name="collective.contact.importexport.breakpoint"
-    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
-    />
-
-  <utility
-    component=".various.CsvFirstLine"
-    name="collective.contact.importexport.csvfirstline"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 

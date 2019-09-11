@@ -1,0 +1,35 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="collective.contact.importexport">
+
+  <!-- Set overrides folder for Just-a-Bunch-Of-Templates product -->
+  <include package="z3c.jbot" file="meta.zcml" />
+  <browser:jbot
+      directory="overrides"
+      layer="collective.contact.importexport.interfaces.ICollectiveContactImportexportLayer"
+      />
+
+  <!-- Publish static files -->
+  <plone:static
+      name="collective.contact.importexport"
+      type="plone"
+      directory="static"
+      />
+
+  <browser:page
+      name="collective_contact_importexport_import_view"
+      for="collective.contact.core.content.directory.IDirectory"
+      permission="zope2.View"
+      class=".import_view.ImportForm"
+      />
+
+  <browser:page
+      name="document_generation_helper_view"
+      for="collective.contact.core.content.directory.IDirectory"
+      class=".export_view.DocumentGenerationDirectoryHelper"
+      permission="zope2.View"
+      />
+
+</configure>

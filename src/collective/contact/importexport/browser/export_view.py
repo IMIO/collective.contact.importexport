@@ -1,6 +1,7 @@
-from collective.documentgenerator.helper.archetypes import ATDocumentGenerationHelperView
+# -*- coding: utf-8 -*-
+from collective.documentgenerator.helper.dexterity import DXDocumentGenerationHelperView
 from plone import api
-
+import json
 
 class DashboardDGBaseHelper():
     """
@@ -26,7 +27,7 @@ class DashboardDGBaseHelper():
         return False
 
 
-class DocumentGenerationDirectoryHelper(ATDocumentGenerationHelperView, DashboardDGBaseHelper):
+class DocumentGenerationDirectoryHelper(DXDocumentGenerationHelperView, DashboardDGBaseHelper):
     """
         Helper for collective.contact.core directory
     """
@@ -108,9 +109,59 @@ class DocumentGenerationDirectoryHelper(ATDocumentGenerationHelperView, Dashboar
             str_phones = ";".join(getattr(contact, type_phone))
         return str_phones
 
+    def get_schedule(self, contact):
+        '''
+        Return Dictionary string representation when there is at least one value in one day else return empty string.
+        '''
+        if contact.schedule is not None:
+            dict_schedule = json.loads(contact.schedule)
+            has_value = False
+            for day, dic_value in dict_schedule.items():
+                for k, v in dic_value.items():
+                    if v != "":
+                        has_value = True
+            if has_value is True:
+                return contact.schedule
+            else:
+                return ""
+        else:
+            return ""
 
-#    def is_internal(self, contact):
-#        """
-#            Check if contact is internal (not INotPloneGroupContact => IPloneGroupContact or IPers)
-#        """
-#        return 0 #not INotPloneGroupContact.providedBy(contact)
+    def get_formated_schedule(self, contact):
+        '''
+        Return a formated human readable text.
+        xxx => use case when there is only a comment in a day?
+        '''
+        if contact.schedule is not None:
+            day_fr = {
+                'monday':'lundi',
+                'tuesday':'mardi',
+                'wednesday':'mercredi',
+                'thursday':'jeudi',
+                'friday':'vendredi',
+                'saturday':'samedi',
+                'sunday':'dimanche'
+            }
+            dict_schedule = json.loads(contact.schedule)
+            str_schedule = ""
+            for day, v in dict_schedule.items():
+                str_current_day = ""
+                clean_v = self.get_keys_case(v)
+                if len(clean_v.items()) == 2:
+                    str_current_day = u"{}: de {} à {} \n {}\n".format(day_fr.get(day), clean_v.get('morningstart') or clean_v.get('afternoonstart'),
+                                                    clean_v.get('morningend') or clean_v.get('afternoonend'), v.get('comment'))
+                if len(clean_v.items()) == 4:
+                    str_current_day = u"{}: de {} à {} et de {} {} \n {}\n".format(day_fr.get(day),clean_v.get('morningstart'), clean_v.get('morningend'),
+                                                    clean_v.get('afternoonstart'), clean_v.get('afternoonend'), v.get('comment'))
+                str_schedule = u"{}\r\n{}".format(str_schedule, str_current_day)
+            return str_schedule
+        else:
+            return ""
+
+    def get_keys_case(self, day):
+        value = 0
+        new_dict = {}
+        for k, v in day.items():
+            if k in ["morningstart","morningend","afternoonstart","afternoonend"] and v != "":
+                new_dict[k] = v
+        return new_dict

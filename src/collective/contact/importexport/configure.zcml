@@ -14,6 +14,7 @@
   <include package="transmogrify.dexterity" />
 
   <include package=".blueprints" />
+  <include package=".browser" />
 
   <genericsetup:registerProfile
       name="default"

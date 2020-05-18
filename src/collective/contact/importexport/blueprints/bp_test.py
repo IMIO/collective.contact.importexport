@@ -52,6 +52,7 @@ class Source2(object):
         logger.info('{0} before previous loop'.format(self.name))
         for item in self.previous:
             logger.info('{0} yield previous'.format(self.name))
+            continue
             yield item
         logger.info('{0} after previous loop'.format(self.name))
         for elem in self.source_list:
@@ -95,7 +96,7 @@ class Constructor2(object):
 
 
 """
-Results:
+Results: source1 source2 constructor1 c2, sans continue dans s2
 --------
 source1 init
 source2 init
@@ -118,6 +119,39 @@ source1 yield elem
 source2 yield previous
 constructor1 yield previous
 constructor2 yield previous
+source1 after elem loop
+source2 after previous loop
+source2 yield elem
+constructor1 yield previous
+constructor2 yield previous
+source2 yield elem
+constructor1 yield previous
+constructor2 yield previous
+source2 yield elem
+constructor1 yield previous
+constructor2 yield previous
+source2 after elem loop
+constructor1 after previous loop
+constructor2 after previous loop
+
+
+Results: source1 source2 constructor1 c2, avec continue dans s2
+--------
+source1 init
+source2 init
+constructor1 init
+constructor2 init
+constructor2 before previous loop
+constructor1 before previous loop
+source2 before previous loop
+source1 before previous loop
+source1 after previous loop
+source1 yield elem
+source2 yield previous
+source1 yield elem
+source2 yield previous
+source1 yield elem
+source2 yield previous
 source1 after elem loop
 source2 after previous loop
 source2 yield elem

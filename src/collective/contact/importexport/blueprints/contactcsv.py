@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from collective.contact.importexport.blueprints.main import input_error
+from collective.contact.importexport.blueprints.main import logger
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
@@ -26,10 +28,10 @@ class CSVContactSourceSection(object):
         self.persons_fieldnames = options.get('persons_fieldnames')
         if self.persons_fieldnames:
             self.persons_fieldnames = self.persons_fieldnames.split()
-        self.positions_filename = options.get('positions_filename')
-        self.positions_fieldnames = options.get('positions_fieldnames')
-        if self.positions_fieldnames:
-            self.positions_fieldnames = self.positions_fieldnames.split()
+        self.held_positions_filename = options.get('positions_filename')
+        self.held_positions_fieldnames = options.get('positions_fieldnames')
+        if self.held_positions_fieldnames:
+            self.held_positions_fieldnames = self.held_positions_fieldnames.split()
 
         if self.organization_filename is None and self.persons_filename is None:
             raise Exception("You must specify at least organizations or persons CSV")
@@ -47,43 +49,39 @@ class CSVContactSourceSection(object):
             yield item
 
         if self.organization_filename:
-            bypassed = False
-            for item in self.rows(self.organization_filename, self.organization_fieldnames):
-                if self.csv_headers and not bypassed:
-                    # Bypass CSV headers if any
-                    bypassed = True
-                    continue
-                item["_type"] = "organization"
+            for item in self.rows("organization", self.organization_filename, self.organization_fieldnames):
                 yield item
 
         if self.persons_filename:
-            bypassed = False
-            for item in self.rows(self.persons_filename, self.persons_fieldnames):
-                if self.csv_headers and not bypassed:
-                    # Bypass CSV headers if any
-                    bypassed = True
-                    continue
-                item["_type"] = "person"
+            for item in self.rows("person", self.persons_filename, self.persons_fieldnames):
                 yield item
 
-        if self.positions_filename:
-            bypassed = False
-            for item in self.rows(self.positions_filename, self.positions_fieldnames):
-                if self.csv_headers and not bypassed:
-                    # Bypass CSV headers if any
-                    bypassed = True
-                    continue
-                item["_type"] = "position"
+        if self.held_positions_filename:
+            for item in self.rows("held_position", self.held_positions_filename, self.held_positions_fieldnames):
                 yield item
 
-    def rows(self, filename, fieldnames):
+    def rows(self, typ, filename, fieldnames):
         file_ = openFileReference(self.transmogrifier, filename)
         if file_ is None:
             return
-        reader = csv.DictReader(
-            file_, dialect=self.dialect,
-            fieldnames=fieldnames,
-            **self.fmtparam)
+        logger.info("Reading {}".format(filename))
+        reader = csv.DictReader(file_, dialect=self.dialect, fieldnames=fieldnames, restkey='_rest',
+                                restval='__NO_CO_LU_MN__', **self.fmtparam)
         for item in reader:
+            item["_type"] = typ
+            item['_ln'] = reader.line_num
+            # check fieldnames length on first line
+            if reader.line_num == 1:
+                reader.restval = None
+                if '_rest' in item:
+                    input_error(item, u'STOPPING: some columns are not defined in fieldnames: {}'.format(item['_rest']))
+                    break
+                extra_cols = [key for (key, val) in item.items() if val == '__NO_CO_LU_MN__']
+                if extra_cols:
+                    input_error(item, u'STOPPING: to much columns defined in fieldnames: {}'.format(extra_cols))
+                    break
+                # pass headers if any
+                if self.csv_headers:
+                    continue
             yield item
         file_.close()

@@ -10,23 +10,6 @@ import ipdb
 import sys
 
 
-class AddLineNumber(object):
-    classProvides(ISectionBlueprint)
-    implements(ISection)
-
-    def __init__(self, transmogrifier, name, options, previous):
-        self.previous = previous
-        self.keyname = options.get('keyname', '_counter')
-        self.firstvalue = options.get('firstvalue', 1)
-
-    def __iter__(self):
-        counter = self.firstvalue
-        for item in self.previous:
-            item[self.keyname] = counter
-            counter += 1
-            yield item
-
-
 class BreakpointSection(object):
     classProvides(ISectionBlueprint)
     implements(ISection)

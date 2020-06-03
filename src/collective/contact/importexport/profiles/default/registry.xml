@@ -14,7 +14,6 @@
 pipeline =
     initialization
     csvcontactsource
-    linescounter
     dependencysorter
 #    breakpoint
 #    pathinserter
@@ -28,8 +27,8 @@ organizations_filename = organizations-test.csv
 organizations_fieldnames = _oid _pid title description organization_type use_parent_address_bool street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 persons_filename = persons-test.csv
 persons_fieldnames =
-positions_filename = positions-test.csv
-positions_fieldnames =
+held_positions_filename = heldpositions-test.csv
+held_positions_fieldnames =
 csv_headers = python:True
 
 [initialization]
@@ -45,10 +44,6 @@ organization_filename = ${config:organizations_filename}
 organization_fieldnames = ${config:organizations_fieldnames}
 fmtparam-strict = python:True
 csv_headers = ${config:csv_headers}
-
-[linescounter]
-blueprint = collective.contact.importexport.linescounter
-keyname = _c
 
 [dependencysorter]
 blueprint = collective.contact.importexport.dependencysorter

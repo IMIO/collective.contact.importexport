@@ -16,7 +16,7 @@ class DependencySorter(object):
     def __iter__(self):
         all_organizations = []
         all_persons = []
-        all_positions = []
+        all_held_positions = []
         parent_relation = {}
         for item in self.previous:
             if item["_type"] == "organization":
@@ -25,8 +25,8 @@ class DependencySorter(object):
                 all_organizations.append(item)
             elif item["_type"] == "person":
                 all_persons.append(item)
-            elif item["_type"] == "position":
-                all_positions.append(item)
+            elif item["_type"] == "held_position":
+                all_held_positions.append(item)
 
         for org in all_organizations:
             org["level"] = self.get_level(parent_relation, org["_oid"])
@@ -37,7 +37,7 @@ class DependencySorter(object):
         for pers in all_persons:
             yield pers
 
-        for pos in all_positions:
+        for pos in all_held_positions:
             yield pos
 
     def get_level(self, parent_relation, oid):

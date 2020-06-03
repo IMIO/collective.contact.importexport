@@ -10,10 +10,15 @@ from zope.interface import implements
 import logging
 import os
 
-e_logger = logging.getLogger('ccie-transmo')
+logger = logging.getLogger('ccie')
+e_logger = logging.getLogger('ccie-input')
 e_logger.setLevel(logging.INFO)
 
 ANNOTATION_KEY = "collective.contact.importexport"
+
+
+def input_error(item, msg):
+    e_logger.error(u'{}: ln {:d}, {}'.format(item['_type'], item['_ln'], msg))
 
 
 class Initialization(object):

@@ -14,12 +14,6 @@
     />
 
   <utility
-    component=".various.AddLineNumber"
-    name="collective.contact.importexport.linescounter"
-    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
-    />
-
-  <utility
     component=".dependency.DependencySorter"
     name="collective.contact.importexport.dependencysorter"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"

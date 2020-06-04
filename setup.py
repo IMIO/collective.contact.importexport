@@ -51,6 +51,7 @@ setup(
     ],
     extras_require={
         'test': [
+            'collective.taxonomy',
             'plone.app.testing',
             # Plone KGS does not use this version, because it would break
             # Remove if your package shall be part of coredev.

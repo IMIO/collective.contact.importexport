@@ -19,18 +19,18 @@ class DependencySorter(object):
         all_held_positions = []
         parent_relation = {}
         for item in self.previous:
-            if item["_type"] == "organization":
-                if item["_pid"]:
-                    parent_relation[item["_oid"]] = item["_pid"]
+            if item['_type'] == 'organization':
+                if item['_pid']:
+                    parent_relation[item['_id']] = item['_pid']
                 all_organizations.append(item)
-            elif item["_type"] == "person":
+            elif item['_type'] == 'person':
                 all_persons.append(item)
-            elif item["_type"] == "held_position":
+            elif item['_type'] == 'held_position':
                 all_held_positions.append(item)
 
         for org in all_organizations:
-            org["level"] = self.get_level(parent_relation, org["_oid"])
-        sorted_organizations = sorted(all_organizations, key=lambda item: (item['level'], item['_oid']))
+            org['_level'] = self.get_level(parent_relation, org['_id'])
+        sorted_organizations = sorted(all_organizations, key=lambda item: (item['_level'], item['_id']))
         for org in sorted_organizations:
             yield org
 

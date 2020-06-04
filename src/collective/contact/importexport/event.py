@@ -13,7 +13,7 @@ def modified_pipeline(obj, event):
         return
     path = get_main_path()
     pipeline_path = os.path.join(path, 'pipeline.cfg')
-    fd = open(pipeline_path, "w")
+    fd = open(pipeline_path, 'w')
     fd.writelines(event.newValue)
     fd.close()
-    logger.info("Pipeline was placed in {}".format(pipeline_path))
+    logger.info('Pipeline was placed in {}'.format(pipeline_path))

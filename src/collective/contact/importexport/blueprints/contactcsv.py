@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from collective.contact.importexport.blueprints.main import input_error
-from collective.contact.importexport.blueprints.main import logger
+from collective.contact.importexport import logger
+from collective.contact.importexport.utils import input_error
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
@@ -21,20 +21,17 @@ class CSVContactSourceSection(object):
         self.transmogrifier = transmogrifier
 
         self.organization_filename = options.get('organization_filename')
-        self.organization_fieldnames = options.get('organization_fieldnames')
-        if self.organization_fieldnames:
-            self.organization_fieldnames = self.organization_fieldnames.split()
+        if self.organization_filename:
+            self.organization_fieldnames = transmogrifier['config'].get('organizations_fieldnames', '').split()
         self.persons_filename = options.get('persons_filename')
-        self.persons_fieldnames = options.get('persons_fieldnames')
-        if self.persons_fieldnames:
-            self.persons_fieldnames = self.persons_fieldnames.split()
-        self.held_positions_filename = options.get('positions_filename')
-        self.held_positions_fieldnames = options.get('positions_fieldnames')
-        if self.held_positions_fieldnames:
-            self.held_positions_fieldnames = self.held_positions_fieldnames.split()
+        if self.persons_filename:
+            self.persons_fieldnames = transmogrifier['config'].get('persons_fieldnames', '').split()
+        self.held_positions_filename = options.get('held_positions_filename')
+        if self.held_positions_filename:
+            self.held_positions_fieldnames = transmogrifier['config'].get('held_positions_fieldnames', '').split()
 
         if self.organization_filename is None and self.persons_filename is None:
-            raise Exception("You must specify at least organizations or persons CSV")
+            raise Exception('You must specify at least organizations or persons CSV')
 
         self.csv_headers = Condition(options.get('csv_headers', 'python:True'), transmogrifier, name, options)
         self.dialect = options.get('dialect', 'excel')
@@ -49,30 +46,30 @@ class CSVContactSourceSection(object):
             yield item
 
         if self.organization_filename:
-            for item in self.rows("organization", self.organization_filename, self.organization_fieldnames):
+            for item in self.rows(u'organization', self.organization_filename, self.organization_fieldnames):
                 yield item
 
         if self.persons_filename:
-            for item in self.rows("person", self.persons_filename, self.persons_fieldnames):
+            for item in self.rows(u'person', self.persons_filename, self.persons_fieldnames):
                 yield item
 
         if self.held_positions_filename:
-            for item in self.rows("held_position", self.held_positions_filename, self.held_positions_fieldnames):
+            for item in self.rows(u'held_position', self.held_positions_filename, self.held_positions_fieldnames):
                 yield item
 
     def rows(self, typ, filename, fieldnames):
         file_ = openFileReference(self.transmogrifier, filename)
         if file_ is None:
             return
-        logger.info("Reading {}".format(filename))
+        logger.info('Reading {}'.format(filename))
         reader = csv.DictReader(file_, dialect=self.dialect, fieldnames=fieldnames, restkey='_rest',
                                 restval='__NO_CO_LU_MN__', **self.fmtparam)
         for item in reader:
-            item["_type"] = typ
+            item['_type'] = typ
             item['_ln'] = reader.line_num
             # check fieldnames length on first line
             if reader.line_num == 1:
-                reader.restval = None
+                reader.restval = u''
                 if '_rest' in item:
                     input_error(item, u'STOPPING: some columns are not defined in fieldnames: {}'.format(item['_rest']))
                     break

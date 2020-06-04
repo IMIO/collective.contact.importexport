@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from collective.contact.core.behaviors import validateEmail
+from collective.contact.importexport import e_logger
+
 import os
-import re
 import phonenumbers
+import re
+
+
+def input_error(item, msg):
+    e_logger.error(u'{}: ln {:d}, {}'.format(item['_type'], item['_ln'], msg))
 
 
 def get_main_path(path='', subpath=''):
@@ -23,30 +30,63 @@ def get_main_path(path='', subpath=''):
     raise Exception("Path '{}' doesn't exist".format(path))
 
 
-def is_valid_zip(zipc, country):
-    if not zipc:
-        return False
-    elif zipc and zipc.isdigit and len(zipc) != 4 and not country:
-        return False
-    else:
-        return True
+def to_bool(item, key):
+    try:
+        return bool(int(item[key] or 0))
+    except:
+        input_error(item, u"Cannot change '{}' key value '{}' to bool".format(key, item[key]))
+    return False
 
 
-def is_valid_phone(phone, country):
+def digit(phone):
+    # filter with str.isdigit or unicode.isdigit
+    return filter(type(phone).isdigit, phone)
+
+
+def valid_zip(item, zipkey, countrykey):
+    """ Check and return valid format zip """
+    zipc = digit(item[zipkey])
+    if item[zipkey] != zipc:
+        input_error(item, u"zip code col '{}' contains non digit chars, value '{}'".format(zipkey, item[zipkey]))
+    if zipc and len(zipc) != 4 and not item[countrykey]:
+        input_error(item, u"zip code col '{}' length not 4, value '{}' => kept '' value".format(zipkey, item[zipkey]))
+        return u''
+    return zipc
+
+
+def valid_phone(item, phonekey, countrykey):
+    """ Check and return valid phone """
+    phone = item[phonekey]
     if not phone:
-        return False
-    country = country.lower()
+        return phone
+    country = item[countrykey].lower()
     countries = {'belgique': 'BE', 'france': 'FR'}
     if not country:
         ctry = 'BE'
     elif country in countries:
         ctry = countries[country]
     else:
-        return False
+        input_error(item, u"country col '{}' with undetected value '{}', kept phone number col {} with value '{}'".format(
+                          countrykey, item[countrykey], phonekey, phone))
+        return phone
     try:
         number = phonenumbers.parse(phone, ctry)
     except phonenumbers.NumberParseException:
-        return False
+        input_error(item, u"phone number col '{}' with bad value '{}' => kept '' value".format(phonekey, phone))
+        return u''
     if not phonenumbers.is_valid_number(number):
-        return False
-    return True
+        input_error(item, u"phone number col '{}' with invalid value '{}' => kept '' value".format(phonekey, phone))
+        return u''
+    return phone
+
+
+def valid_email(item, emailkey):
+    """ Check and return valid email """
+    if not item[emailkey]:
+        return u''
+    try:
+        validateEmail(item[emailkey])
+    except:
+        input_error(item, u"email col '{}' with invalid value '{}' => kept '' value".format(emailkey, item[emailkey]))
+        return u''
+    return item[emailkey]

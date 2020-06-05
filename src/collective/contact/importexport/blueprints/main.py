@@ -92,9 +92,9 @@ class CommonInputChecks(object):
                                if key in self.fieldnames[typ]}
                          for typ in MANAGED_TYPES}
         self.dir_org_config = self.storage['dir_org_config']
-        self.idnormalizer = getUtility(IIDNormalizer)
 
     def __iter__(self):
+        idnormalizer = getUtility(IIDNormalizer)
         for item in self.previous:
             item_type = item['_type']
 
@@ -139,7 +139,7 @@ class CommonInputChecks(object):
                     type_type = item['_pid'] and 'levels' or 'types'
                     if item['organization_type'] not in self.dir_org_config[type_type]:
                         self.dir_org_config[type_type][item['organization_type']] = \
-                            self.idnormalizer.normalize(item['organization_type'])
+                            idnormalizer.normalize(item['organization_type'])
                     item['organization_type'] = self.dir_org_config[type_type][item['organization_type']]
                 else:  # we take the first value
                     item['organization_type'] = self.dir_org_config[type_type].values()[0]

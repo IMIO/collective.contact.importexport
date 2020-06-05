@@ -16,8 +16,7 @@ pipeline =
     common_input_checks
     dependencysorter
 #    breakpoint
-#    pathinserter
-#    directorymanipulator
+    pathinserter
 #    constructor
 #    schemaupdater
     logger
@@ -61,9 +60,6 @@ blueprint = collective.contact.importexport.dependencysorter
 
 [pathinserter]
 blueprint = collective.contact.importexport.pathinserter
-
-[directorymanipulator]
-blueprint = collective.contact.importexport.directorymanipulator
 
 [constructor]
 blueprint = collective.transmogrifier.sections.constructor

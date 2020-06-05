@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from collective.contact.importexport import logger
+from collective.contact.importexport.blueprints.main import ANNOTATION_KEY
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
+from zope.annotation.interfaces import IAnnotations
 from zope.interface import classProvides
 from zope.interface import implements
 
@@ -12,6 +15,10 @@ class DependencySorter(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
+        self.transmogrifier = transmogrifier
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+        self.dir_org_config = self.storage['dir_org_config']
+        self.dir_org_config_len = self.storage['dir_org_config_len']
 
     def __iter__(self):
         all_organizations = []
@@ -31,6 +38,17 @@ class DependencySorter(object):
         for org in all_organizations:
             org['_level'] = self.get_level(parent_relation, org['_id'])
         sorted_organizations = sorted(all_organizations, key=lambda item: (item['_level'], item['_id']))
+
+        # updating directory options
+        fields = {}
+        for typ in ['types', 'levels']:
+            if len(self.dir_org_config[typ]) != self.dir_org_config_len[typ]:
+                logger.info("Contacts parameter modification 'organization_%s'" % typ)
+            fields['organization_%s' % typ] = [{'name': i[0], 'token': i[1]} for i in self.dir_org_config[typ].items()]
+        if fields:
+            fields['_path'] = self.transmogrifier['config'].get('directory_path', 'contacts')
+            yield fields
+
         for org in sorted_organizations:
             yield org
 

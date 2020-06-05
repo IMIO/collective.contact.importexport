@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from collections import OrderedDict
 from collective.contact.importexport import e_logger
 from collective.contact.importexport.utils import get_main_path
 from collective.contact.importexport.utils import input_error
@@ -9,8 +10,10 @@ from collective.contact.importexport.utils import valid_zip
 from collective.contact.importexport.utils import to_bool
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
+from plone.i18n.normalizer.interfaces import IIDNormalizer
 from Products.CMFPlone.utils import safe_unicode
 from zope.annotation.interfaces import IAnnotations
+from zope.component import getUtility
 from zope.interface import classProvides
 from zope.interface import implements
 
@@ -32,12 +35,24 @@ class Initialization(object):
         lfh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         lfh.setLevel(logging.INFO)
         e_logger.addHandler(lfh)
+
+        # set global variables in annotation
         self.storage = IAnnotations(transmogrifier).setdefault(ANNOTATION_KEY, {})
         self.storage['ids'] = {typ: {} for typ in MANAGED_TYPES}
 #        self.storage['uniques'] = {typ: {} for typ in MANAGED_TYPES}
         self.storage['fieldnames'] = {typ: transmogrifier['config'].get('{}s_fieldnames'.format(typ), '').split()
                                       for typ in MANAGED_TYPES}
-        self.storage['directory'] = transmogrifier.context.contacts
+        self.storage['directory'] = transmogrifier.context.restrictedTraverse(transmogrifier['config'].get('directory_path', 'contacts'))
+        # store directory configuration
+        dir_org_config = {}
+        dir_org_config_len = {}
+        for typ in ['types', 'levels']:
+            dir_org_config[typ] = OrderedDict([(t['name'], t['token']) for t in getattr(self.storage['directory'], 'organization_%s' % typ)])
+            if not len(dir_org_config[typ]):
+                dir_org_config[typ] = OrderedDict([(u'Non défini', 'non-defini')])
+            dir_org_config_len[typ] = len(dir_org_config[typ])
+        self.storage['dir_org_config'] = dir_org_config
+        self.storage['dir_org_config_len'] = dir_org_config_len
 
     def __iter__(self):
         for item in self.previous:
@@ -60,6 +75,8 @@ class CommonInputChecks(object):
         self.booleans = {typ: {key: {} for key in options.get('{}_booleans'.format(typ), '').split()
                                if key in self.fieldnames[typ]}
                          for typ in MANAGED_TYPES}
+        self.dir_org_config = self.storage['dir_org_config']
+        self.idnormalizer = getUtility(IIDNormalizer)
 
     def __iter__(self):
         for item in self.previous:
@@ -102,4 +119,12 @@ class CommonInputChecks(object):
                 if item['_id'] == item['_pid']:
                     input_error(item, u'SKIPPING: _pid is equal to _id {}'.format(item['_id']))
                     continue
+                if item['organization_type']:
+                    type_type = item['_pid'] and 'levels' or 'types'
+                    if item['organization_type'] not in self.dir_org_config[type_type]:
+                        self.dir_org_config[type_type][item['organization_type']] = self.idnormalizer.normalize(item['organization_type'])
+                    item['organization_type'] = self.dir_org_config[type_type][item['organization_type']]
+                else:  # we take the first value
+                    item['organization_type'] = self.dir_org_config[type_type].values()[0]
+
             yield item

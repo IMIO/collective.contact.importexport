@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from AccessControl.SecurityManagement import newSecurityManager
+from collective.contact.importexport import logger
 from collective.transmogrifier.transmogrifier import configuration_registry
 from collective.transmogrifier.transmogrifier import Transmogrifier
+from Testing import makerequest
 from zope.component.hooks import setSite
+from zope.globalrequest import setRequest
 
 import sys
 import transaction
@@ -36,5 +40,17 @@ if 'app' in locals():
     app = locals().get('app')
     portal = app.get(plone_id)
     setSite(portal)
+    acl_users = app.acl_users
+    user = acl_users.getUser('admin')
+    if user:
+        user = user.__of__(acl_users)
+        newSecurityManager(None, user)
+    else:
+        logger.error("Cannot find admin user ")
+    app = makerequest.makerequest(app)
+    # support plone.subrequest
+    app.REQUEST['PARENTS'] = [app]
+    setRequest(app.REQUEST)
+
     execute_pipeline(portal, pipeline_filepath)
-    transaction.commit()
+#    transaction.commit()

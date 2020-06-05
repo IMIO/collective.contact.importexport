@@ -11,6 +11,7 @@ from collective.contact.importexport.utils import to_bool
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from plone.i18n.normalizer.interfaces import IIDNormalizer
+from plone import api
 from Products.CMFPlone.utils import safe_unicode
 from zope.annotation.interfaces import IAnnotations
 from zope.component import getUtility
@@ -42,12 +43,27 @@ class Initialization(object):
 #        self.storage['uniques'] = {typ: {} for typ in MANAGED_TYPES}
         self.storage['fieldnames'] = {typ: transmogrifier['config'].get('{}s_fieldnames'.format(typ), '').split()
                                       for typ in MANAGED_TYPES}
-        self.storage['directory'] = transmogrifier.context.restrictedTraverse(transmogrifier['config'].get('directory_path', 'contacts'))
+        # find directory
+        directory = None
+        dir_path = transmogrifier['config'].get('directory_path', '')
+        if dir_path:
+            directory = transmogrifier.context.restrictedTraverse(dir_path, default=None)
+        else:
+            brains = api.content.find(portal_type='directory')
+            if brains:
+                directory = brains[0].getObject()
+                portal_path = '/'.join(transmogrifier.context.getPhysicalPath())
+                dir_path = brains[0].getPath().lstrip(portal_path)
+        if not directory:
+            raise Exception("Directory not found !")
+        self.storage['directory'] = directory
+        self.storage['directory_path'] = dir_path
         # store directory configuration
         dir_org_config = {}
         dir_org_config_len = {}
         for typ in ['types', 'levels']:
-            dir_org_config[typ] = OrderedDict([(t['name'], t['token']) for t in getattr(self.storage['directory'], 'organization_%s' % typ)])
+            dir_org_config[typ] = OrderedDict([(t['name'], t['token']) for t in getattr(self.storage['directory'],
+                                                                                        'organization_%s' % typ)])
             if not len(dir_org_config[typ]):
                 dir_org_config[typ] = OrderedDict([(u'Non défini', 'non-defini')])
             dir_org_config_len[typ] = len(dir_org_config[typ])
@@ -122,7 +138,8 @@ class CommonInputChecks(object):
                 if item['organization_type']:
                     type_type = item['_pid'] and 'levels' or 'types'
                     if item['organization_type'] not in self.dir_org_config[type_type]:
-                        self.dir_org_config[type_type][item['organization_type']] = self.idnormalizer.normalize(item['organization_type'])
+                        self.dir_org_config[type_type][item['organization_type']] = \
+                            self.idnormalizer.normalize(item['organization_type'])
                     item['organization_type'] = self.dir_org_config[type_type][item['organization_type']]
                 else:  # we take the first value
                     item['organization_type'] = self.dir_org_config[type_type].values()[0]

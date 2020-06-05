@@ -19,6 +19,7 @@ class DependencySorter(object):
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.dir_org_config = self.storage['dir_org_config']
         self.dir_org_config_len = self.storage['dir_org_config_len']
+        self.directory_path = self.storage['directory_path']
 
     def __iter__(self):
         all_organizations = []
@@ -46,7 +47,7 @@ class DependencySorter(object):
                 logger.info("Contacts parameter modification 'organization_%s'" % typ)
             fields['organization_%s' % typ] = [{'name': i[0], 'token': i[1]} for i in self.dir_org_config[typ].items()]
         if fields:
-            fields['_path'] = self.transmogrifier['config'].get('directory_path', 'contacts')
+            fields['_path'] = self.directory_path
             yield fields
 
         for org in sorted_organizations:

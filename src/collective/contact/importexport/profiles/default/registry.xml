@@ -9,8 +9,7 @@
           <key_type type="plone.registry.field.Text" />
           <value_type type="plone.registry.field.Text" />
       </field>
-<value>
-[transmogrifier]
+<value>[transmogrifier]
 pipeline =
     initialization
     csvcontactsource

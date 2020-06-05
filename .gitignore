@@ -25,6 +25,7 @@ lib64
 log.html
 output.xml
 pip-selfcheck.json
+pipeline*.cfg
 report.html
 # excludes
 !.coveragerc

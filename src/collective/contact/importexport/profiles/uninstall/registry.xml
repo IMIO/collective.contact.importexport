@@ -3,6 +3,6 @@
 
   <record interface="collective.contact.importexport.interfaces.IPipelineConfiguration"
           name="collective.contact.importexport.pipeline"
-          remove="True">
+          remove="True" />
 
 </registry>

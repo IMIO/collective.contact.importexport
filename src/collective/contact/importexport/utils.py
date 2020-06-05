@@ -23,6 +23,8 @@ def get_main_path(path='', subpath=''):
         match = re.match('(.+)/parts/.+', INSTANCE_HOME)
         if match:
             path = match.group(1)
+        else:
+            path = os.getenv('PWD')
     if subpath:
         path = os.path.join(path, subpath)
     if os.path.exists(path):

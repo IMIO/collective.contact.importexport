@@ -2,6 +2,7 @@
 
 from collections import OrderedDict
 from collective.contact.importexport import e_logger
+from collective.contact.importexport.utils import correct_path
 from collective.contact.importexport.utils import get_main_path
 from collective.contact.importexport.utils import input_error
 from collective.contact.importexport.utils import valid_email
@@ -47,13 +48,14 @@ class Initialization(object):
         directory = None
         dir_path = transmogrifier['config'].get('directory_path', '')
         if dir_path:
-            directory = transmogrifier.context.restrictedTraverse(dir_path, default=None)
+            dir_path = dir_path.lstrip('/')
+            directory = transmogrifier.context.unrestrictedTraverse(dir_path, default=None)
         else:
             brains = api.content.find(portal_type='directory')
             if brains:
                 directory = brains[0].getObject()
                 portal_path = '/'.join(transmogrifier.context.getPhysicalPath())
-                dir_path = brains[0].getPath().lstrip(portal_path)
+                dir_path = brains[0].getPath()[len(portal_path) + 1:]
         if not directory:
             raise Exception("Directory not found !")
         self.storage['directory'] = directory
@@ -105,8 +107,8 @@ class CommonInputChecks(object):
             # duplicated _id ?
             if not item['_id'] or item['_id'] in self.ids[item_type]:
                 input_error(item, u"missing or duplicated id '{}', already present line {}".format(item['_id'],
-                                  self.ids[item_type][item['_id']]['_ln']))
-            self.ids[item_type][item['_id']] = item
+                                  self.ids[item_type][item['_id']]['ln']))
+            self.ids[item_type][item['_id']] = {'path': '', 'ln': item['_ln']}
 
             # uniqueness
             for key in self.uniques[item_type]:
@@ -154,18 +156,29 @@ class PathInserter(object):
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.title_key = options.get('title-key', 'title')
+        self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.directory_path = self.storage['directory_path']
+        self.ids = self.storage['ids']
 
     def __iter__(self):
         idnormalizer = getUtility(IIDNormalizer)
         for item in self.previous:
-            if '_path' in item:  # _path has already be set for existing content
+            if '_path' in item:  # _path has already be set
                 yield item
                 continue
+            item_type = item['_type']
             title = item.get(self.title_key, None)
             if not title:
                 continue
             new_id = idnormalizer.normalize(title)
-            item["_path"] = '/'.join([self.directory_path, new_id])
+            # put in directory by default
+            item['_path'] = '/'.join([self.directory_path, new_id])
+            # organization parent ?
+            if item_type == 'organization' and item['_pid']:
+                    item['_path'] = '/'.join([self.ids[item_type][item['_pid']]['path'], new_id])
+            # we rename id if it already exists
+            item['_path'] = correct_path(self.transmogrifier.context, item['_path'])
+            # we store _path for each _id
+            self.ids[item_type][item['_id']]['path'] = item['_path']
             yield item

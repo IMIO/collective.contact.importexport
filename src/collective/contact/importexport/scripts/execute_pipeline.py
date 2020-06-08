@@ -16,7 +16,7 @@ PIPELINE_ID = 'collective.contact.importexport.pipeline'
 USAGE = """
 Usage : bin/instance run \
 src/collective/contact/importexport/scripts/execute_pipeline.py \
-PILELINE_FILE PLONE_ID
+PILELINE_FILE PLONE_ID COMMIT_0_1
 """
 
 
@@ -32,11 +32,12 @@ def execute_pipeline(portal, filepath):
 if 'app' in locals():
     # Called from bin/instance run
     args = sys.argv
-    if len(args) < 5:
+    if len(args) < 6 or sys.argv[5] not in ('0', '1'):
         print USAGE
         sys.exit(0)
     pipeline_filepath = sys.argv[3]
     plone_id = sys.argv[4]
+    commit = bool(int(sys.argv[5]))
     app = locals().get('app')
     portal = app.get(plone_id)
     setSite(portal)
@@ -53,4 +54,5 @@ if 'app' in locals():
     setRequest(app.REQUEST)
 
     execute_pipeline(portal, pipeline_filepath)
-#    transaction.commit()
+    if commit:
+        transaction.commit()

@@ -15,6 +15,11 @@
 
   <include package=".blueprints" />
 
+  <!-- We use DefaultDeserializer in place of ObjectDeserializer for IMasterSelectBoolField -->
+  <adapter for="plone.formwidget.masterselect.interfaces.IMasterSelectBoolField"
+           factory="transmogrify.dexterity.converters.DefaultDeserializer"
+           provides="transmogrify.dexterity.interfaces.IDeserializer" />
+
   <genericsetup:registerProfile
       name="default"
       title="collective.contact.importexport"

@@ -17,13 +17,13 @@ pipeline =
     dependencysorter
 #    breakpoint
     pathinserter
-#    constructor
-#    schemaupdater
+    constructor
+    schemaupdater
     logger
 
 # mandatory section !
 [config]
-# if empty, first found directory is used. Else do not start path with /
+# if empty, first found directory is used. Else relative path in portal
 directory_path =
 organizations_filename = organizations-test.csv
 organizations_fieldnames = _id _pid title description organization_type use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid

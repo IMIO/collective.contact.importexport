@@ -27,9 +27,9 @@ class DependencySorter(object):
         all_held_positions = []
         parent_relation = {}
         for item in self.previous:
-            # we set None if value is empty
+            # we set None if value is empty string
             for fld in item:
-                if item[fld] or fld.startswith('_'):
+                if item[fld] != u'' or fld.startswith('_') or fld in ('description',):
                     continue
                 item[fld] = None
             if item['_type'] == 'organization':

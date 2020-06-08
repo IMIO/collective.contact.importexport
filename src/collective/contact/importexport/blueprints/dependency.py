@@ -27,6 +27,11 @@ class DependencySorter(object):
         all_held_positions = []
         parent_relation = {}
         for item in self.previous:
+            # we set None if value is empty
+            for fld in item:
+                if item[fld] or fld.startswith('_'):
+                    continue
+                item[fld] = None
             if item['_type'] == 'organization':
                 if item['_pid']:
                     parent_relation[item['_id']] = item['_pid']
@@ -48,6 +53,7 @@ class DependencySorter(object):
             fields['organization_%s' % typ] = [{'name': i[0], 'token': i[1]} for i in self.dir_org_config[typ].items()]
         if fields:
             fields['_path'] = self.directory_path
+            fields['_type'] = 'directory'  # to avoid message from constructor
             yield fields
 
         for org in sorted_organizations:

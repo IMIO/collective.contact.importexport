@@ -145,3 +145,27 @@ class CommonInputChecks(object):
                     item['organization_type'] = self.dir_org_config[type_type].values()[0]
 
             yield item
+
+
+class PathInserter(object):
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+        self.title_key = options.get('title-key', 'title')
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+        self.directory_path = self.storage['directory_path']
+
+    def __iter__(self):
+        idnormalizer = getUtility(IIDNormalizer)
+        for item in self.previous:
+            if '_path' in item:  # _path has already be set for existing content
+                yield item
+                continue
+            title = item.get(self.title_key, None)
+            if not title:
+                continue
+            new_id = idnormalizer.normalize(title)
+            item["_path"] = '/'.join([self.directory_path, new_id])
+            yield item

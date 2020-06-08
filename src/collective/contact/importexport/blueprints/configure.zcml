@@ -26,14 +26,14 @@
     />
 
   <utility
-    component=".various.BreakpointSection"
-    name="collective.contact.importexport.breakpoint"
+    component=".main.PathInserter"
+    name="collective.contact.importexport.pathinserter"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 
   <utility
-    component=".path.PathInserter"
-    name="collective.contact.importexport.pathinserter"
+    component=".various.BreakpointSection"
+    name="collective.contact.importexport.breakpoint"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 

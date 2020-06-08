@@ -64,8 +64,8 @@ class Initialization(object):
         dir_org_config = {}
         dir_org_config_len = {}
         for typ in ['types', 'levels']:
-            dir_org_config[typ] = OrderedDict([(t['name'], t['token']) for t in getattr(self.storage['directory'],
-                                                                                        'organization_%s' % typ)])
+            dir_org_config[typ] = OrderedDict([(safe_unicode(t['name']), safe_unicode(t['token'])) for t in
+                                               getattr(self.storage['directory'], 'organization_%s' % typ)])
             if not len(dir_org_config[typ]):
                 dir_org_config[typ] = OrderedDict([(u'Non défini', u'non-defini')])
             dir_org_config_len[typ] = len(dir_org_config[typ])
@@ -141,7 +141,7 @@ class CommonInputChecks(object):
                     type_type = item['_pid'] and 'levels' or 'types'
                     if item['organization_type'] not in self.dir_org_config[type_type]:
                         self.dir_org_config[type_type][item['organization_type']] = \
-                            idnormalizer.normalize(item['organization_type'])
+                            safe_unicode(idnormalizer.normalize(item['organization_type']))
                     item['organization_type'] = self.dir_org_config[type_type][item['organization_type']]
                 else:  # we take the first value
                     item['organization_type'] = self.dir_org_config[type_type].values()[0]

@@ -67,7 +67,7 @@ class Initialization(object):
             dir_org_config[typ] = OrderedDict([(t['name'], t['token']) for t in getattr(self.storage['directory'],
                                                                                         'organization_%s' % typ)])
             if not len(dir_org_config[typ]):
-                dir_org_config[typ] = OrderedDict([(u'Non défini', 'non-defini')])
+                dir_org_config[typ] = OrderedDict([(u'Non défini', u'non-defini')])
             dir_org_config_len[typ] = len(dir_org_config[typ])
         self.storage['dir_org_config'] = dir_org_config
         self.storage['dir_org_config_len'] = dir_org_config_len

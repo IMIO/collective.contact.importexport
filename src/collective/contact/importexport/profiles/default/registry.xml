@@ -19,6 +19,7 @@ pipeline =
     pathinserter
     constructor
     schemaupdater
+    reindexobject
     logger
 
 # mandatory section !
@@ -66,6 +67,9 @@ blueprint = collective.transmogrifier.sections.constructor
 
 [schemaupdater]
 blueprint = transmogrify.dexterity.schemaupdater
+
+[reindexobject]
+blueprint = plone.app.transmogrifier.reindexobject
 
 [logger]
 blueprint = collective.transmogrifier.sections.logger

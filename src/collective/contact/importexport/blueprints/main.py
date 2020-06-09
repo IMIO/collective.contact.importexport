@@ -109,8 +109,11 @@ class CommonInputChecks(object):
                 item[fld] = safe_unicode(item[fld].strip(' '))
 
             # duplicated _id ?
-            if not item['_id'] or item['_id'] in self.ids[item_type]:
-                input_error(item, u"missing or duplicated id '{}', already present line {}".format(item['_id'],
+            if not item['_id']:
+                input_error(item, u"SKIPPING: missing id '_id'")
+                continue
+            if item['_id'] in self.ids[item_type]:
+                input_error(item, u"duplicated id '{}', already present line {}".format(item['_id'],
                                   self.ids[item_type][item['_id']]['ln']))
             self.ids[item_type][item['_id']] = {'path': '', 'ln': item['_ln']}
 
@@ -138,11 +141,11 @@ class CommonInputChecks(object):
 
             # organization checks
             if item_type == 'organization':
-                if item['_id'] == item['_pid']:
-                    input_error(item, u'SKIPPING: _pid is equal to _id {}'.format(item['_id']))
+                if item['_id'] == item['_oid']:
+                    input_error(item, u'SKIPPING: _oid is equal to _id {}'.format(item['_id']))
                     continue
                 if item['organization_type']:
-                    type_type = item['_pid'] and 'levels' or 'types'
+                    type_type = item['_oid'] and 'levels' or 'types'
                     if item['organization_type'] not in self.dir_org_config[type_type]:
                         self.dir_org_config[type_type][item['organization_type']] = \
                             safe_unicode(idnormalizer.normalize(item['organization_type']))
@@ -152,12 +155,45 @@ class CommonInputChecks(object):
             elif item_type == 'person':
                 item['gender'] = valid_value_in_list(item, item['gender'], ('', 'F', 'M'))
                 item['birthday'] = valid_date(item, item['birthday'])
+            elif item_type == 'held_position':
+                item['start_date'] = valid_date(item, item['start_date'])
+                item['end_date'] = valid_date(item, item['end_date'])
+                if not item['_pid']:
+                    input_error(item, u"SKIPPING: missing related person id")
+                    continue
+                if not item['_oid'] and (not item['_fid'] or item['_fid'] == '-'):
+                    input_error(item, u"SKIPPING: missing organization/position id")
+                    continue
 
             yield item
 
 
-class ObjectUpdate(object):
-    """ Check if we must do an object update """
+class RelationsInserter(object):
+    """ Add relations between objects """
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+        self.transmogrifier = transmogrifier
+        self.catalog = self.transmogrifier.context.portal_catalog
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+        self.directory_path = self.storage['directory_path']
+        self.ids = self.storage['ids']
+
+    def __iter__(self):
+        for item in self.previous:
+            item_type = item['_type']
+            if item_type == 'held_position':
+                if item['_oid'] and item['_oid'] not in self.ids['organization']:
+                    input_error(item, u"SKIPPING: invalid related organization id '{}'".format(item['_oid']))
+                    continue
+
+            yield item
+
+
+class UpdatePathInserter(object):
+    """ Add _path if we have to do an element update """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -201,6 +237,7 @@ class ObjectUpdate(object):
 
 
 class PathInserter(object):
+    """ Add _path for new element """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -231,8 +268,17 @@ class PathInserter(object):
             # put in directory by default
             item['_path'] = '/'.join([self.directory_path, new_id])
             # organization parent ?
-            if item_type == 'organization' and item['_pid']:
-                    item['_path'] = '/'.join([self.ids[item_type][item['_pid']]['path'], new_id])
+            if item_type == 'organization' and item['_oid']:
+                if item['_oid'] not in self.ids['organization']:
+                    input_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']))
+                    continue
+                item['_path'] = '/'.join([self.ids['organization'][item['_oid']]['path'], new_id])
+            # related person
+            elif item_type == 'held_position':
+                if item['_pid'] not in self.ids['person']:
+                    input_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']))
+                    continue
+                item['_path'] = '/'.join([self.ids['person'][item['_pid']]['path'], new_id])
             # we rename id if it already exists
             item['_path'] = correct_path(self.transmogrifier.context, item['_path'])
             item['_act'] = 'new'

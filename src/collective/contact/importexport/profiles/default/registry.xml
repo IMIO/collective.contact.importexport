@@ -16,12 +16,13 @@ pipeline =
     common_input_checks
 #    personal input bp came here
     dependencysorter
-#    breakpoint
-    objectupdate
+    relationsinserter
+    updatepathinserter
     pathinserter
     constructor
     schemaupdater
     reindexobject
+#    breakpoint
     logger
 
 # mandatory section !
@@ -29,11 +30,11 @@ pipeline =
 # if empty, first found directory is used. Else relative path in portal
 directory_path =
 organizations_filename = organizations-test.csv
-organizations_fieldnames = _id _pid title description organization_type use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
+organizations_fieldnames = _id _oid title description organization_type use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 persons_filename = persons-test.csv
 persons_fieldnames = _id lastname firstname gender person_title birthday use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 held_positions_filename = heldpositions-test.csv
-held_positions_fieldnames =
+held_positions_fieldnames = _id _pid _oid _fid label start_date end_date use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 csv_headers = python:True
 
 [initialization]
@@ -47,6 +48,7 @@ subpath = imports
 blueprint = collective.contact.importexport.csvcontactsource
 organizations_filename = ${config:organizations_filename}
 persons_filename = ${config:persons_filename}
+held_positions_filename = ${config:held_positions_filename}
 fmtparam-strict = python:True
 csv_headers = ${config:csv_headers}
 
@@ -56,18 +58,21 @@ organization_uniques = _uid
 organization_booleans = use_parent_address
 person_uniques = _uid
 person_booleans = use_parent_address
-held_position_uniques =
-held_position_booleans =
+held_position_uniques = _uid
+held_position_booleans = use_parent_address
 
 [dependencysorter]
 blueprint = collective.contact.importexport.dependencysorter
 
-[objectupdate]
-blueprint = collective.contact.importexport.objectupdate
+[relationsinserter]
+blueprint = collective.contact.importexport.relationsinserter
+
+[updatepathinserter]
+blueprint = collective.contact.importexport.updatepathinserter
 # list of 'column' 'index name' pairs used to search in catalog for an existing object
 organization_uniques = _uid UID
 person_uniques = _uid UID
-held_position_uniques =
+held_position_uniques = _uid UID
 
 [pathinserter]
 blueprint = collective.contact.importexport.pathinserter

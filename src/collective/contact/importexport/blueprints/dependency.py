@@ -33,8 +33,8 @@ class DependencySorter(object):
                     continue
                 item[fld] = None
             if item['_type'] == 'organization':
-                if item['_pid']:
-                    parent_relation[item['_id']] = item['_pid']
+                if item['_oid']:
+                    parent_relation[item['_id']] = item['_oid']
                 all_organizations.append(item)
             elif item['_type'] == 'person':
                 all_persons.append(item)

@@ -26,8 +26,14 @@
     />
 
   <utility
-    component=".main.ObjectUpdate"
-    name="collective.contact.importexport.objectupdate"
+    component=".main.RelationsInserter"
+    name="collective.contact.importexport.relationsinserter"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
+    component=".main.UpdatePathInserter"
+    name="collective.contact.importexport.updatepathinserter"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 

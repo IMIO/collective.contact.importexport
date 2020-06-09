@@ -180,16 +180,18 @@ class ObjectUpdate(object):
             # we will do a search for each index
             for field, idx in self.uniques[item_type]:
                 if item[field]:
-                    brains = self.catalog({idx: item[field]})
+                    brains = self.catalog.unrestrictedSearchResults({idx: item[field]})
                     if len(brains) > 1:
-                        input_error(item, u"a search with '{}'='{}' get multiple objs: {}".format(idx, item[field],
+                        input_error(item, u"the search with '{}'='{}' get multiple objs: {}".format(idx, item[field],
                                           u', '.join([b.getPath() for b in brains])))
                     elif len(brains):
                         item['_path'] = relative_path(self.transmogrifier.context, brains[0].getPath())
-                        item['_st'] = 'update'
+                        item['_act'] = 'update'
                         # we store _path for each _id
                         self.ids[item_type][item['_id']]['path'] = item['_path']
                         break
+                    else:
+                        input_error(item, u"the search with '{}'='{}' get no result".format(idx, item[field]))
             yield item
 
 
@@ -223,7 +225,7 @@ class PathInserter(object):
                     item['_path'] = '/'.join([self.ids[item_type][item['_pid']]['path'], new_id])
             # we rename id if it already exists
             item['_path'] = correct_path(self.transmogrifier.context, item['_path'])
-            item['_st'] = 'new'
+            item['_act'] = 'new'
             # we store _path for each _id
             self.ids[item_type][item['_id']]['path'] = item['_path']
             yield item

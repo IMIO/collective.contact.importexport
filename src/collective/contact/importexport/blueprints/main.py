@@ -5,6 +5,8 @@ from collective.contact.importexport import e_logger
 from collective.contact.importexport.utils import correct_path
 from collective.contact.importexport.utils import get_main_path
 from collective.contact.importexport.utils import input_error
+from collective.contact.importexport.utils import pairwise
+from collective.contact.importexport.utils import relative_path
 from collective.contact.importexport.utils import valid_email
 from collective.contact.importexport.utils import valid_phone
 from collective.contact.importexport.utils import valid_zip
@@ -27,6 +29,7 @@ MANAGED_TYPES = ['organization', 'person', 'held_position']
 
 
 class Initialization(object):
+    """ Initialize global variables to be used in next sections """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -54,8 +57,7 @@ class Initialization(object):
             brains = api.content.find(portal_type='directory')
             if brains:
                 directory = brains[0].getObject()
-                portal_path = '/'.join(transmogrifier.context.getPhysicalPath())
-                dir_path = brains[0].getPath()[len(portal_path) + 1:]
+                dir_path = relative_path(transmogrifier.context, brains[0].getPath())
         if not directory:
             raise Exception("Directory not found !")
         self.storage['directory'] = directory
@@ -78,6 +80,7 @@ class Initialization(object):
 
 
 class CommonInputChecks(object):
+    """ Check input values """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -86,10 +89,9 @@ class CommonInputChecks(object):
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.fieldnames = self.storage['fieldnames']
         self.ids = self.storage['ids']
-        self.uniques = self.storage.setdefault('uniques', {typ: {key: {} for key in
-                                                                 options.get('{}_uniques'.format(typ), '').split()
-                                                                 if key in self.fieldnames[typ]}
-                                                           for typ in MANAGED_TYPES})
+        self.uniques = {typ: {key: {} for key in options.get('{}_uniques'.format(typ), '').split()
+                              if key in self.fieldnames[typ]}
+                        for typ in MANAGED_TYPES}
         self.booleans = {typ: {key: {} for key in options.get('{}_booleans'.format(typ), '').split()
                                if key in self.fieldnames[typ]}
                          for typ in MANAGED_TYPES}
@@ -149,6 +151,48 @@ class CommonInputChecks(object):
             yield item
 
 
+class ObjectUpdate(object):
+    """ Check if we must do an object update """
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+        self.transmogrifier = transmogrifier
+        self.catalog = self.transmogrifier.context.portal_catalog
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+        self.directory_path = self.storage['directory_path']
+        self.ids = self.storage['ids']
+        self.uniques = {}
+        for typ in MANAGED_TYPES:
+            pairs = options.get('{}_uniques'.format(typ), '').strip().split()
+            if len(pairs) % 2:
+                raise Exception("The '{}' section '{}' option must contain a even number of elements".format(name,
+                                '{}_uniques'.format(typ)))
+            self.uniques[typ] = [(f, i) for f, i in pairwise(pairs)]
+
+    def __iter__(self):
+        for item in self.previous:
+            if '_path' in item:  # _path has already be set
+                yield item
+                continue
+            item_type = item['_type']
+            # we will do a search for each index
+            for field, idx in self.uniques[item_type]:
+                if item[field]:
+                    brains = self.catalog({idx: item[field]})
+                    if len(brains) > 1:
+                        input_error(item, u"a search with '{}'='{}' get multiple objs: {}".format(idx, item[field],
+                                          u', '.join([b.getPath() for b in brains])))
+                    elif len(brains):
+                        item['_path'] = relative_path(self.transmogrifier.context, brains[0].getPath())
+                        item['_st'] = 'update'
+                        # we store _path for each _id
+                        self.ids[item_type][item['_id']]['path'] = item['_path']
+                        break
+            yield item
+
+
 class PathInserter(object):
     classProvides(ISectionBlueprint)
     implements(ISection)
@@ -179,6 +223,7 @@ class PathInserter(object):
                     item['_path'] = '/'.join([self.ids[item_type][item['_pid']]['path'], new_id])
             # we rename id if it already exists
             item['_path'] = correct_path(self.transmogrifier.context, item['_path'])
+            item['_st'] = 'new'
             # we store _path for each _id
             self.ids[item_type][item['_id']]['path'] = item['_path']
             yield item

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from builtins import zip  # from future package
 from collective.contact.core.behaviors import validateEmail
 from collective.contact.importexport import e_logger
 
@@ -102,3 +103,15 @@ def correct_path(portal, path):
         path = '{}-{:d}'.format(original, i)
         i += 1
     return path
+
+
+def pairwise(iterable):
+    """ s -> (s0, s1), (s2, s3), (s4, s5), ... """
+    a = iter(iterable)
+    return zip(a, a)
+
+
+def relative_path(portal, fullpath):
+    """ return relative path """
+    portal_path = '/'.join(portal.getPhysicalPath())
+    return fullpath[len(portal_path) + 1:]

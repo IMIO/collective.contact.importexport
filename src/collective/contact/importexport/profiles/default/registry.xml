@@ -44,7 +44,7 @@ subpath = imports
 
 [csvcontactsource]
 blueprint = collective.contact.importexport.csvcontactsource
-organization_filename = ${config:organizations_filename}
+organizations_filename = ${config:organizations_filename}
 fmtparam-strict = python:True
 csv_headers = ${config:csv_headers}
 
@@ -79,7 +79,7 @@ level = INFO
 
 [breakpoint]
 blueprint = collective.contact.importexport.breakpoint
-condition = python:item['_c'] == 1
+condition = python:item.get('_id', u'') == u'0'
 </value>
   </record>
 

@@ -20,8 +20,8 @@ class CSVContactSourceSection(object):
         self.previous = previous
         self.transmogrifier = transmogrifier
 
-        self.organization_filename = options.get('organization_filename')
-        if self.organization_filename:
+        self.organizations_filename = options.get('organizations_filename')
+        if self.organizations_filename:
             self.organization_fieldnames = transmogrifier['config'].get('organizations_fieldnames', '').split()
         self.persons_filename = options.get('persons_filename')
         if self.persons_filename:
@@ -30,7 +30,7 @@ class CSVContactSourceSection(object):
         if self.held_positions_filename:
             self.held_positions_fieldnames = transmogrifier['config'].get('held_positions_fieldnames', '').split()
 
-        if self.organization_filename is None and self.persons_filename is None:
+        if self.organizations_filename is None and self.persons_filename is None:
             raise Exception('You must specify at least organizations or persons CSV')
 
         self.csv_headers = Condition(options.get('csv_headers', 'python:True'), transmogrifier, name, options)
@@ -45,8 +45,8 @@ class CSVContactSourceSection(object):
         for item in self.previous:
             yield item
 
-        if self.organization_filename:
-            for item in self.rows(u'organization', self.organization_filename, self.organization_fieldnames):
+        if self.organizations_filename:
+            for item in self.rows(u'organization', self.organizations_filename, self.organization_fieldnames):
                 yield item
 
         if self.persons_filename:

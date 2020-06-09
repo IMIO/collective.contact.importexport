@@ -17,6 +17,7 @@ pipeline =
 #    personal input bp came here
     dependencysorter
 #    breakpoint
+    objectupdate
     pathinserter
     constructor
     schemaupdater
@@ -30,7 +31,7 @@ directory_path =
 organizations_filename = organizations-test.csv
 organizations_fieldnames = _id _pid title description organization_type use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 persons_filename = persons-test.csv
-persons_fieldnames =
+persons_fieldnames = _id lastname firstname gender person_title birthday use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 held_positions_filename = heldpositions-test.csv
 held_positions_fieldnames =
 csv_headers = python:True
@@ -45,6 +46,7 @@ subpath = imports
 [csvcontactsource]
 blueprint = collective.contact.importexport.csvcontactsource
 organizations_filename = ${config:organizations_filename}
+persons_filename = ${config:persons_filename}
 fmtparam-strict = python:True
 csv_headers = ${config:csv_headers}
 
@@ -52,16 +54,26 @@ csv_headers = ${config:csv_headers}
 blueprint = collective.contact.importexport.common_input_checks
 organization_uniques = _uid
 organization_booleans = use_parent_address
-person_uniques =
-person_booleans =
+person_uniques = _uid
+person_booleans = use_parent_address
 held_position_uniques =
 held_position_booleans =
 
 [dependencysorter]
 blueprint = collective.contact.importexport.dependencysorter
 
+[objectupdate]
+blueprint = collective.contact.importexport.objectupdate
+# list of 'column' 'index name' pairs used to search in catalog for an existing object
+organization_uniques = _uid UID
+person_uniques = _uid UID
+held_position_uniques =
+
 [pathinserter]
 blueprint = collective.contact.importexport.pathinserter
+organization_id_keys = title
+person_id_keys = firstname lastname
+held_position_id_keys =
 
 [constructor]
 blueprint = collective.transmogrifier.sections.constructor

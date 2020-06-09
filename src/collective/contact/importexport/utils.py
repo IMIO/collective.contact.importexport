@@ -4,6 +4,7 @@ from builtins import zip  # from future package
 from collective.contact.core.behaviors import validateEmail
 from collective.contact.importexport import e_logger
 
+import datetime
 import os
 import phonenumbers
 import re
@@ -93,6 +94,25 @@ def valid_email(item, emailkey):
         input_error(item, u"email col '{}' with invalid value '{}' => kept '' value".format(emailkey, item[emailkey]))
         return u''
     return item[emailkey]
+
+
+def valid_value_in_list(item, val, lst):
+    if val not in lst:
+        input_error(item, "value '%s' not in valid values '%s'" % (val, lst))
+        return u''
+    return val
+
+
+def valid_date(item, val, fmt='%Y/%m/%d', can_be_empty=True):
+    if not val and can_be_empty:
+        return None
+    try:
+        dtm = datetime.datetime.strptime(val, fmt)
+        dt = dtm.date()
+    except Exception, ex:
+        input_error(item, u"not a valid date '%s': %s" % (val, ex))
+        return None
+    return dt
 
 
 def correct_path(portal, path):

@@ -7,8 +7,10 @@ from collective.contact.importexport.utils import get_main_path
 from collective.contact.importexport.utils import input_error
 from collective.contact.importexport.utils import pairwise
 from collective.contact.importexport.utils import relative_path
+from collective.contact.importexport.utils import valid_date
 from collective.contact.importexport.utils import valid_email
 from collective.contact.importexport.utils import valid_phone
+from collective.contact.importexport.utils import valid_value_in_list
 from collective.contact.importexport.utils import valid_zip
 from collective.contact.importexport.utils import to_bool
 from collective.transmogrifier.interfaces import ISection
@@ -147,6 +149,9 @@ class CommonInputChecks(object):
                     item['organization_type'] = self.dir_org_config[type_type][item['organization_type']]
                 else:  # we take the first value
                     item['organization_type'] = self.dir_org_config[type_type].values()[0]
+            elif item_type == 'person':
+                item['gender'] = valid_value_in_list(item, item['gender'], ('', 'F', 'M'))
+                item['birthday'] = valid_date(item, item['birthday'])
 
             yield item
 
@@ -180,7 +185,7 @@ class ObjectUpdate(object):
             # we will do a search for each index
             for field, idx in self.uniques[item_type]:
                 if item[field]:
-                    brains = self.catalog.unrestrictedSearchResults({idx: item[field]})
+                    brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
                     if len(brains) > 1:
                         input_error(item, u"the search with '{}'='{}' get multiple objs: {}".format(idx, item[field],
                                           u', '.join([b.getPath() for b in brains])))
@@ -201,11 +206,15 @@ class PathInserter(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
-        self.title_key = options.get('title-key', 'title')
+        self.title_keys = options.get('title-keys', 'title')
         self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.directory_path = self.storage['directory_path']
+        self.fieldnames = self.storage['fieldnames']
         self.ids = self.storage['ids']
+        self.id_keys = {typ: [key for key in options.get('{}_id_keys'.format(typ), '').split()
+                              if key in self.fieldnames[typ]]
+                        for typ in MANAGED_TYPES}
 
     def __iter__(self):
         idnormalizer = getUtility(IIDNormalizer)
@@ -214,8 +223,9 @@ class PathInserter(object):
                 yield item
                 continue
             item_type = item['_type']
-            title = item.get(self.title_key, None)
+            title = u'-'.join([item[key] for key in self.id_keys[item_type] if item[key]])
             if not title:
+                input_error(item, 'cannot get an id from id keys {}'.format(self.id_keys[item_type]))
                 continue
             new_id = idnormalizer.normalize(title)
             # put in directory by default

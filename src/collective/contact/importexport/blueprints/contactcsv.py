@@ -60,7 +60,7 @@ class CSVContactSourceSection(object):
     def rows(self, typ, filename, fieldnames):
         file_ = openFileReference(self.transmogrifier, filename)
         if file_ is None:
-            return
+            raise Exception("Cannot open file '{}'".format(filename))
         logger.info('Reading {}'.format(filename))
         reader = csv.DictReader(file_, dialect=self.dialect, fieldnames=fieldnames, restkey='_rest',
                                 restval='__NO_CO_LU_MN__', **self.fmtparam)

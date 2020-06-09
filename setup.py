@@ -38,16 +38,17 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'plone.api',
-        'Products.GenericSetup>=1.8.2',
-        'setuptools',
         'collective.contact.core',
-        'plone.app.transmogrifier',
         'collective.transmogrifier',
-        'transmogrify.dexterity',
+        'future',
         'imio.helpers',
         'ipdb',
         'phonenumbers'
+        'plone.api',
+        'plone.app.transmogrifier',
+        'Products.GenericSetup>=1.8.2',
+        'setuptools',
+        'transmogrify.dexterity',
     ],
     extras_require={
         'test': [

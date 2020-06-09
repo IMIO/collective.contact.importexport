@@ -50,7 +50,7 @@ class DependencySorter(object):
         for typ in ['types', 'levels']:
             if len(self.dir_org_config[typ]) != self.dir_org_config_len[typ]:
                 logger.info("Contacts parameter modification 'organization_%s'" % typ)
-            fields['organization_%s' % typ] = [{'name': i[0], 'token': i[1]} for i in self.dir_org_config[typ].items()]
+                fields['organization_%s' % typ] = [{'name': i[0], 'token': i[1]} for i in self.dir_org_config[typ].items()]
         if fields:
             fields['_path'] = self.directory_path
             fields['_type'] = 'directory'  # to avoid message from constructor

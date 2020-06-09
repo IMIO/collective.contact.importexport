@@ -43,7 +43,7 @@ setup(
         'future',
         'imio.helpers',
         'ipdb',
-        'phonenumbers'
+        'phonenumbers',
         'plone.api',
         'plone.app.transmogrifier',
         'Products.GenericSetup>=1.8.2',

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from builtins import zip  # from future package
+from future.builtins import zip
 from collective.contact.core.behaviors import validateEmail
 from collective.contact.importexport import e_logger
 

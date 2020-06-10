@@ -18,10 +18,12 @@ from collective.transmogrifier.interfaces import ISectionBlueprint
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from plone import api
 from Products.CMFPlone.utils import safe_unicode
+from z3c.relationfield.relation import RelationValue
 from zope.annotation.interfaces import IAnnotations
 from zope.component import getUtility
 from zope.interface import classProvides
 from zope.interface import implements
+from zope.intid.interfaces import IIntIds
 
 import logging
 import os
@@ -38,6 +40,7 @@ class Initialization(object):
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.workingpath = get_main_path(options.get('basepath', ''), options.get('subpath', ''))
+        self.portal = transmogrifier.context
         lfh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors.log'), mode='w')
         lfh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         lfh.setLevel(logging.INFO)
@@ -54,12 +57,12 @@ class Initialization(object):
         dir_path = transmogrifier['config'].get('directory_path', '')
         if dir_path:
             dir_path = dir_path.lstrip('/')
-            directory = transmogrifier.context.unrestrictedTraverse(dir_path, default=None)
+            directory = self.portal.unrestrictedTraverse(dir_path, default=None)
         else:
             brains = api.content.find(portal_type='directory')
             if brains:
                 directory = brains[0].getObject()
-                dir_path = relative_path(transmogrifier.context, brains[0].getPath())
+                dir_path = relative_path(self.portal, brains[0].getPath())
         if not directory:
             raise Exception("Directory not found !")
         self.storage['directory'] = directory
@@ -107,6 +110,9 @@ class CommonInputChecks(object):
             # set correct values
             for fld in self.fieldnames[item_type]:
                 item[fld] = safe_unicode(item[fld].strip(' '))
+
+            if item_type == 'held_position':
+                item['_fid'] = None  # we don't yet manage position
 
             # duplicated _id ?
             if not item['_id']:
@@ -161,7 +167,7 @@ class CommonInputChecks(object):
                 if not item['_pid']:
                     input_error(item, u"SKIPPING: missing related person id")
                     continue
-                if not item['_oid'] and (not item['_fid'] or item['_fid'] == '-'):
+                if not item['_oid'] and not item['_fid']:
                     input_error(item, u"SKIPPING: missing organization/position id")
                     continue
 
@@ -175,20 +181,23 @@ class RelationsInserter(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
-        self.transmogrifier = transmogrifier
-        self.catalog = self.transmogrifier.context.portal_catalog
+        self.portal = transmogrifier.context
+        self.catalog = self.portal.portal_catalog
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.directory_path = self.storage['directory_path']
         self.ids = self.storage['ids']
 
     def __iter__(self):
+        intids = getUtility(IIntIds)
         for item in self.previous:
             item_type = item['_type']
             if item_type == 'held_position':
                 if item['_oid'] and item['_oid'] not in self.ids['organization']:
                     input_error(item, u"SKIPPING: invalid related organization id '{}'".format(item['_oid']))
                     continue
-
+                # not using _pid yet
+                org = self.portal.unrestrictedTraverse(self.ids['organization'][item['_oid']]['path'])
+                item['position'] = RelationValue(intids.getId(org))
             yield item
 
 
@@ -199,8 +208,8 @@ class UpdatePathInserter(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
-        self.transmogrifier = transmogrifier
-        self.catalog = self.transmogrifier.context.portal_catalog
+        self.portal = transmogrifier.context
+        self.catalog = self.portal.portal_catalog
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.directory_path = self.storage['directory_path']
         self.ids = self.storage['ids']
@@ -226,7 +235,7 @@ class UpdatePathInserter(object):
                         input_error(item, u"the search with '{}'='{}' get multiple objs: {}".format(idx, item[field],
                                           u', '.join([b.getPath() for b in brains])))
                     elif len(brains):
-                        item['_path'] = relative_path(self.transmogrifier.context, brains[0].getPath())
+                        item['_path'] = relative_path(self.portal, brains[0].getPath())
                         item['_act'] = 'update'
                         # we store _path for each _id
                         self.ids[item_type][item['_id']]['path'] = item['_path']
@@ -244,7 +253,7 @@ class PathInserter(object):
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.title_keys = options.get('title-keys', 'title')
-        self.transmogrifier = transmogrifier
+        self.portal = transmogrifier.context
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.directory_path = self.storage['directory_path']
         self.fieldnames = self.storage['fieldnames']
@@ -260,28 +269,37 @@ class PathInserter(object):
                 yield item
                 continue
             item_type = item['_type']
+            # put in directory by default
+            parent_path = self.directory_path
+            related_title = ''
             title = u'-'.join([item[key] for key in self.id_keys[item_type] if item[key]])
+
+            # organization parent ?
+            if item_type in ('organization', 'held_position') and item['_oid']:
+                if item['_oid'] not in self.ids['organization']:
+                    input_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']))
+                    continue
+                parent_path = self.ids['organization'][item['_oid']]['path']
+                related_title = self.portal.unrestrictedTraverse(parent_path).get_full_title()
+            # person parent ?
+            if item_type == 'held_position':
+                if item['_pid'] not in self.ids['person']:
+                    input_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']))
+                    continue
+                parent_path = self.ids['person'][item['_pid']]['path']
+                if related_title:  # position not taken into account
+                    title = u'-'.join([title, related_title])
+
             if not title:
                 input_error(item, 'cannot get an id from id keys {}'.format(self.id_keys[item_type]))
                 continue
             new_id = idnormalizer.normalize(title)
-            # put in directory by default
-            item['_path'] = '/'.join([self.directory_path, new_id])
-            # organization parent ?
-            if item_type == 'organization' and item['_oid']:
-                if item['_oid'] not in self.ids['organization']:
-                    input_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']))
-                    continue
-                item['_path'] = '/'.join([self.ids['organization'][item['_oid']]['path'], new_id])
-            # related person
-            elif item_type == 'held_position':
-                if item['_pid'] not in self.ids['person']:
-                    input_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']))
-                    continue
-                item['_path'] = '/'.join([self.ids['person'][item['_pid']]['path'], new_id])
+            item['_path'] = '/'.join([parent_path, new_id])
             # we rename id if it already exists
-            item['_path'] = correct_path(self.transmogrifier.context, item['_path'])
+            item['_path'] = correct_path(self.portal, item['_path'])
             item['_act'] = 'new'
             # we store _path for each _id
             self.ids[item_type][item['_id']]['path'] = item['_path']
             yield item
+
+# ["{}: '{}'".format(attr, getattr(context, attr)) for attr in ('title', 'description', 'organization_type', 'use_parent_address', 'street', 'number', 'additional_address_details', 'zip_code', 'city', 'phone', 'cell_phone', 'fax', 'email', 'website', 'region', 'country')]

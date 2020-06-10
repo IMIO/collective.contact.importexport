@@ -78,7 +78,7 @@ held_position_uniques = _uid UID
 blueprint = collective.contact.importexport.pathinserter
 organization_id_keys = title
 person_id_keys = firstname lastname
-held_position_id_keys =
+held_position_id_keys = label
 
 [constructor]
 blueprint = collective.transmogrifier.sections.constructor

@@ -101,6 +101,7 @@ class CommonInputChecks(object):
                                if key in self.fieldnames[typ]}
                          for typ in MANAGED_TYPES}
         self.dir_org_config = self.storage['dir_org_config']
+        self.directory_path = self.storage['directory_path']
 
     def __iter__(self):
         idnormalizer = getUtility(IIDNormalizer)
@@ -113,6 +114,9 @@ class CommonInputChecks(object):
 
             if item_type == 'held_position':
                 item['_fid'] = None  # we don't yet manage position
+
+            # set directory as default parent
+            item['_parent'] = self.directory_path
 
             # duplicated _id ?
             if not item['_id']:
@@ -184,7 +188,6 @@ class RelationsInserter(object):
         self.portal = transmogrifier.context
         self.catalog = self.portal.portal_catalog
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.directory_path = self.storage['directory_path']
         self.ids = self.storage['ids']
 
     def __iter__(self):
@@ -211,7 +214,6 @@ class UpdatePathInserter(object):
         self.portal = transmogrifier.context
         self.catalog = self.portal.portal_catalog
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.directory_path = self.storage['directory_path']
         self.ids = self.storage['ids']
         self.uniques = {}
         for typ in MANAGED_TYPES:
@@ -255,7 +257,6 @@ class PathInserter(object):
         self.title_keys = options.get('title-keys', 'title')
         self.portal = transmogrifier.context
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.directory_path = self.storage['directory_path']
         self.fieldnames = self.storage['fieldnames']
         self.ids = self.storage['ids']
         self.id_keys = {typ: [key for key in options.get('{}_id_keys'.format(typ), '').split()
@@ -269,8 +270,6 @@ class PathInserter(object):
                 yield item
                 continue
             item_type = item['_type']
-            # put in directory by default
-            parent_path = self.directory_path
             related_title = ''
             title = u'-'.join([item[key] for key in self.id_keys[item_type] if item[key]])
 
@@ -279,14 +278,14 @@ class PathInserter(object):
                 if item['_oid'] not in self.ids['organization']:
                     input_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']))
                     continue
-                parent_path = self.ids['organization'][item['_oid']]['path']
-                related_title = self.portal.unrestrictedTraverse(parent_path).get_full_title()
+                item['_parent'] = self.ids['organization'][item['_oid']]['path']
+                related_title = self.portal.unrestrictedTraverse(item['_parent']).get_full_title()
             # person parent ?
             if item_type == 'held_position':
                 if item['_pid'] not in self.ids['person']:
                     input_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']))
                     continue
-                parent_path = self.ids['person'][item['_pid']]['path']
+                item['_parent'] = self.ids['person'][item['_pid']]['path']
                 if related_title:  # position not taken into account
                     title = u'-'.join([title, related_title])
 
@@ -294,7 +293,7 @@ class PathInserter(object):
                 input_error(item, 'cannot get an id from id keys {}'.format(self.id_keys[item_type]))
                 continue
             new_id = idnormalizer.normalize(title)
-            item['_path'] = '/'.join([parent_path, new_id])
+            item['_path'] = '/'.join([item['_parent'], new_id])
             # we rename id if it already exists
             item['_path'] = correct_path(self.portal, item['_path'])
             item['_act'] = 'new'

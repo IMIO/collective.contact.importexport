@@ -2,10 +2,10 @@
 
 from collections import OrderedDict
 from collective.contact.importexport import e_logger
+from collective.contact.importexport.utils import by3wise
 from collective.contact.importexport.utils import correct_path
 from collective.contact.importexport.utils import get_main_path
 from collective.contact.importexport.utils import input_error
-from collective.contact.importexport.utils import pairwise
 from collective.contact.importexport.utils import relative_path
 from collective.contact.importexport.utils import valid_date
 from collective.contact.importexport.utils import valid_email
@@ -15,6 +15,7 @@ from collective.contact.importexport.utils import valid_zip
 from collective.contact.importexport.utils import to_bool
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
+from collective.transmogrifier.utils import Condition
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from plone import api
 from Products.CMFPlone.utils import safe_unicode
@@ -215,13 +216,16 @@ class UpdatePathInserter(object):
         self.catalog = self.portal.portal_catalog
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.ids = self.storage['ids']
+        # we add in options the following information, used in imio.dms.mail context
+        cbin = self.portal.portal_quickinstaller.isProductInstalled('collective.behavior.internalnumber')
+        options['cbin'] = str(cbin)
         self.uniques = {}
         for typ in MANAGED_TYPES:
-            pairs = options.get('{}_uniques'.format(typ), '').strip().split()
-            if len(pairs) % 2:
-                raise Exception("The '{}' section '{}' option must contain a even number of elements".format(name,
+            values = options.get('{}_uniques'.format(typ), '').strip().split()
+            if len(values) % 3:
+                raise Exception("The '{}' section '{}' option must contain a multiple of 3 elements".format(name,
                                 '{}_uniques'.format(typ)))
-            self.uniques[typ] = [(f, i) for f, i in pairwise(pairs)]
+            self.uniques[typ] = [(f, i, Condition(c, transmogrifier, name, options)) for f, i, c in by3wise(values)]
 
     def __iter__(self):
         for item in self.previous:
@@ -230,8 +234,8 @@ class UpdatePathInserter(object):
                 continue
             item_type = item['_type']
             # we will do a search for each index
-            for field, idx in self.uniques[item_type]:
-                if item[field]:
+            for field, idx, condition in self.uniques[item_type]:
+                if item[field] and condition(item):
                     brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
                     if len(brains) > 1:
                         input_error(item, u"the search with '{}'='{}' get multiple objs: {}".format(idx, item[field],

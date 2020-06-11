@@ -131,6 +131,12 @@ def pairwise(iterable):
     return zip(a, a)
 
 
+def by3wise(iterable):
+    """ Returns tuples of 3 elements: s -> (s0, s1, s3), (s4, s5, s6) ... """
+    a = iter(iterable)
+    return zip(a, a, a)
+
+
 def relative_path(portal, fullpath):
     """ return relative path """
     portal_path = '/'.join(portal.getPhysicalPath())

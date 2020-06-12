@@ -43,7 +43,7 @@ class DependencySorter(object):
 
         for org in all_organizations:
             org['_level'] = self.get_level(parent_relation, org['_id'])
-        sorted_organizations = sorted(all_organizations, key=lambda item: (item['_level'], item['_id']))
+        sorted_organizations = sorted(all_organizations, key=lambda item: (item['_level'], item['_ln']))
 
         # updating directory options
         fields = {}

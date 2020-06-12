@@ -60,7 +60,7 @@ def valid_zip(item, zipkey, countrykey):
 
 def valid_phone(item, phonekey, countrykey):
     """ Check and return valid phone """
-    phone = item[phonekey]
+    phone = digit(item[phonekey])
     if not phone:
         return phone
     country = item[countrykey].lower()
@@ -70,9 +70,9 @@ def valid_phone(item, phonekey, countrykey):
     elif country in countries:
         ctry = countries[country]
     else:
-        input_error(item, u"country col '{}' with undetected value '{}', kept phone number col {} with value '{}'".format(
-                          countrykey, item[countrykey], phonekey, phone))
-        return phone
+        input_error(item, u"country col '{}' with undetected value '{}', kept '' value for phone number col {}".format(
+                          countrykey, item[countrykey], phonekey))
+        return u''
     try:
         number = phonenumbers.parse(phone, ctry)
     except phonenumbers.NumberParseException:

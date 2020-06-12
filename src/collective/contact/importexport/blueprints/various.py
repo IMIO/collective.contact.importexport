@@ -41,9 +41,14 @@ class ShortLog(object):
         self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
 
-    def __iter__(self):
+    def shortcut(self, val):
         shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'n', 'update': u'U'}
+        if val in shortcuts:
+            return shortcuts[val]
+        return val
+
+    def __iter__(self):
         for item in self.previous:
-            print(u"{},{},{}, {}".format(shortcuts[item['_type']], item['_id'], shortcuts[item['_act']],
+            print(u"{},{},{}, {}".format(self.shortcut(item['_type']), item.get('_id', ''), self.shortcut(item['_act']),
                                          item['_path']), file=sys.stderr)
             yield item

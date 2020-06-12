@@ -155,8 +155,8 @@ class CommonInputChecks(object):
                 if item['_id'] == item['_oid']:
                     input_error(item, u'SKIPPING: _oid is equal to _id {}'.format(item['_id']))
                     continue
+                type_type = item['_oid'] and 'levels' or 'types'
                 if item['organization_type']:
-                    type_type = item['_oid'] and 'levels' or 'types'
                     if item['organization_type'] not in self.dir_org_config[type_type]:
                         self.dir_org_config[type_type][item['organization_type']] = \
                             safe_unicode(idnormalizer.normalize(item['organization_type']))

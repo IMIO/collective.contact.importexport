@@ -50,6 +50,12 @@
     />
 
   <utility
+    component=".various.ShortLog"
+    name="collective.contact.importexport.short_log"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
     component=".bp_test.Source1"
     name="collective.contact.importexport.source1"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"

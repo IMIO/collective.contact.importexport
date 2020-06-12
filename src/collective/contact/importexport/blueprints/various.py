@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 from collective.contact.importexport.blueprints.main import ANNOTATION_KEY
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
@@ -28,4 +29,21 @@ class BreakpointSection(object):
             if self.condition(item):
 #                ipdb.set_trace(sys._getframe().f_back)  # Break!
                 ipdb.set_trace()  # Break!
+            yield item
+
+
+class ShortLog(object):
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+        self.transmogrifier = transmogrifier
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+
+    def __iter__(self):
+        shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'n', 'update': u'U'}
+        for item in self.previous:
+            print(u"{},{},{}, {}".format(shortcuts[item['_type']], item['_id'], shortcuts[item['_act']],
+                                         item['_path']), file=sys.stderr)
             yield item

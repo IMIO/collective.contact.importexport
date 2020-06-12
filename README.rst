@@ -15,8 +15,8 @@ collective.contact.importexport
 Import and export organizations and persons with csv files, there are 4 csv files:
 - organizations
 - persons
-- functions_file
-- occupied_functions_file
+- positions (not yet managed)
+- held_positions
 
 ! This is a WIP, only flat organizations can be imported for now.
 

@@ -54,6 +54,7 @@ class DependencySorter(object):
         if fields:
             fields['_path'] = self.directory_path
             fields['_type'] = 'directory'  # to avoid message from constructor
+            fields['_act'] = 'update'
             yield fields
 
         for org in sorted_organizations:

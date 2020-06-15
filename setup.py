@@ -47,6 +47,7 @@ setup(
         'plone.api',
         'plone.app.transmogrifier',
         'Products.GenericSetup>=1.8.2',
+        'pycountry',
         'setuptools',
         'transmogrify.dexterity',
     ],

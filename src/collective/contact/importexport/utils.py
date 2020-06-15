@@ -3,11 +3,14 @@
 from future.builtins import zip
 from collective.contact.core.behaviors import validateEmail
 from collective.contact.importexport import e_logger
+from zope.i18n import translate
 
 import datetime
 import os
 import phonenumbers
+import pycountry
 import re
+import unicodedata
 
 
 def input_error(item, msg):
@@ -58,30 +61,48 @@ def valid_zip(item, zipkey, countrykey):
     return zipc
 
 
-def valid_phone(item, phonekey, countrykey):
+def valid_phone(item, phonekey, countrykey, default_country, language='en'):
     """ Check and return valid phone """
     phone = digit(item[phonekey])
     if not phone:
         return phone
-    country = item[countrykey].lower()
-    countries = {'belgique': 'BE', 'france': 'FR'}
-    if not country:
-        ctry = 'BE'
-    elif country in countries:
-        ctry = countries[country]
+    countries = [default_country]
+    # get country in lower cas without accent
+    country = unicodedata.normalize('NFD', item[countrykey].lower()).encode('ascii', 'ignore')
+    if country:
+        # get english country translation
+        tr_ctry = translate(country, domain="to_pycountry_lower", target_language=language, default=u'')
+        import ipdb; ipdb.set_trace()
+        if tr_ctry == u'':
+            input_error(item, u"country col '{}' with value '{}' changed in '{}' cannot be translated, kept '' value "
+                              u"for phone number col {}".format(countrykey, item[countrykey], country, phonekey))
+            return u''
+        # get alpha2 country
+        entry = pycountry.countries.get(name=tr_ctry)
+        if entry is None:
+            input_error(item, u"country col '{}' with value '{}' changed in '{}' cannot be found, kept '' value "
+                              u"for phone number col {}".format(countrykey, item[countrykey], tr_ctry, phonekey))
+            return u''
+        countries.insert(0, entry.alpha_2)
+
+    for ctry in countries:
+        try:
+            number = phonenumbers.parse(phone, ctry)
+            break
+        except phonenumbers.NumberParseException:
+            pass
     else:
-        input_error(item, u"country col '{}' with undetected value '{}', kept '' value for phone number col {}".format(
-                          countrykey, item[countrykey], phonekey))
+        input_error(item, u"phone number col '{}' with value '{}' cannot be parsed => kept '' value".format(phonekey,
+                                                                                                            phone))
         return u''
-    try:
-        number = phonenumbers.parse(phone, ctry)
-    except phonenumbers.NumberParseException:
-        input_error(item, u"phone number col '{}' with bad value '{}' => kept '' value".format(phonekey, phone))
-        return u''
+
     if not phonenumbers.is_valid_number(number):
-        input_error(item, u"phone number col '{}' with invalid value '{}' => kept '' value".format(phonekey, phone))
+        input_error(item, u"phone number col '{}' with value '{}' is invalid '{}' => kept '' value".format(phonekey,
+                          phone, number))
         return u''
     return phone
+    # can be done : verify if number region == country
+    # from phonenumbers.phonenumberutil import country_code_for_region
 
 
 def valid_email(item, emailkey):

@@ -95,6 +95,8 @@ class CommonInputChecks(object):
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.fieldnames = self.storage['fieldnames']
         self.ids = self.storage['ids']
+        self.phone_country = options.get('phone_country', 'BE').upper()
+        self.language = options.get('language', 'fr').lower()
         self.uniques = {typ: {key: {} for key in options.get('{}_uniques'.format(typ), '').split()
                               if key in self.fieldnames[typ]}
                         for typ in MANAGED_TYPES}
@@ -145,7 +147,7 @@ class CommonInputChecks(object):
 
             # check phones
             for key in ('phone', 'cell_phone', 'fax'):
-                item[key] = valid_phone(item, key, 'country')
+                item[key] = valid_phone(item, key, 'country', self.phone_country, self.language)
 
             # check email
             item['email'] = valid_email(item, 'email')

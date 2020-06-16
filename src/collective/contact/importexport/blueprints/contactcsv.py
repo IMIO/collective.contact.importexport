@@ -6,6 +6,7 @@ from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
 from collective.transmogrifier.utils import Expression
 from collective.transmogrifier.utils import openFileReference
+from Products.CMFPlone.utils import safe_unicode
 from zope.interface import classProvides
 from zope.interface import implements
 
@@ -20,13 +21,13 @@ class CSVContactSourceSection(object):
         self.previous = previous
         self.transmogrifier = transmogrifier
 
-        self.organizations_filename = options.get('organizations_filename')
+        self.organizations_filename = safe_unicode(options.get('organizations_filename'))
         if self.organizations_filename:
             self.organization_fieldnames = transmogrifier['config'].get('organizations_fieldnames', '').split()
-        self.persons_filename = options.get('persons_filename')
+        self.persons_filename = safe_unicode(options.get('persons_filename'))
         if self.persons_filename:
             self.persons_fieldnames = transmogrifier['config'].get('persons_fieldnames', '').split()
-        self.held_positions_filename = options.get('held_positions_filename')
+        self.held_positions_filename = safe_unicode(options.get('held_positions_filename'))
         if self.held_positions_filename:
             self.held_positions_fieldnames = transmogrifier['config'].get('held_positions_fieldnames', '').split()
 
@@ -34,7 +35,7 @@ class CSVContactSourceSection(object):
             raise Exception('You must specify at least organizations or persons CSV')
 
         self.csv_headers = Condition(options.get('csv_headers', 'python:True'), transmogrifier, name, options)
-        self.dialect = options.get('dialect', 'excel')
+        self.dialect = safe_unicode(options.get('dialect', 'excel'))
         self.fmtparam = dict(
             (key[len('fmtparam-'):],
              Expression(value, transmogrifier, name, options)(

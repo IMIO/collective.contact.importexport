@@ -42,7 +42,8 @@ class Initialization(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
-        self.workingpath = get_main_path(options.get('basepath', ''), options.get('subpath', ''))
+        self.workingpath = get_main_path(safe_unicode(options.get('basepath', '')),
+                                         safe_unicode(options.get('subpath', '')))
         self.portal = transmogrifier.context
         lfh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors.log'), mode='w')
         lfh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
@@ -101,12 +102,13 @@ class CommonInputChecks(object):
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.fieldnames = self.storage['fieldnames']
         self.ids = self.storage['ids']
-        self.phone_country = options.get('phone_country', 'BE').upper()
-        self.language = options.get('language', 'fr').lower()
-        self.uniques = {typ: {key: {} for key in options.get('{}_uniques'.format(typ), '').split()
+        self.csv_encoding = transmogrifier['config'].get('csv_encoding', 'utf8')
+        self.phone_country = safe_unicode(options.get('phone_country', 'BE')).upper()
+        self.language = safe_unicode(options.get('language', 'fr')).lower()
+        self.uniques = {typ: {key: {} for key in safe_unicode(options.get('{}_uniques'.format(typ), '')).split()
                               if key in self.fieldnames[typ]}
                         for typ in MANAGED_TYPES}
-        self.booleans = {typ: {key: {} for key in options.get('{}_booleans'.format(typ), '').split()
+        self.booleans = {typ: {key: {} for key in safe_unicode(options.get('{}_booleans'.format(typ), '')).split()
                                if key in self.fieldnames[typ]}
                          for typ in MANAGED_TYPES}
         self.dir_org_config = self.storage['dir_org_config']
@@ -233,7 +235,7 @@ class UpdatePathInserter(object):
         options['cbin'] = str(cbin)
         self.uniques = {}
         for typ in MANAGED_TYPES:
-            values = options.get('{}_uniques'.format(typ), '').strip().split()
+            values = safe_unicode(options.get('{}_uniques'.format(typ), '')).strip().split()
             if len(values) % 3:
                 raise Exception("The '{}' section '{}' option must contain a multiple of 3 elements".format(name,
                                 '{}_uniques'.format(typ)))
@@ -270,12 +272,12 @@ class PathInserter(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
-        self.title_keys = options.get('title-keys', 'title')
+        self.title_keys = safe_unicode(options.get('title-keys', 'title'))
         self.portal = transmogrifier.context
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.fieldnames = self.storage['fieldnames']
         self.ids = self.storage['ids']
-        self.id_keys = {typ: [key for key in options.get('{}_id_keys'.format(typ), '').split()
+        self.id_keys = {typ: [key for key in safe_unicode(options.get('{}_id_keys'.format(typ), '')).split()
                               if key in self.fieldnames[typ]]
                         for typ in MANAGED_TYPES}
 

@@ -50,6 +50,11 @@ def digit(phone):
     return filter(type(phone).isdigit, phone)
 
 
+def alphanum(value):
+    # filter with str.isalnum or unicode.isalnum
+    return filter(type(value).isalnum, value)
+
+
 def valid_zip(item, zipkey, countrykey):
     """ Check and return valid format zip """
     zipc = digit(item[zipkey])
@@ -72,7 +77,6 @@ def valid_phone(item, phonekey, countrykey, default_country, language='en'):
     if country:
         # get english country translation
         tr_ctry = translate(country, domain="to_pycountry_lower", target_language=language, default=u'')
-        import ipdb; ipdb.set_trace()
         if tr_ctry == u'':
             input_error(item, u"country col '{}' with value '{}' changed in '{}' cannot be translated, kept '' value "
                               u"for phone number col {}".format(countrykey, item[countrykey], country, phonekey))

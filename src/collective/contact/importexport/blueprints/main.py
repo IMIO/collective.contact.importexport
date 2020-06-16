@@ -2,6 +2,7 @@
 
 from collections import OrderedDict
 from collective.contact.importexport import e_logger
+from collective.contact.importexport.utils import alphanum
 from collective.contact.importexport.utils import by3wise
 from collective.contact.importexport.utils import correct_path
 from collective.contact.importexport.utils import get_main_path
@@ -157,6 +158,10 @@ class CommonInputChecks(object):
                 if item['_id'] == item['_oid']:
                     input_error(item, u'SKIPPING: _oid is equal to _id {}'.format(item['_id']))
                     continue
+                # keep only alphanum chars
+                if 'enterprise_number' in item and item['enterprise_number']:
+                    item['enterprise_number'] = alphanum(item['enterprise_number']).strip()
+                # manage org type
                 type_type = item['_oid'] and 'levels' or 'types'
                 if item['organization_type']:
                     if item['organization_type'] not in self.dir_org_config[type_type]:

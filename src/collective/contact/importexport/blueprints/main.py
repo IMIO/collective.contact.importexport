@@ -72,7 +72,7 @@ class Initialization(object):
                 directory = brains[0].getObject()
                 dir_path = relative_path(self.portal, brains[0].getPath())
         if not directory:
-            raise Exception("Directory not found !")
+            raise Exception("{}: Directory not found !".format(name))
         self.storage['directory'] = directory
         self.storage['directory_path'] = dir_path
         # store directory configuration
@@ -121,7 +121,7 @@ class CommonInputChecks(object):
 
             # set correct values
             for fld in self.fieldnames[item_type]:
-                item[fld] = safe_unicode(item[fld].strip(' '))
+                item[fld] = safe_unicode(item[fld].strip(' '), encoding=self.csv_encoding)
 
             if item_type == 'held_position':
                 item['_fid'] = None  # we don't yet manage position

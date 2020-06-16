@@ -2,6 +2,7 @@
 
 from collections import OrderedDict
 from collective.contact.importexport import e_logger
+from collective.contact.importexport import o_logger
 from collective.contact.importexport.utils import alphanum
 from collective.contact.importexport.utils import by3wise
 from collective.contact.importexport.utils import correct_path
@@ -47,6 +48,10 @@ class Initialization(object):
         lfh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         lfh.setLevel(logging.INFO)
         e_logger.addHandler(lfh)
+        lfh = logging.FileHandler(os.path.join(self.workingpath, 'ie_shortlog.log'), mode='w')
+        lfh.setFormatter(logging.Formatter('%(message)s'))
+        lfh.setLevel(logging.INFO)
+        o_logger.addHandler(lfh)
 
         # set global variables in annotation
         self.storage = IAnnotations(transmogrifier).setdefault(ANNOTATION_KEY, {})

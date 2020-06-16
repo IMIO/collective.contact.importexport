@@ -9,4 +9,7 @@ logger.setLevel(logging.INFO)  # needed to be displayed with instance run
 e_logger = logging.getLogger('ccie-input')
 e_logger.setLevel(logging.INFO)
 
+o_logger = logging.getLogger('ccie-output')
+o_logger.setLevel(logging.INFO)
+
 _ = MessageFactory('collective.contact.importexport')

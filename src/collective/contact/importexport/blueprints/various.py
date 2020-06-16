@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
+from collective.contact.importexport import o_logger
 from collective.contact.importexport.blueprints.main import ANNOTATION_KEY
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
@@ -10,7 +11,7 @@ from zope.interface import classProvides
 from zope.interface import implements
 
 import ipdb
-import sys
+# import sys
 
 
 class BreakpointSection(object):
@@ -49,6 +50,8 @@ class ShortLog(object):
 
     def __iter__(self):
         for item in self.previous:
-            print(u"{},{},{}, {}".format(self.shortcut(item['_type']), item.get('_id', ''), self.shortcut(item['_act']),
-                                         item['_path']), file=sys.stderr)
+            to_print = u"{},{},{}, {}".format(self.shortcut(item['_type']), item.get('_id', ''),
+                                              self.shortcut(item['_act']), item['_path'])
+            # print(to_print, file=sys.stderr)
+            o_logger.info(to_print)
             yield item

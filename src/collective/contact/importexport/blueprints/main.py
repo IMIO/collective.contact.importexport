@@ -169,15 +169,17 @@ class CommonInputChecks(object):
                 # keep only alphanum chars
                 if 'enterprise_number' in item and item['enterprise_number']:
                     item['enterprise_number'] = alphanum(item['enterprise_number']).strip()
-                # manage org type
-                type_type = item['_oid'] and 'levels' or 'types'
-                if item['organization_type']:
-                    if item['organization_type'] not in self.dir_org_config[type_type]:
-                        self.dir_org_config[type_type][item['organization_type']] = \
-                            safe_unicode(idnormalizer.normalize(item['organization_type']))
-                    item['organization_type'] = self.dir_org_config[type_type][item['organization_type']]
-                else:  # we take the first value
-                    item['organization_type'] = self.dir_org_config[type_type].values()[0]
+                # manage org type if 'organization_type' column is defined
+                # (some clients use this column to put something else)
+                if 'organization_type' in item:
+                    type_type = item['_oid'] and 'levels' or 'types'
+                    if item['organization_type']:
+                        if item['organization_type'] not in self.dir_org_config[type_type]:
+                            self.dir_org_config[type_type][item['organization_type']] = \
+                                safe_unicode(idnormalizer.normalize(item['organization_type']))
+                        item['organization_type'] = self.dir_org_config[type_type][item['organization_type']]
+                    else:  # we take the first value
+                        item['organization_type'] = self.dir_org_config[type_type].values()[0]
             elif item_type == 'person':
                 item['gender'] = valid_value_in_list(item, item['gender'], ('', 'F', 'M'))
                 item['birthday'] = valid_date(item, item['birthday'])

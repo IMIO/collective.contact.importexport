@@ -323,4 +323,29 @@ class PathInserter(object):
             self.ids[item_type][item['_id']]['path'] = item['_path']
             yield item
 
+
+class TransitionsInserter():
+    """ Add _transitions following _inactive column """
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+        self.portal = transmogrifier.context
+        self.name = name
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+
+    def __iter__(self):
+        for item in self.previous:
+            if '_inactive' in item:
+                if not isinstance(item['_inactive'], bool):
+                    raise Exception("{}: _inactive field is not configured as boolean !".format(self.name))
+                obj = self.portal.unrestrictedTraverse(item['_path'], default=None)
+                state = api.content.get_state(obj=obj)
+                if item['_inactive'] and state == 'active':
+                    item['_transitions'] = 'deactivate'
+                elif not item['_inactive'] and state == 'deactivated':
+                    input_error(item, u'_inactive is False and current state is deactivated: we do not activate')
+            yield item
+
 # ["{}: '{}'".format(attr, getattr(context, attr)) for attr in ('title', 'description', 'organization_type', 'use_parent_address', 'street', 'number', 'additional_address_details', 'zip_code', 'city', 'phone', 'cell_phone', 'fax', 'email', 'website', 'region', 'country')]

@@ -44,6 +44,12 @@
     />
 
   <utility
+    component=".main.TransitionsInserter"
+    name="collective.contact.importexport.transitions_inserter"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
     component=".various.BreakpointSection"
     name="collective.contact.importexport.breakpoint"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"

@@ -22,6 +22,8 @@ pipeline =
     constructor
     schemaupdater
     reindexobject
+#    transitions_inserter
+#    workflowupdater
 #    breakpoint
     logger
 
@@ -91,6 +93,12 @@ blueprint = transmogrify.dexterity.schemaupdater
 
 [reindexobject]
 blueprint = plone.app.transmogrifier.reindexobject
+
+[transitions_inserter]
+blueprint = collective.contact.importexport.transitions_inserter
+
+[workflowupdater]
+blueprint = plone.app.transmogrifier.workflowupdater
 
 [logger]
 blueprint = collective.transmogrifier.sections.logger

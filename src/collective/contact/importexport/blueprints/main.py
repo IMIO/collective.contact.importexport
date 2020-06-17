@@ -140,6 +140,8 @@ class CommonInputChecks(object):
 
             # uniqueness
             for key in self.uniques[item_type]:
+                if key not in item:
+                    continue
                 if item[key] in self.uniques[item_type][key]:
                     input_error(item, u"duplicated {} '{}', already present line {:d}".format(key, item[key],
                                       self.uniques[item_type][key][item[key]]))
@@ -148,7 +150,8 @@ class CommonInputChecks(object):
 
             # to bool from int
             for key in self.booleans[item_type]:
-                item[key] = to_bool(item, key)
+                if key in item:
+                    item[key] = to_bool(item, key)
 
             # check zip
             item['zip_code'] = valid_zip(item, 'zip_code', 'country')
@@ -232,6 +235,7 @@ class UpdatePathInserter(object):
         self.ids = self.storage['ids']
         # we add in options the following information, used in imio.dms.mail context
         cbin = self.portal.portal_quickinstaller.isProductInstalled('collective.behavior.internalnumber')
+        # TODO : MUST CHECK IF BEHAVIOR IS WELL ADDED ON PORTAL_TYPE !!
         options['cbin'] = str(cbin)
         self.uniques = {}
         for typ in MANAGED_TYPES:
@@ -308,7 +312,7 @@ class PathInserter(object):
                     title = u'-'.join([title, related_title])
 
             if not title:
-                input_error(item, 'cannot get an id from id keys {}'.format(self.id_keys[item_type]))
+                input_error(item, u'cannot get an id from id keys {}'.format(self.id_keys[item_type]))
                 continue
             new_id = idnormalizer.normalize(title)
             item['_path'] = '/'.join([item['_parent'], new_id])

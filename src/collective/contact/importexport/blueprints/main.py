@@ -108,9 +108,10 @@ class CommonInputChecks(object):
         self.uniques = {typ: {key: {} for key in safe_unicode(options.get('{}_uniques'.format(typ), '')).split()
                               if key in self.fieldnames[typ]}
                         for typ in MANAGED_TYPES}
-        self.booleans = {typ: {key: {} for key in safe_unicode(options.get('{}_booleans'.format(typ), '')).split()
-                               if key in self.fieldnames[typ]}
+        self.booleans = {typ: [key for key in safe_unicode(options.get('{}_booleans'.format(typ), '')).split()
+                               if key in self.fieldnames[typ]]
                          for typ in MANAGED_TYPES}
+        self.storage['booleans'] = self.booleans
         self.dir_org_config = self.storage['dir_org_config']
         self.directory_path = self.storage['directory_path']
 
@@ -140,8 +141,6 @@ class CommonInputChecks(object):
 
             # uniqueness
             for key in self.uniques[item_type]:
-                if key not in item:
-                    continue
                 if item[key] in self.uniques[item_type][key]:
                     input_error(item, u"duplicated {} '{}', already present line {:d}".format(key, item[key],
                                       self.uniques[item_type][key][item[key]]))
@@ -150,8 +149,7 @@ class CommonInputChecks(object):
 
             # to bool from int
             for key in self.booleans[item_type]:
-                if key in item:
-                    item[key] = to_bool(item, key)
+                item[key] = to_bool(item, key)
 
             # check zip
             item['zip_code'] = valid_zip(item, 'zip_code', 'country')
@@ -334,12 +332,14 @@ class TransitionsInserter():
         self.portal = transmogrifier.context
         self.name = name
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+        self.fieldnames = self.storage['fieldnames']
+        for typ in MANAGED_TYPES:
+            if '_inactive' in self.fieldnames[typ] and not '_inactive' in self.storage['booleans'][typ]:
+                raise Exception("{}: _inactive field is not configured as boolean for type {} !".format(self.name, typ))
 
     def __iter__(self):
         for item in self.previous:
             if '_inactive' in item:
-                if not isinstance(item['_inactive'], bool):
-                    raise Exception("{}: _inactive field is not configured as boolean !".format(self.name))
                 obj = self.portal.unrestrictedTraverse(item['_path'], default=None)
                 state = api.content.get_state(obj=obj)
                 if item['_inactive'] and state == 'active':

@@ -12,7 +12,8 @@
 <value>[transmogrifier]
 pipeline =
     initialization
-    csvcontactsource
+    csv_disk_source
+    csv_reader
     common_input_checks
 #    personal input bp came here
     dependencysorter
@@ -38,7 +39,6 @@ persons_filename = persons-test.csv
 persons_fieldnames = _id lastname firstname gender person_title birthday use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 held_positions_filename = heldpositions-test.csv
 held_positions_fieldnames = _id _pid _oid _fid label start_date end_date use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
-csv_headers = python:True
 
 [initialization]
 blueprint = collective.contact.importexport.init
@@ -47,13 +47,16 @@ basepath =
 # if subpath, it will be appended to basepath
 subpath = imports
 
-[csvcontactsource]
-blueprint = collective.contact.importexport.csvcontactsource
+[csv_disk_source]
+blueprint = collective.contact.importexport.csv_disk_source
 organizations_filename = ${config:organizations_filename}
 persons_filename = ${config:persons_filename}
 held_positions_filename = ${config:held_positions_filename}
+
+[csv_reader]
+blueprint = collective.contact.importexport.csv_reader
 fmtparam-strict = python:True
-csv_headers = ${config:csv_headers}
+csv_headers = python:True
 
 [common_input_checks]
 blueprint = collective.contact.importexport.common_input_checks

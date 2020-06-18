@@ -58,6 +58,7 @@ class Initialization(object):
         self.storage = IAnnotations(transmogrifier).setdefault(ANNOTATION_KEY, {})
         self.storage['ids'] = {typ: {} for typ in MANAGED_TYPES}
 #        self.storage['uniques'] = {typ: {} for typ in MANAGED_TYPES}
+        self.storage['csv_files'] = {typ: None for typ in MANAGED_TYPES}
         self.storage['fieldnames'] = {typ: transmogrifier['config'].get('{}s_fieldnames'.format(typ), '').split()
                                       for typ in MANAGED_TYPES}
         # find directory

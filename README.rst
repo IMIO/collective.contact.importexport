@@ -13,17 +13,21 @@ collective.contact.importexport
     :target: https://coveralls.io/github/IMIO/collective.contact.importexport?branch=master
 
 Import and export organizations and persons with csv files, there are 4 csv files:
+
 - organizations
 - persons
 - positions (not yet managed)
 - held_positions
 
-! This is a WIP, only flat organizations can be imported for now.
+! This is a WIP:
+
+- Import is managed via a transmogrifier pipeline.
+- Export can be managed with a collective.documentgenerator template. (not yet included in this product)
 
 Features
 --------
 
-- Import flat organizations list
+- Import flat organizations list in csv format. Text column must be enclosed with double quotes. A double quote in content must be escaped with another double quote.
 
 
 Examples of csv files

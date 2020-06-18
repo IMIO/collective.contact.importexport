@@ -8,8 +8,14 @@
     />
 
   <utility
-    component=".contactcsv.CSVContactSourceSection"
-    name="collective.contact.importexport.csvcontactsource"
+    component=".contactcsv.CSVDiskSourceSection"
+    name="collective.contact.importexport.csv_disk_source"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
+    component=".contactcsv.CSVReaderSection"
+    name="collective.contact.importexport.csv_reader"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 

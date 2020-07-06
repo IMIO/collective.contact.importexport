@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from future.builtins import zip
-from collective.contact.core.behaviors import validateEmail
+from collective.contact.core.behaviors import validate_email
 from collective.contact.importexport import e_logger
 from zope.i18n import translate
 
@@ -114,7 +114,7 @@ def valid_email(item, emailkey):
     if not item[emailkey]:
         return u''
     try:
-        validateEmail(item[emailkey])
+        validate_email(item[emailkey])
     except:
         input_error(item, u"email col '{}' with invalid value '{}' => kept '' value".format(emailkey, item[emailkey]))
         return u''

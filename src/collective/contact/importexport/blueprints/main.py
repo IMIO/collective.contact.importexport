@@ -6,6 +6,7 @@ from collective.contact.importexport import o_logger
 from collective.contact.importexport.utils import alphanum
 from collective.contact.importexport.utils import by3wise
 from collective.contact.importexport.utils import correct_path
+from collective.contact.importexport.utils import get_country_code
 from collective.contact.importexport.utils import get_main_path
 from collective.contact.importexport.utils import input_error
 from collective.contact.importexport.utils import relative_path
@@ -153,11 +154,12 @@ class CommonInputChecks(object):
                 item[key] = to_bool(item, key)
 
             # check zip
-            item['zip_code'] = valid_zip(item, 'zip_code', 'country')
+            country_code = get_country_code(item, 'country', self.phone_country, self.language)
+            item['zip_code'] = valid_zip(item, 'zip_code', country_code)
 
             # check phones
             for key in ('phone', 'cell_phone', 'fax'):
-                item[key] = valid_phone(item, key, 'country', self.phone_country, self.language)
+                item[key] = valid_phone(item, key, country_code, self.phone_country)
 
             # check email
             item['email'] = valid_email(item, 'email')
@@ -257,8 +259,8 @@ class UpdatePathInserter(object):
                 if item[field] and condition(item):
                     brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
                     if len(brains) > 1:
-                        input_error(item, u"the search with '{}'='{}' get multiple objs: {}".format(idx, item[field],
-                                          u', '.join([b.getPath() for b in brains])))
+                        input_error(item, u"the search with '{}'='{}' get multiple objs: {}".format(
+                            idx, item[field], u', '.join([b.getPath() for b in brains])))
                     elif len(brains):
                         item['_path'] = relative_path(self.portal, brains[0].getPath())
                         item['_act'] = 'update'

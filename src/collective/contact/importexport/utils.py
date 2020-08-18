@@ -3,6 +3,8 @@
 from future.builtins import zip
 from collective.contact.core.behaviors import validate_email
 from collective.contact.importexport import e_logger
+from collective.contact.importexport.config import ZIP_DIGIT
+from collective.contact.importexport.config import ZIP_PATTERN
 from zope.i18n import translate
 
 import datetime
@@ -55,39 +57,60 @@ def alphanum(value):
     return filter(type(value).isalnum, value)
 
 
-def valid_zip(item, zipkey, countrykey):
-    """ Check and return valid format zip """
-    zipc = digit(item[zipkey])
-    if item[zipkey] != zipc:
-        input_error(item, u"zip code col '{}' contains non digit chars, value '{}'".format(zipkey, item[zipkey]))
-    if zipc and len(zipc) != 4 and not item[countrykey]:
-        input_error(item, u"zip code col '{}' length not 4, value '{}' => kept '' value".format(zipkey, item[zipkey]))
+def get_country_code(item, countrykey, default_country, language='en'):
+    """ Get country code """
+    # get country in lower case without accent
+    country = unicodedata.normalize('NFD', item[countrykey].lower()).encode('ascii', 'ignore')
+    if not country:
+        return None
+    # get english country translation
+    tr_ctry = translate(country, domain="to_pycountry_lower", target_language=language, default=u'')
+    if tr_ctry == u'':
+        input_error(item, u"country col '{}' with value '{}' changed in '{}' cannot be translated: "
+                          u"complete po file if necessary ?".format(countrykey, item[countrykey], country))
         return u''
+    # get alpha2 country
+    entry = pycountry.countries.get(name=tr_ctry)
+    if entry is None:
+        input_error(item, u"country col '{}' with value '{}' translated in '{}' cannot be found".format(
+            countrykey, item[countrykey], tr_ctry))
+        return u''
+    return entry.alpha_2
+
+
+def valid_zip(item, zipkey, countrycode):
+    """ Check and return valid format zip """
+    zipc = item[zipkey]
+    if countrycode is None:
+        countrycode = u'BE'
+    if countrycode in ZIP_DIGIT:
+        zipc = digit(item[zipkey])
+        if item[zipkey] != zipc:
+            input_error(item, u"zip code col '{}' contains non digit chars, orig value '{}' => '{}'".format(
+                              zipkey, item[zipkey], zipc))
+    if countrycode in ZIP_PATTERN:
+        match = ZIP_PATTERN[countrycode].match(zipc)
+        if match is None:
+            input_error(item, u"zip code col '{}' with orig value '{}' doesn't match pattern '{}', kept '{}'".format(
+                              zipkey, item[zipkey], ZIP_PATTERN[countrycode].pattern, zipc))
+    else:
+        input_error(item, u"can't check zip code col '{}' with value '{}', kept '{}'".format(
+                          zipkey, item[zipkey], zipc))
     return zipc
 
 
-def valid_phone(item, phonekey, countrykey, default_country, language='en'):
+def valid_phone(item, phonekey, countrycode, default_country):
     """ Check and return valid phone """
     phone = digit(item[phonekey])
     if not phone:
         return phone
+    if countrycode == u'':  # problem converting non empty country
+        input_error(item, u"can't check phone col '{}' with value '{}', kept ''".format(
+                          phonekey, item[phonekey]))
+        return u''
     countries = [default_country]
-    # get country in lower cas without accent
-    country = unicodedata.normalize('NFD', item[countrykey].lower()).encode('ascii', 'ignore')
-    if country:
-        # get english country translation
-        tr_ctry = translate(country, domain="to_pycountry_lower", target_language=language, default=u'')
-        if tr_ctry == u'':
-            input_error(item, u"country col '{}' with value '{}' changed in '{}' cannot be translated, kept '' value "
-                              u"for phone number col {}".format(countrykey, item[countrykey], country, phonekey))
-            return u''
-        # get alpha2 country
-        entry = pycountry.countries.get(name=tr_ctry)
-        if entry is None:
-            input_error(item, u"country col '{}' with value '{}' changed in '{}' cannot be found, kept '' value "
-                              u"for phone number col {}".format(countrykey, item[countrykey], tr_ctry, phonekey))
-            return u''
-        countries.insert(0, entry.alpha_2)
+    if countrycode and countrycode != default_country:
+        countries.insert(0, countrycode)
 
     for ctry in countries:
         try:
@@ -101,8 +124,8 @@ def valid_phone(item, phonekey, countrykey, default_country, language='en'):
         return u''
 
     if not phonenumbers.is_valid_number(number):
-        input_error(item, u"phone number col '{}' with value '{}' is invalid '{}' => kept '' value".format(phonekey,
-                          phone, number))
+        input_error(item, u"phone number col '{}' with value '{}' is invalid '{}' => kept '' value".format(
+                          phonekey, phone, number))
         return u''
     return phone
     # can be done : verify if number region == country

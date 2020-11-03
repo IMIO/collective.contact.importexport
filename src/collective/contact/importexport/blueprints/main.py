@@ -57,6 +57,7 @@ class Initialization(object):
 
         # set global variables in annotation
         self.storage = IAnnotations(transmogrifier).setdefault(ANNOTATION_KEY, {})
+        self.storage['wp'] = self.workingpath
         self.storage['ids'] = {typ: {} for typ in MANAGED_TYPES}
 #        self.storage['uniques'] = {typ: {} for typ in MANAGED_TYPES}
         self.storage['csv_files'] = {typ: None for typ in MANAGED_TYPES}

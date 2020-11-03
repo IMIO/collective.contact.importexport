@@ -12,6 +12,7 @@
 <value>[transmogrifier]
 pipeline =
     initialization
+#    csv_ssh_source
     csv_disk_source
     csv_reader
     common_input_checks
@@ -46,6 +47,14 @@ blueprint = collective.contact.importexport.init
 basepath =
 # if subpath, it will be appended to basepath
 subpath = imports
+
+[csv_ssh_source]
+blueprint = collective.contact.importexport.csv_ssh_source
+servername = sftp-client.imio.be
+username = zope
+server_path = /srv/sftp/inbw/upload_success
+registry_filename = 0_registry.dump
+transfer_path =
 
 [csv_disk_source]
 blueprint = collective.contact.importexport.csv_disk_source

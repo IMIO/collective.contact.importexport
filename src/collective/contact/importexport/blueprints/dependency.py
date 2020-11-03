@@ -48,9 +48,11 @@ class DependencySorter(object):
         # updating directory options
         fields = {}
         for typ in ['types', 'levels']:
-            if len(self.dir_org_config[typ]) != self.dir_org_config_len[typ]:
+            if len(self.dir_org_config[typ]) != self.dir_org_config_len[typ]:  # dic updated in CommonInputChecks
                 logger.info("Contacts parameter modification 'organization_%s'" % typ)
-                fields['organization_%s' % typ] = [{'name': i[0], 'token': i[1]} for i in self.dir_org_config[typ].items()]
+                fields['organization_%s' % typ] = [{'name': i[0], 'token': i[1]} for i
+                                                   in self.dir_org_config[typ].items()]
+                self.dir_org_config_len[typ] = len(self.dir_org_config[typ])  # update for next files group
         if fields:
             fields['_path'] = self.directory_path
             fields['_type'] = 'directory'  # to avoid message from constructor

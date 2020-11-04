@@ -3,6 +3,7 @@
 from __future__ import print_function
 from collective.contact.importexport import o_logger
 from collective.contact.importexport.blueprints.main import ANNOTATION_KEY
+from collective.contact.importexport.utils import shortcut
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
@@ -42,16 +43,10 @@ class ShortLog(object):
         self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
 
-    def shortcut(self, val):
-        shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'n', 'update': u'U'}
-        if val in shortcuts:
-            return shortcuts[val]
-        return val
-
     def __iter__(self):
         for item in self.previous:
-            to_print = u"{},{},{}, {}".format(self.shortcut(item['_type']), item.get('_id', ''),
-                                              self.shortcut(item['_act']), item['_path'])
+            to_print = u"{}:{},{},{}, {}".format(item['_set'], shortcut(item['_type']), item.get('_id', ''),
+                                                 shortcut(item['_act']), item['_path'])
             # print(to_print, file=sys.stderr)
             o_logger.info(to_print)
             yield item

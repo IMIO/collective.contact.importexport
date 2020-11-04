@@ -137,10 +137,10 @@ class CommonInputChecks(object):
             if not item['_id']:
                 input_error(item, u"SKIPPING: missing id '_id'")
                 continue
-            if item['_id'] in self.ids[item_type]:
+            if item['_id'] in self.ids[item_type][item['_set']]:
                 input_error(item, u"duplicated id '{}', already present line {}".format(item['_id'],
-                                  self.ids[item_type][item['_id']]['ln']))
-            self.ids[item_type][item['_id']] = {'path': '', 'ln': item['_ln']}
+                            self.ids[item_type][item['_set']][item['_id']]['ln']))
+            self.ids[item_type][item['_set']][item['_id']] = {'path': '', 'ln': item['_ln']}
 
             # uniqueness
             for key in self.uniques[item_type]:
@@ -217,11 +217,11 @@ class RelationsInserter(object):
         for item in self.previous:
             item_type = item['_type']
             if item_type == 'held_position':
-                if item['_oid'] and item['_oid'] not in self.ids['organization']:
+                if item['_oid'] and item['_oid'] not in self.ids['organization'][item['_set']]:
                     input_error(item, u"SKIPPING: invalid related organization id '{}'".format(item['_oid']))
                     continue
                 # not using _pid yet
-                org = self.portal.unrestrictedTraverse(self.ids['organization'][item['_oid']]['path'])
+                org = self.portal.unrestrictedTraverse(self.ids['organization'][item['_set']][item['_oid']]['path'])
                 item['position'] = RelationValue(intids.getId(org))
             yield item
 
@@ -266,7 +266,7 @@ class UpdatePathInserter(object):
                         item['_path'] = relative_path(self.portal, brains[0].getPath())
                         item['_act'] = 'update'
                         # we store _path for each _id
-                        self.ids[item_type][item['_id']]['path'] = item['_path']
+                        self.ids[item_type][item['_set']][item['_id']]['path'] = item['_path']
                         break
                     else:
                         input_error(item, u"the search with '{}'='{}' get no result".format(idx, item[field]))
@@ -301,17 +301,17 @@ class PathInserter(object):
 
             # organization parent ?
             if item_type in ('organization', 'held_position') and item['_oid']:
-                if item['_oid'] not in self.ids['organization']:
+                if item['_oid'] not in self.ids['organization'][item['_set']]:
                     input_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']))
                     continue
-                item['_parent'] = self.ids['organization'][item['_oid']]['path']
+                item['_parent'] = self.ids['organization'][item['_set']][item['_oid']]['path']
                 related_title = self.portal.unrestrictedTraverse(item['_parent']).get_full_title()
             # person parent ?
             if item_type == 'held_position':
-                if item['_pid'] not in self.ids['person']:
+                if item['_pid'] not in self.ids['person'][item['_set']]:
                     input_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']))
                     continue
-                item['_parent'] = self.ids['person'][item['_pid']]['path']
+                item['_parent'] = self.ids['person'][item['_set']][item['_pid']]['path']
                 if related_title:  # position not taken into account
                     title = u'-'.join([title, related_title])
 
@@ -324,7 +324,7 @@ class PathInserter(object):
             item['_path'] = correct_path(self.portal, item['_path'])
             item['_act'] = 'new'
             # we store _path for each _id
-            self.ids[item_type][item['_id']]['path'] = item['_path']
+            self.ids[item_type][item['_set']][item['_id']]['path'] = item['_path']
             yield item
 
 

@@ -15,8 +15,15 @@ import re
 import unicodedata
 
 
+def shortcut(val):
+    shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'n', 'update': u'U'}
+    if val in shortcuts:
+        return shortcuts[val]
+    return val
+
+
 def input_error(item, msg):
-    e_logger.error(u'{}: ln {:d}, {}'.format(item['_type'], item['_ln'], msg))
+    e_logger.error(u'{:d}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type']), item['_ln'], msg))
 
 
 def get_main_path(path='', subpath=''):

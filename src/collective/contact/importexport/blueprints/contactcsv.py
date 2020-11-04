@@ -38,6 +38,7 @@ class CSVDiskSourceSection(object):
     def __iter__(self):
         for item in self.previous:
             yield item
+        yield {'set': 0}
 
 
 class CSVReaderSection(object):
@@ -59,21 +60,23 @@ class CSVReaderSection(object):
 
     def __iter__(self):
         for item in self.previous:
+            for typ in MANAGED_TYPES:
+                if self.storage['csv_files'][typ] is None:
+                    continue
+                self.storage['ids'][typ][item['set']] = {}  # we add set identifier (to differentiate multiple files)
+                for item2 in self.rows(typ, item['set']):
+                    yield item2
+            continue
             yield item
 
-        for typ in MANAGED_TYPES:
-            if self.storage['csv_files'][typ] is None:
-                continue
-            for item in self.rows(typ):
-                yield item
-
-    def rows(self, typ):
-        logger.info(u"Reading '{}' csv file".format(typ))
+    def rows(self, typ, sett):
+        logger.info(u"Reading set {:d} '{}' csv file ({})".format(sett, typ, self.storage['csv_files'][typ].name))
         reader = csv.DictReader(self.storage['csv_files'][typ], dialect=self.dialect,
                                 fieldnames=self.storage['fieldnames'][typ], restkey='_rest',
                                 restval='__NO_CO_LU_MN__', **self.fmtparam)
         for item in reader:
             item['_type'] = typ
+            item['_set'] = sett
             item['_ln'] = reader.line_num
             # check fieldnames length on first line
             if reader.line_num == 1:

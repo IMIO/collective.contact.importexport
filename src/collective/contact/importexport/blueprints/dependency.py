@@ -22,11 +22,19 @@ class DependencySorter(object):
         self.directory_path = self.storage['directory_path']
 
     def __iter__(self):
-        all_organizations = []
-        all_persons = []
-        all_held_positions = []
+        all_organizations = {}
+        all_persons = {}
+        all_held_positions = {}
         parent_relation = {}
+        sorted_orgs = {}
+
         for item in self.previous:
+            if item['_set'] not in all_organizations:
+                all_organizations[item['_set']] = []
+                all_persons[item['_set']] = []
+                all_held_positions[item['_set']] = []
+                parent_relation[item['_set']] = {}
+                sorted_orgs[item['_set']] = []
             # we set None if value is empty string
             for fld in item:
                 if item[fld] != u'' or fld.startswith('_') or fld in ('description',):
@@ -34,16 +42,17 @@ class DependencySorter(object):
                 item[fld] = None
             if item['_type'] == 'organization':
                 if item['_oid']:
-                    parent_relation[item['_id']] = item['_oid']
-                all_organizations.append(item)
+                    parent_relation[item['_set']][item['_id']] = item['_oid']
+                all_organizations[item['_set']].append(item)
             elif item['_type'] == 'person':
-                all_persons.append(item)
+                all_persons[item['_set']].append(item)
             elif item['_type'] == 'held_position':
-                all_held_positions.append(item)
+                all_held_positions[item['_set']].append(item)
 
-        for org in all_organizations:
-            org['_level'] = self.get_level(parent_relation, org['_id'])
-        sorted_organizations = sorted(all_organizations, key=lambda item: (item['_level'], item['_ln']))
+        for sett in all_organizations:
+            for org in all_organizations[sett]:
+                org['_level'] = self.get_level(parent_relation[sett], org['_id'])
+            sorted_orgs[sett] = sorted(all_organizations[sett], key=lambda itom: (itom['_level'], itom['_ln']))
 
         # updating directory options
         fields = {}
@@ -52,21 +61,22 @@ class DependencySorter(object):
                 logger.info("Contacts parameter modification 'organization_%s'" % typ)
                 fields['organization_%s' % typ] = [{'name': i[0], 'token': i[1]} for i
                                                    in self.dir_org_config[typ].items()]
-                self.dir_org_config_len[typ] = len(self.dir_org_config[typ])  # update for next files group
         if fields:
             fields['_path'] = self.directory_path
             fields['_type'] = 'directory'  # to avoid message from constructor
             fields['_act'] = 'update'
+            fields['_set'] = 'all'  # part of printing
             yield fields
 
-        for org in sorted_organizations:
-            yield org
+        for sett in sorted(all_organizations.keys()):
+            for org in sorted_orgs[sett]:
+                yield org
 
-        for pers in all_persons:
-            yield pers
+            for pers in all_persons[sett]:
+                yield pers
 
-        for pos in all_held_positions:
-            yield pos
+            for pos in all_held_positions[sett]:
+                yield pos
 
     def get_level(self, parent_relation, oid):
         return len(self.ancestors(parent_relation, oid))

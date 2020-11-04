@@ -12,8 +12,8 @@
 <value>[transmogrifier]
 pipeline =
     initialization
-#    csv_ssh_source
     csv_disk_source
+#    csv_ssh_source
     csv_reader
     common_input_checks
 #    personal input bp came here

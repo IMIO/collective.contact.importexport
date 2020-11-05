@@ -57,6 +57,7 @@ if 'app' in locals():
     app.REQUEST['PARENTS'] = [app]
     setRequest(app.REQUEST)
 
+    portal.REQUEST.set('_pipeline_commit_', commit)
     execute_pipeline(portal, pipeline_filepath)
     if commit:
         transaction.commit()

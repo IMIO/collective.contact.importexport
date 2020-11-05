@@ -39,7 +39,11 @@ if 'app' in locals():
     plone_id = sys.argv[4]
     commit = bool(int(sys.argv[5]))
     app = locals().get('app')
-    portal = app.get(plone_id)
+    # plone_id can be 'folder/plone'
+    root = app
+    for pid in plone_id.split('/'):
+        portal = root.get(pid)
+        root = portal
     setSite(portal)
     acl_users = app.acl_users
     user = acl_users.getUser('admin')

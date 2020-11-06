@@ -97,4 +97,10 @@
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 
+  <utility
+    component=".main.LastSection"
+    name="collective.contact.importexport.lastsection"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
 </configure>

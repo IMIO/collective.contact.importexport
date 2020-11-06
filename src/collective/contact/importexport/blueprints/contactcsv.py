@@ -8,7 +8,6 @@ from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
 from collective.transmogrifier.utils import Expression
 from collective.transmogrifier.utils import openFileReference
-from imio.pyutils.system import dump_var
 from imio.pyutils.system import load_var
 from imio.pyutils.system import runCommand
 from Products.CMFPlone.utils import safe_unicode
@@ -38,6 +37,7 @@ class CSVDiskSourceSection(object):
                 self.storage['csv_files'][typ] = file_
         if self.storage['csv_files']['organization'] is None and self.storage['csv_files']['person'] is None:
             raise Exception('You must specify at least organizations or persons CSV')
+        self.storage['set_lst'].update({0: {'dt': ''}})
 
     def __iter__(self):
         for item in self.previous:
@@ -68,8 +68,10 @@ class CSVSshSourceSection(object):
         scpcmd = u'scp {}@{}:{{}} {}'.format(username, servername, transfer_path)
         if not os.path.dirname(self.registry_filename):
             self.registry_filename = os.path.join(self.storage['wp'], self.registry_filename)
+        self.storage['registry_filename'] = self.registry_filename
         self.registry = {}
         load_var(self.registry_filename, self.registry)
+        self.storage['registry_dic'] = self.registry
         last_done = self.registry and max(self.registry) or ''
 
         # get files list
@@ -114,11 +116,8 @@ class CSVSshSourceSection(object):
                     self.storage['csv_files'][typ] = file_
             if self.storage['csv_files']['organization'] is None and self.storage['csv_files']['person'] is None:
                 raise Exception('You must specify at least organizations or persons CSV')
+            self.storage['set_lst'].update({j: {'dt': rec[0]}})
             yield {'set': j}
-            # TODO add some informations
-            self.registry[rec[0]] = {}
-        # dump registry
-        # dump_var(self.registry_filename, self.registry)
 
 
 class CSVReaderSection(object):
@@ -140,6 +139,8 @@ class CSVReaderSection(object):
 
     def __iter__(self):
         for item in self.previous:
+            # we update 'set_lst' for lastsection
+            self.storage['set_lst'][item['set']].update({tp: {'nb': 0, 'n': 0, 'U': 0} for tp in ('O', 'P', 'HP')})
             for typ in MANAGED_TYPES:
                 if self.storage['csv_files'][typ] is None:
                     continue

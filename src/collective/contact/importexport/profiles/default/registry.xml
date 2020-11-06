@@ -27,7 +27,9 @@ pipeline =
 #    transitions_inserter
 #    workflowupdater
 #    breakpoint
-    logger
+    short_log
+#    logger
+    lastsection
 
 # mandatory section !
 [config]
@@ -112,10 +114,16 @@ blueprint = collective.contact.importexport.transitions_inserter
 [workflowupdater]
 blueprint = plone.app.transmogrifier.workflowupdater
 
+[short_log]
+blueprint = collective.contact.importexport.short_log
+
 [logger]
 blueprint = collective.transmogrifier.sections.logger
 name = logger
 level = INFO
+
+[lastsection]
+blueprint = collective.contact.importexport.lastsection
 
 [breakpoint]
 blueprint = collective.contact.importexport.breakpoint

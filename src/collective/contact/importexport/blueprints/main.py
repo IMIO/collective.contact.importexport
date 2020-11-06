@@ -2,6 +2,7 @@
 
 from collections import OrderedDict
 from collective.contact.importexport import e_logger
+from collective.contact.importexport import logger
 from collective.contact.importexport import o_logger
 from collective.contact.importexport.utils import alphanum
 from collective.contact.importexport.utils import by3wise
@@ -10,6 +11,7 @@ from collective.contact.importexport.utils import get_country_code
 from collective.contact.importexport.utils import get_main_path
 from collective.contact.importexport.utils import input_error
 from collective.contact.importexport.utils import relative_path
+from collective.contact.importexport.utils import shortcut
 from collective.contact.importexport.utils import valid_date
 from collective.contact.importexport.utils import valid_email
 from collective.contact.importexport.utils import valid_phone
@@ -19,6 +21,7 @@ from collective.contact.importexport.utils import to_bool
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
+from imio.pyutils.system import dump_var
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from plone import api
 from Products.CMFPlone.utils import safe_unicode
@@ -59,10 +62,10 @@ class Initialization(object):
         self.storage = IAnnotations(transmogrifier).setdefault(ANNOTATION_KEY, {})
         self.storage['wp'] = self.workingpath
         self.storage['ids'] = {typ: {} for typ in MANAGED_TYPES}
-#        self.storage['uniques'] = {typ: {} for typ in MANAGED_TYPES}
         self.storage['csv_files'] = {typ: None for typ in MANAGED_TYPES}
         self.storage['fieldnames'] = {typ: transmogrifier['config'].get('{}s_fieldnames'.format(typ), '').split()
                                       for typ in MANAGED_TYPES}
+        self.storage['set_lst'] = {}  # to store set and associated date
         # find directory
         directory = None
         dir_path = transmogrifier['config'].get('directory_path', '')
@@ -146,7 +149,7 @@ class CommonInputChecks(object):
             for key in self.uniques[item_type]:
                 if item[key] in self.uniques[item_type][key]:
                     input_error(item, u"duplicated {} '{}', already present line {:d}".format(key, item[key],
-                                      self.uniques[item_type][key][item[key]]))
+                                self.uniques[item_type][key][item[key]]))
                 elif item[key]:
                     self.uniques[item_type][key][item[key]] = item['_ln']
 
@@ -340,7 +343,7 @@ class TransitionsInserter():
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.fieldnames = self.storage['fieldnames']
         for typ in MANAGED_TYPES:
-            if '_inactive' in self.fieldnames[typ] and not '_inactive' in self.storage['booleans'][typ]:
+            if '_inactive' in self.fieldnames[typ] and '_inactive' not in self.storage['booleans'][typ]:
                 raise Exception("{}: _inactive field is not configured as boolean for type {} !".format(self.name, typ))
 
     def __iter__(self):
@@ -354,4 +357,39 @@ class TransitionsInserter():
                     input_error(item, u'_inactive is False and current state is deactivated: we do not activate')
             yield item
 
-# ["{}: '{}'".format(attr, getattr(context, attr)) for attr in ('title', 'description', 'organization_type', 'use_parent_address', 'street', 'number', 'additional_address_details', 'zip_code', 'city', 'phone', 'cell_phone', 'fax', 'email', 'website', 'region', 'country')]
+
+class LastSection(object):
+    """ Last section to do things at the end of the process """
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+        self.transmogrifier = transmogrifier
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+        self.portal = transmogrifier.context
+        self.sets = self.storage['set_lst']
+
+    def __iter__(self):
+        for item in self.previous:
+            sett = item['_set']
+            if sett != 'all':
+                self.sets[sett][shortcut(item['_type'])]['nb'] += 1
+                self.sets[sett][shortcut(item['_type'])][shortcut(item['_act'])] += 1
+            yield item
+
+        # end of process
+        registry = self.storage.get('registry_dic', {})
+        for sett in sorted(self.sets):
+            o_logger.info("{}: {}".format(sett, ', '.join(["'{}' => ({})".format(tp,
+                          'nb={nb}, n={n}, U={U}'.format(**self.sets[sett][tp])) for tp in ('O', 'P', 'HP')])))
+            registry[self.sets[sett].pop('dt')] = self.sets[sett]
+        # dump registry if CSVSshSourceSection section is used
+        if 'registry_filename' in self.storage and self.transmogrifier.context.REQUEST.get('_pipeline_commit_', False):
+            if self.sets:
+                logger.info("Updating registry in '{}'".format(self.storage['registry_filename']))
+                dump_var(self.storage['registry_filename'], registry)
+
+# ["{}: '{}'".format(attr, getattr(context, attr)) for attr in ('title', 'description', 'organization_type',
+# 'use_parent_address', 'street', 'number', 'additional_address_details', 'zip_code', 'city', 'phone', 'cell_phone',
+# 'fax', 'email', 'website', 'region', 'country')]

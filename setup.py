@@ -42,6 +42,7 @@ setup(
         'collective.transmogrifier',
         'future',
         'imio.helpers',
+        'imio.pyutils',
         'ipdb',
         'phonenumbers',
         'plone.api',

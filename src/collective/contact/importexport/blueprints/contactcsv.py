@@ -61,6 +61,8 @@ class CSVSshSourceSection(object):
         files_path = safe_unicode(options.get('server_files_path', ''))
         self.registry_filename = safe_unicode(options.get('registry_filename', ''))
         transfer_path = safe_unicode(options.get('transfer_path', '')) or u'/tmp'
+        if not os.path.dirname(transfer_path):
+            transfer_path = os.path.join(self.storage['wp'], transfer_path)
         if not servername or not username or not files_path or not self.registry_filename:
             logger.error('Missing server parameters or registry in csv_ssh_source section')
             raise Exception('Missing server parameters or registry in csv_ssh_source section')

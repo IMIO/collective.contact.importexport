@@ -88,6 +88,8 @@ def get_country_code(item, countrykey, default_country, language='en'):
 def valid_zip(item, zipkey, countrycode):
     """ Check and return valid format zip """
     zipc = item[zipkey]
+    if not zipc:
+        return zipc
     if countrycode is None:
         countrycode = u'BE'
     if countrycode in ZIP_DIGIT:
@@ -101,8 +103,8 @@ def valid_zip(item, zipkey, countrycode):
             input_error(item, u"zip code col '{}' with orig value '{}' doesn't match pattern '{}', kept '{}'".format(
                               zipkey, item[zipkey], ZIP_PATTERN[countrycode].pattern, zipc))
     else:
-        input_error(item, u"can't check zip code col '{}' with value '{}', kept '{}'".format(
-                          zipkey, item[zipkey], zipc))
+        input_error(item, u"can't check zip code col '{}' for country '{}' with value '{}', kept '{}'".format(
+                          zipkey, countrycode, item[zipkey], zipc))
     return zipc
 
 

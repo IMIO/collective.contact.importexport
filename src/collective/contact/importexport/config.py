@@ -2,7 +2,8 @@
 
 import re
 
-ZIP_DIGIT = [u'BE', u'CH', u'CN', u'DE', u'DK', u'ES', u'FI', u'FR', u'HR', u'HU', u'IT', u'LV', u'LT', u'MD', u'NL', u'US']
+ZIP_DIGIT = [u'BE', u'CH', u'CN', u'DE', u'DK', u'ES', u'FI', u'FR', u'HR', u'HU', u'IT', u'LU', u'LV', u'LT', u'MD',
+             u'NL', u'US']
 ZIP_PATTERN = {
     u'BE': re.compile(r'\d{4}$'),  # 4 digits
     u'BR': re.compile(r'\d{5}-\d{3}$'),  # 5 dig - 3 dig
@@ -19,6 +20,7 @@ ZIP_PATTERN = {
     u'HR': re.compile(r'\d{5}$'),  # 5 digits
     u'HU': re.compile(r'\d{4}$'),  # 4 digits
     u'IT': re.compile(r'\d{5}$'),  # 5 digits
+    u'LU': re.compile(r'\d{4}$'),  # 4 digits
     u'LV': re.compile(r'\d{4}$'),  # 4 digits
     u'LT': re.compile(r'\d{5}$'),  # 5 digits
     u'MA': re.compile(r'\d{2} *\d{3}$'),  # 5 digits avec espace

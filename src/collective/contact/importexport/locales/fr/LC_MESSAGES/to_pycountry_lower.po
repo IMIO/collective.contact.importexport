@@ -211,6 +211,9 @@ msgstr "Cayman Islands"
 msgid "chypre"
 msgstr "Cyprus"
 
+msgid "republique tcheque"
+msgstr "Czechia"
+
 msgid "tchequie"
 msgstr "Czechia"
 

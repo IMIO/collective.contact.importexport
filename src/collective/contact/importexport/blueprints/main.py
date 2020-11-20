@@ -110,7 +110,9 @@ class CommonInputChecks(object):
         self.ids = self.storage['ids']
         self.csv_encoding = transmogrifier['config'].get('csv_encoding', 'utf8')
         self.phone_country = safe_unicode(options.get('phone_country', 'BE')).upper()
-        self.language = safe_unicode(options.get('language', 'fr')).lower()
+        self.languages = [safe_unicode(options.get('language', 'fr')).lower()]
+        if 'en' not in self.languages:
+            self.languages.append('en')
         self.uniques = {typ: {key: {} for key in safe_unicode(options.get('{}_uniques'.format(typ), '')).split()
                               if key in self.fieldnames[typ]}
                         for typ in MANAGED_TYPES}

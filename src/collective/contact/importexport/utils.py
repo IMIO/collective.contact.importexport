@@ -64,15 +64,18 @@ def alphanum(value):
     return filter(type(value).isalnum, value)
 
 
-def get_country_code(item, countrykey, default_country, language='en'):
+def get_country_code(item, countrykey, default_country, languages=['en']):
     """ Get country code """
     # get country in lower case without accent
     country = unicodedata.normalize('NFD', item[countrykey].lower()).encode('ascii', 'ignore')
     if not country:
         return None
     # get english country translation
-    tr_ctry = translate(country, domain="to_pycountry_lower", target_language=language, default=u'')
-    if tr_ctry == u'':
+    for language in languages:
+        tr_ctry = translate(country, domain="to_pycountry_lower", target_language=language, default=u'')
+        if tr_ctry != u'':
+            break
+    else:
         input_error(item, u"country col '{}' with value '{}' changed in '{}' cannot be translated: "
                           u"complete po file if necessary ?".format(countrykey, item[countrykey], country))
         return u''
@@ -95,13 +98,14 @@ def valid_zip(item, zipkey, countrycode):
     if countrycode in ZIP_DIGIT:
         zipc = digit(item[zipkey])
         if item[zipkey] != zipc:
-            input_error(item, u"zip code col '{}' contains non digit chars, orig value '{}' => '{}'".format(
-                              zipkey, item[zipkey], zipc))
+            input_error(item, u"zip code col '{}' for country '{}' contains non digit chars, orig value '{}' => "
+                              u"'{}'".format(zipkey, countrycode, [zipkey], zipc))
     if countrycode in ZIP_PATTERN:
         match = ZIP_PATTERN[countrycode].match(zipc)
         if match is None:
-            input_error(item, u"zip code col '{}' with orig value '{}' doesn't match pattern '{}', kept '{}'".format(
-                              zipkey, item[zipkey], ZIP_PATTERN[countrycode].pattern, zipc))
+            input_error(item, u"zip code col '{}' for country '{}' with value '{}' doesn't match pattern '{}', "
+                              u"kept '{}'".format(zipkey, countrycode, [zipkey],
+                                                  ZIP_PATTERN[countrycode].pattern, zipc))
     else:
         input_error(item, u"can't check zip code col '{}' for country '{}' with value '{}', kept '{}'".format(
                           zipkey, countrycode, item[zipkey], zipc))

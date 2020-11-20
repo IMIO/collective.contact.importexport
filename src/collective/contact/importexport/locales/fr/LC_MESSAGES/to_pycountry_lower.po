@@ -124,7 +124,7 @@ msgstr "Bermuda"
 msgid "bolivie"
 msgstr "Bolivia, Plurinational State of"
 
-msgid "brésil"
+msgid "bresil"
 msgstr "Brazil"
 
 msgid "barbades"
@@ -289,7 +289,7 @@ msgstr "United Kingdom"
 msgid "royaume-uni"
 msgstr "United Kingdom"
 
-msgid "Angleterre"
+msgid "angleterre"
 msgstr "United Kingdom"
 
 msgid "georgie"
@@ -583,6 +583,9 @@ msgstr "Nicaragua"
 msgid "niue"
 msgstr "Niue"
 
+msgid "hollande"
+msgstr "Netherlands"
+
 msgid "pays-bas"
 msgstr "Netherlands"
 
@@ -659,6 +662,9 @@ msgid "qatar"
 msgstr "Qatar"
 
 msgid "la reunion"
+msgstr "Réunion"
+
+msgid "reunion"
 msgstr "Réunion"
 
 msgid "roumanie"
@@ -751,16 +757,16 @@ msgstr "Sweden"
 msgid "eswatini"
 msgstr "Eswatini"
 
-msgid "saint martin (partie néerlandaise)"
+msgid "saint martin (partie neerlandaise)"
 msgstr "Sint Maarten (Dutch part)"
 
-msgid "saint-martin (partie néerlandaise)"
+msgid "saint-martin (partie neerlandaise)"
 msgstr "Sint Maarten (Dutch part)"
 
-msgid "saint martin (antilles néerlandaises)"
+msgid "saint martin (antilles neerlandaises)"
 msgstr "Sint Maarten (Dutch part)"
 
-msgid "saint-martin (antilles néerlandaises)"
+msgid "saint-martin (antilles neerlandaises)"
 msgstr "Sint Maarten (Dutch part)"
 
 msgid "seychelles"
@@ -845,6 +851,9 @@ msgid "etats unis"
 msgstr "United States"
 
 msgid "etats-unis"
+msgstr "United States"
+
+msgid "usa"
 msgstr "United States"
 
 msgid "ouzbekistan"

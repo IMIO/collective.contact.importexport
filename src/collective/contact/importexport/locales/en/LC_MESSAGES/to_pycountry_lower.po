@@ -196,6 +196,9 @@ msgstr "Cyprus"
 msgid "czechia"
 msgstr "Czechia"
 
+msgid "czech republic"
+msgstr "Czechia"
+
 msgid "germany"
 msgstr "Germany"
 

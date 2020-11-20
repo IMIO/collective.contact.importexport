@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from collective.contact.core.behaviors import InvalidEmailAddress
 from future.builtins import zip
 from collective.contact.core.behaviors import validate_email
 from collective.contact.importexport import e_logger
@@ -143,14 +143,17 @@ def valid_phone(item, phonekey, countrycode, default_country):
 
 def valid_email(item, emailkey):
     """ Check and return valid email """
-    if not item[emailkey]:
+    emailv = item[emailkey].strip(',; ')
+    if not emailv:
         return u''
+    emailv = unicodedata.normalize('NFD', emailv.lower()).encode('ascii', 'ignore')
     try:
-        validate_email(item[emailkey])
-    except:
-        input_error(item, u"email col '{}' with invalid value '{}' => kept '' value".format(emailkey, item[emailkey]))
+        validate_email(emailv)
+    except InvalidEmailAddress:
+        input_error(item, u"email col '{}' with orig value '{}' changed in '{}' => kept '' value".format(emailkey,
+                    item[emailkey], emailv))
         return u''
-    return item[emailkey]
+    return emailv
 
 
 def valid_value_in_list(item, val, lst):

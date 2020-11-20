@@ -160,7 +160,7 @@ class CommonInputChecks(object):
                 item[key] = to_bool(item, key)
 
             # check zip
-            country_code = get_country_code(item, 'country', self.phone_country, self.language)
+            country_code = get_country_code(item, 'country', self.phone_country, self.languages)
             item['zip_code'] = valid_zip(item, 'zip_code', country_code)
 
             # check phones

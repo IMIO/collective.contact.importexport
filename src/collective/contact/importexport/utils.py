@@ -99,12 +99,12 @@ def valid_zip(item, zipkey, countrycode):
         zipc = digit(item[zipkey])
         if item[zipkey] != zipc:
             input_error(item, u"zip code col '{}' for country '{}' contains non digit chars, orig value '{}' => "
-                              u"'{}'".format(zipkey, countrycode, [zipkey], zipc))
+                              u"'{}'".format(zipkey, countrycode, item[zipkey], zipc))
     if countrycode in ZIP_PATTERN:
         match = ZIP_PATTERN[countrycode].match(zipc)
         if match is None:
             input_error(item, u"zip code col '{}' for country '{}' with value '{}' doesn't match pattern '{}', "
-                              u"kept '{}'".format(zipkey, countrycode, [zipkey],
+                              u"kept '{}'".format(zipkey, countrycode, item[zipkey],
                                                   ZIP_PATTERN[countrycode].pattern, zipc))
     else:
         input_error(item, u"can't check zip code col '{}' for country '{}' with value '{}', kept '{}'".format(

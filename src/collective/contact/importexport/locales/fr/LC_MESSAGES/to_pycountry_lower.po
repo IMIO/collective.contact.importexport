@@ -166,7 +166,7 @@ msgstr "Chile"
 msgid "chine"
 msgstr "China"
 
-msgid "côte d'ivoire"
+msgid "cote d'ivoire"
 msgstr "Côte d'Ivoire"
 
 msgid "cameroun"

@@ -64,7 +64,7 @@ def alphanum(value):
     return filter(type(value).isalnum, value)
 
 
-def get_country_code(item, countrykey, default_country, languages=['en']):
+def get_country_code(item, countrykey, default_country, languages=[u'en']):
     """ Get country code """
     # get country in lower case without accent
     country = unicodedata.normalize('NFD', item[countrykey].lower()).encode('ascii', 'ignore')

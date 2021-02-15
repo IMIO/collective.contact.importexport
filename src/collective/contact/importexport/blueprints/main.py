@@ -40,7 +40,12 @@ MANAGED_TYPES = ['organization', 'person', 'held_position']
 
 
 class Initialization(object):
-    """ Initialize global variables to be used in next sections """
+    """Initializes global variables to be used in next sections.
+
+    Parameters:
+        * basepath = O, absolute directory. If empty, buildout dir will be used.
+        * subpath = O, if given, it will be appended to basepath.
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 

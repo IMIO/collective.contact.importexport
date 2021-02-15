@@ -20,7 +20,13 @@ import os
 
 
 class CSVDiskSourceSection(object):
-    """ Open disk files from filenames ans store handlers """
+    """Opens disk files from filenames and stores handlers.
+
+    Parameters:
+        * organizations_filename = O, organizations csv file path.
+        * persons_filename = O, persons csv file path.
+        * held_positions_filename = O, held positions csv file path.
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -46,7 +52,21 @@ class CSVDiskSourceSection(object):
 
 
 class CSVSshSourceSection(object):
-    """ Open disk files from filenames ans store handlers """
+    """Gets new distant files regularly uploaded with ssh.
+
+    * Lists distant files ending with .txt.
+    * Checks if basenames (YYYYMMDD-HHmm) is newer than last one done (stored in registry file).
+      Example: 20211202-0731.txt
+    * Transfers files with corresponding name YYYYMMDD-HHmm_TYPEs.csv. Example: 20211202-0731_organisations.csv.
+    * Stores handlers.
+
+    Parameters:
+        * servername = M, ssh host
+        * username = M, ssh user
+        * server_files_path = M, csv path
+        * registry_filename = M, registry filename storing treated files basenames
+        * transfer_path = O, local path to transfer files in
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -123,7 +143,15 @@ class CSVSshSourceSection(object):
 
 
 class CSVReaderSection(object):
-    """ Read as csv file handlers stored in self.storage['csv_files'][typ] """
+    """Reads, as csv, file handlers stored in self.storage['csv_files'][typ].
+
+    Works by set to treat multiple sets by order (following date basename).
+    Manual files are of set 0.
+
+    Parameters:
+        * csv_headers = O, csv header line bool. Default: True
+        * fmtparam-strict = O, raises exception on row error. Default False.
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -149,7 +177,7 @@ class CSVReaderSection(object):
                 self.storage['ids'][typ][item['set']] = {}  # we add set identifier (to differentiate multiple files)
                 for item2 in self.rows(typ, item['set']):
                     yield item2
-            continue
+            continue  # skip item containing set
             yield item
 
     def rows(self, typ, sett):

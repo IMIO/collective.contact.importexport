@@ -104,7 +104,25 @@ class Initialization(object):
 
 
 class CommonInputChecks(object):
-    """ Check input values """
+    """Checks input values.
+
+    * check uniqueness of _id
+    * check uniqueness of some fields
+    * check zip code following pattern
+    * check phone following country
+    * check email format
+    * manage organization type, enterprise_number, ...
+
+    Parameters:
+        * phone_country = O, phone country. Default: BE.
+        * language = O, country language. Default: fr.
+        * organization_uniques = O, organization fieldnames that must be uniques.
+        * organization_booleans = O, organization fieldnames that must be converted to boolean.
+        * person_uniques = O, person fieldnames that must be uniques.
+        * person_booleans = O, person fieldnames that must be converted to boolean.
+        * held_position_uniques = O, held position fieldnames that must be uniques.
+        * held_position_booleans = O, held position fieldnames that must be converted to boolean.
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 

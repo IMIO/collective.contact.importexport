@@ -434,7 +434,7 @@ class LastSection(object):
         # end of process
         registry = self.storage.get('registry_dic', {})
         for sett in sorted(self.sets):
-            o_logger.info("{}: {}".format(sett, ', '.join(["'{}' => ({})".format(tp,
+            o_logger.info("{}: {}".format(self.sets[sett]['dt'], ', '.join(["'{}' => ({})".format(tp,
                           'nb={nb}, n={n}, U={U}'.format(**self.sets[sett][tp])) for tp in ('O', 'P', 'HP')])))
             registry[self.sets[sett].pop('dt')] = self.sets[sett]
         # dump registry if CSVSshSourceSection section is used

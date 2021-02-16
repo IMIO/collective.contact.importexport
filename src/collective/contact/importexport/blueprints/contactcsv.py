@@ -8,6 +8,7 @@ from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
 from collective.transmogrifier.utils import Expression
 from collective.transmogrifier.utils import openFileReference
+from datetime import datetime
 from imio.pyutils.system import load_var
 from imio.pyutils.system import runCommand
 from Products.CMFPlone.utils import safe_unicode
@@ -43,7 +44,7 @@ class CSVDiskSourceSection(object):
                 self.storage['csv_files'][typ] = file_
         if self.storage['csv_files']['organization'] is None and self.storage['csv_files']['person'] is None:
             raise Exception('You must specify at least organizations or persons CSV')
-        self.storage['set_lst'].update({0: {'dt': ''}})
+        self.storage['set_lst'].update({0: {'dt': datetime.now().strftime('%Y%m%d-%H%M')}})
 
     def __iter__(self):
         for item in self.previous:

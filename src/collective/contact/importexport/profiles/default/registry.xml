@@ -16,12 +16,13 @@ pipeline =
 #    csv_ssh_source
     csv_reader
     common_input_checks
-#    personal input bp came here
+# personal input bp came here
     dependencysorter
     relationsinserter
     updatepathinserter
     pathinserter
     constructor
+# personal attributes bp came here
     schemaupdater
     reindexobject
 #    transitions_inserter

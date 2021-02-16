@@ -16,6 +16,11 @@ import ipdb
 
 
 class BreakpointSection(object):
+    """Stops with ipdb if condition is matched.
+
+    Parameters:
+        * condition = M, matching condition.
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -29,12 +34,13 @@ class BreakpointSection(object):
     def __iter__(self):
         for item in self.previous:
             if self.condition(item):
-#                ipdb.set_trace(sys._getframe().f_back)  # Break!
+                # ipdb.set_trace(sys._getframe().f_back)  # Break!
                 ipdb.set_trace()  # Break!
             yield item
 
 
 class ShortLog(object):
+    """Logs shortly item."""
     classProvides(ISectionBlueprint)
     implements(ISection)
 

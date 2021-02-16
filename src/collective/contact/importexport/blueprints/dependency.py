@@ -10,7 +10,12 @@ from zope.interface import implements
 
 
 class DependencySorter(object):
-    """Sorts organizations by hierarchy."""
+    """Sorts organizations by hierarchy.
+
+    * Sets to None empty values.
+    * Updates directory if necessary.
+    * yields again all items by set.
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 

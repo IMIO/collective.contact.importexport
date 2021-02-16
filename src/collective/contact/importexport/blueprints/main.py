@@ -229,7 +229,7 @@ class CommonInputChecks(object):
 
 
 class RelationsInserter(object):
-    """ Add relations between objects """
+    """Add relations between held position and organization."""
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -255,7 +255,16 @@ class RelationsInserter(object):
 
 
 class UpdatePathInserter(object):
-    """ Add _path if we have to do an element update """
+    """Add _path if we have to do an element update.
+
+    * searches existing objects following parameter, composed of tierce (field index condition)
+    * if found, set _path and _act
+
+    Arguments:
+        * organization_uniques = M, tierces related to organizations
+        * person_uniques = M, tierces related to persons
+        * held_position_uniques = M, tierces related to held positions
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -302,7 +311,16 @@ class UpdatePathInserter(object):
 
 
 class PathInserter(object):
-    """ Add _path for new element """
+    """Adds _path for new element.
+
+    * Finds parent for sub organization and held position.
+    * Defines id from parameter list (fields).
+
+    Parameters:
+        * organization_id_keys = M, organization normalized fieldnames.
+        * person_id_keys = M, person normalized fieldnames.
+        * held_position_id_keys = M, held position normalized fieldnames.
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -356,8 +374,8 @@ class PathInserter(object):
             yield item
 
 
-class TransitionsInserter():
-    """ Add _transitions following _inactive column """
+class TransitionsInserter(object):
+    """Adds _transitions following _inactive column."""
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -384,7 +402,12 @@ class TransitionsInserter():
 
 
 class LastSection(object):
-    """ Last section to do things at the end of the process """
+    """Last section to do things at the end of each item process.
+
+    * counts by type and action.
+    * logs totals.
+    * updates and dumps registry.
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 

@@ -23,7 +23,7 @@ def shortcut(val):
 
 
 def input_error(item, msg):
-    e_logger.error(u'{:d}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type']), item['_ln'], msg))
+    e_logger.error(u'{}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type']), item['_ln'], msg))
 
 
 def get_main_path(path='', subpath=''):

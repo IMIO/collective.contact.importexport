@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collective.contact.importexport import logger
+from collective.contact.importexport import o_logger
 from collective.contact.importexport.blueprints.main import ANNOTATION_KEY
 from collective.contact.importexport.blueprints.main import MANAGED_TYPES
 from collective.contact.importexport.utils import input_error
@@ -44,12 +45,15 @@ class CSVDiskSourceSection(object):
                 self.storage['csv_files'][typ] = file_
         if self.storage['csv_files']['organization'] is None and self.storage['csv_files']['person'] is None:
             raise Exception('You must specify at least organizations or persons CSV')
-        self.storage['set_lst'].update({0: {'dt': datetime.now().strftime('%Y%m%d-%H%M')}})
+        self.sett = datetime.now().strftime('%Y%m%d-%H%M')
+        if self.sett in self.storage['set_lst']:
+            raise Exception("This set '{}' is already in set list".format(self.sett))
+        self.storage['set_lst'].update({self.sett: {'mode': 'disk'}})
 
     def __iter__(self):
         for item in self.previous:
             yield item
-        yield {'set': 0}
+        yield {'set': self.sett}
 
 
 class CSVSshSourceSection(object):
@@ -139,8 +143,10 @@ class CSVSshSourceSection(object):
                     self.storage['csv_files'][typ] = file_
             if self.storage['csv_files']['organization'] is None and self.storage['csv_files']['person'] is None:
                 raise Exception('You must specify at least organizations or persons CSV')
-            self.storage['set_lst'].update({j: {'dt': rec[0]}})
-            yield {'set': j}
+            if rec[0] in self.storage['set_lst']:
+                raise Exception("This set '{}' is already in set list".format(rec[0]))
+            self.storage['set_lst'].update({rec[0]: {'mode': 'ssh'}})
+            yield {'set': rec[0]}
 
 
 class CSVReaderSection(object):
@@ -182,7 +188,7 @@ class CSVReaderSection(object):
             yield item
 
     def rows(self, typ, sett):
-        logger.info(u"Reading set {:d} '{}' csv file ({})".format(sett, typ, self.storage['csv_files'][typ].name))
+        o_logger.info(u"Reading '{}' '{}' ({})".format(sett, typ, self.storage['csv_files'][typ].name))
         reader = csv.DictReader(self.storage['csv_files'][typ], dialect=self.dialect,
                                 fieldnames=self.storage['fieldnames'][typ], restkey='_rest',
                                 restval='__NO_CO_LU_MN__', **self.fmtparam)

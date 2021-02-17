@@ -48,12 +48,11 @@ class ShortLog(object):
         self.previous = previous
         self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.sets = self.storage['set_lst']
 
     def __iter__(self):
         for item in self.previous:
-            to_print = u"{}:{},{},{}, {}".format(self.sets[item['_set']]['dt'], shortcut(item['_type']),
-                                                 item.get('_id', ''), shortcut(item['_act']), item['_path'])
+            to_print = u"{}:{},{},{}, {}".format(item['_set'], shortcut(item['_type']), item.get('_id', ''),
+                                                 shortcut(item['_act']), item['_path'])
             # print(to_print, file=sys.stderr)
             o_logger.info(to_print)
             yield item

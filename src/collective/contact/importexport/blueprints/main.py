@@ -434,12 +434,13 @@ class LastSection(object):
         # end of process
         registry = self.storage.get('registry_dic', {})
         for sett in sorted(self.sets):
-            o_logger.info("{}: {}".format(self.sets[sett]['dt'], ', '.join(["'{}' => ({})".format(tp,
+            o_logger.info("{}: {}".format(sett, ', '.join(["'{}' => ({})".format(tp,
                           'nb={nb}, n={n}, U={U}'.format(**self.sets[sett][tp])) for tp in ('O', 'P', 'HP')])))
-            registry[self.sets[sett].pop('dt')] = self.sets[sett]
+            if self.sets[sett].pop('mode') == 'ssh':
+                registry.update({sett: self.sets[sett]})
         # dump registry if CSVSshSourceSection section is used
         if 'registry_filename' in self.storage and self.transmogrifier.context.REQUEST.get('_pipeline_commit_', False):
-            if self.sets:
+            if registry:
                 logger.info("Updating registry in '{}'".format(self.storage['registry_filename']))
                 dump_var(self.storage['registry_filename'], registry)
 

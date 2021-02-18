@@ -27,8 +27,10 @@ Import and export organizations and persons with csv files, there are 4 csv file
 Features
 --------
 
-- Import flat organizations list in csv format. Text column must be enclosed with double quotes. A double quote in content must be escaped with another double quote.
-
+- Import from csv format. Text column must be enclosed with double quotes. A double quote in content must be escaped with another double quote.
+- Organizations can be hierarchical: sub organizations can be defined.
+- Held positions are linked to persons and organizations.
+- Pipeline can contain other sections to manage new columns.
 
 Examples of csv files
 ---------------------

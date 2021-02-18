@@ -201,6 +201,12 @@ def by3wise(iterable):
     return zip(a, a, a)
 
 
+def by4wise(iterable):
+    """ Returns tuples of 4 elements: s -> (s0, s1, s3, s4), (s5, s6, s7, s8) ... """
+    a = iter(iterable)
+    return zip(a, a, a, a)
+
+
 def relative_path(portal, fullpath):
     """ return relative path """
     portal_path = '/'.join(portal.getPhysicalPath())

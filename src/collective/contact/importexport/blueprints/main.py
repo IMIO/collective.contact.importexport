@@ -5,7 +5,7 @@ from collective.contact.importexport import e_logger
 from collective.contact.importexport import logger
 from collective.contact.importexport import o_logger
 from collective.contact.importexport.utils import alphanum
-from collective.contact.importexport.utils import by3wise
+from collective.contact.importexport.utils import by4wise
 from collective.contact.importexport.utils import correct_path
 from collective.contact.importexport.utils import get_country_code
 from collective.contact.importexport.utils import get_main_path
@@ -262,13 +262,13 @@ class RelationsInserter(object):
 class UpdatePathInserter(object):
     """Add _path if we have to do an element update.
 
-    * searches existing objects following parameter, composed of tierce (field index condition)
+    * searches existing objects following parameter, composed of quartet (field index item-condition must-exist)
     * if found, set _path and _act
 
     Arguments:
-        * organization_uniques = M, tierces related to organizations
-        * person_uniques = M, tierces related to persons
-        * held_position_uniques = M, tierces related to held positions
+        * organization_uniques = M, quartets related to organizations
+        * person_uniques = M, quartets related to persons
+        * held_position_uniques = M, quartets related to held positions
     """
     classProvides(ISectionBlueprint)
     implements(ISection)
@@ -286,10 +286,11 @@ class UpdatePathInserter(object):
         self.uniques = {}
         for typ in MANAGED_TYPES:
             values = safe_unicode(options.get('{}_uniques'.format(typ), '')).strip().split()
-            if len(values) % 3:
-                raise Exception("The '{}' section '{}' option must contain a multiple of 3 elements".format(name,
+            if len(values) % 4:
+                raise Exception("The '{}' section '{}' option must contain a multiple of 4 elements".format(name,
                                 '{}_uniques'.format(typ)))
-            self.uniques[typ] = [(f, i, Condition(c, transmogrifier, name, options)) for f, i, c in by3wise(values)]
+            self.uniques[typ] = [(f, i, Condition(c, transmogrifier, name, options),
+                                  Condition(e, transmogrifier, name, options)) for f, i, c, e in by4wise(values)]
 
     def __iter__(self):
         for item in self.previous:
@@ -298,11 +299,11 @@ class UpdatePathInserter(object):
                 continue
             item_type = item['_type']
             # we will do a search for each index
-            for field, idx, condition in self.uniques[item_type]:
+            for field, idx, condition, must_exist in self.uniques[item_type]:
                 if item[field] and condition(item):
                     brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
                     if len(brains) > 1:
-                        input_error(item, u"the search with '{}'='{}' get multiple objs: {}".format(
+                        input_error(item, u"the search with '{}'='{}' gets multiple objs: {}".format(
                             idx, item[field], u', '.join([b.getPath() for b in brains])))
                     elif len(brains):
                         item['_path'] = relative_path(self.portal, brains[0].getPath())
@@ -310,8 +311,8 @@ class UpdatePathInserter(object):
                         # we store _path for each _id
                         self.ids[item_type][item['_set']][item['_id']]['path'] = item['_path']
                         break
-                    else:
-                        input_error(item, u"the search with '{}'='{}' get no result".format(idx, item[field]))
+                    elif must_exist(item):
+                        input_error(item, u"the search with '{}'='{}' doesn't get any result".format(idx, item[field]))
             yield item
 
 

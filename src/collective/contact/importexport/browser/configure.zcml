@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    i18n_domain="collective.contact.importexport">
+
+    <browser:view
+        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        name="execute-contact-pipeline"
+        class=".views.ExecutePipeline"
+        layer="collective.contact.importexport.interfaces.ICollectiveContactImportexportLayer"
+        permission="cmf.ManagePortal" />
+
+</configure>

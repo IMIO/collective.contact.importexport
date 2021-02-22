@@ -7,6 +7,8 @@ Changelog
 
 - Full rewrite, using transmogrifier to import contacts.
   [laulaz, sgeulette]
+- Added view to execute pipeline
+  [sgeulette]
 - 0.x branch has been created for previous code.
   [laulaz]
 

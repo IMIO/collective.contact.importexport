@@ -14,6 +14,7 @@
   <include package="transmogrify.dexterity" />
 
   <include package=".blueprints" />
+  <include package=".browser" />
 
   <!-- We use DefaultDeserializer in place of ObjectDeserializer for IMasterSelectBoolField -->
   <adapter for="plone.formwidget.masterselect.interfaces.IMasterSelectBoolField"

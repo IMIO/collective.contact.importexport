@@ -435,8 +435,11 @@ class LastSection(object):
         # end of process
         registry = self.storage.get('registry_dic', {})
         for sett in sorted(self.sets):
-            o_logger.info("{}: {}".format(sett, ', '.join(["'{}' => ({})".format(tp,
-                          'nb={nb}, n={n}, U={U}'.format(**self.sets[sett][tp])) for tp in ('O', 'P', 'HP')])))
+            # TODO stores msg in plone ?
+            # TODO add errors count ?
+            msg = "{}: {}".format(sett, ', '.join(["'{}' => ({})".format(tp,
+                                  'nb={nb}, n={n}, U={U}'.format(**self.sets[sett][tp])) for tp in ('O', 'P', 'HP')]))
+            o_logger.info(msg)
             if self.sets[sett].pop('mode') == 'ssh':
                 registry.update({sett: self.sets[sett]})
         # dump registry if CSVSshSourceSection section is used
@@ -444,7 +447,3 @@ class LastSection(object):
             if registry:
                 logger.info("Updating registry in '{}'".format(self.storage['registry_filename']))
                 dump_var(self.storage['registry_filename'], registry)
-
-# ["{}: '{}'".format(attr, getattr(context, attr)) for attr in ('title', 'description', 'organization_type',
-# 'use_parent_address', 'street', 'number', 'additional_address_details', 'zip_code', 'city', 'phone', 'cell_phone',
-# 'fax', 'email', 'website', 'region', 'country')]

@@ -397,6 +397,9 @@ class TransitionsInserter(object):
 
     def __iter__(self):
         for item in self.previous:
+            if '_path' not in item:
+                yield item
+                continue
             if '_inactive' in item:
                 obj = self.portal.unrestrictedTraverse(item['_path'], default=None)
                 state = api.content.get_state(obj=obj)

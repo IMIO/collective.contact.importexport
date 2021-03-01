@@ -56,3 +56,26 @@ class ShortLog(object):
             # print(to_print, file=sys.stderr)
             o_logger.info(to_print)
             yield item
+
+
+class StopSection(object):
+    """Stops if condition is matched.
+
+    Parameters:
+        * condition = M, matching condition.
+    """
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        condition = options['condition']
+        self.condition = Condition(condition, transmogrifier, name, options)
+        self.previous = previous
+        self.transmogrifier = transmogrifier
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+
+    def __iter__(self):
+        for item in self.previous:
+            if self.condition(item):
+                raise Exception('STOP requested')
+            yield item

@@ -74,6 +74,19 @@
     />
 
   <utility
+    component=".various.StopSection"
+    name="collective.contact.importexport.stop"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
+    component=".main.LastSection"
+    name="collective.contact.importexport.lastsection"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <!-- Test purpose -->
+  <utility
     component=".bp_test.Source1"
     name="collective.contact.importexport.source1"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
@@ -94,12 +107,6 @@
   <utility
     component=".bp_test.Constructor2"
     name="collective.contact.importexport.constructor2"
-    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
-    />
-
-  <utility
-    component=".main.LastSection"
-    name="collective.contact.importexport.lastsection"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"
     />
 

@@ -19,6 +19,7 @@ pipeline =
 # personal input bp came here
     dependencysorter
     relationsinserter
+#    stop
     updatepathinserter
     pathinserter
     constructor
@@ -125,6 +126,10 @@ level = INFO
 
 [lastsection]
 blueprint = collective.contact.importexport.lastsection
+
+[stop]
+blueprint = collective.contact.importexport.stop
+condition = python:True
 
 [breakpoint]
 blueprint = collective.contact.importexport.breakpoint

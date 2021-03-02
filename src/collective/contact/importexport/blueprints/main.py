@@ -306,6 +306,7 @@ class UpdatePathInserter(object):
                 if item[field] and condition(item):
                     if field == 'internal_number' and idx == 'internal_number' and not self.cbin_beh[item_type]:
                         input_error(item, u"the internalnumber behavior is not defined on type {}".format(item_type))
+                        continue
                     brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
                     if len(brains) > 1:
                         input_error(item, u"the search with '{}'='{}' gets multiple objs: {}".format(

@@ -281,9 +281,9 @@ class UpdatePathInserter(object):
         self.ids = self.storage['ids']
         # we add in options the following information, used in imio.dms.mail context
         cbin = self.portal.portal_quickinstaller.isProductInstalled('collective.behavior.internalnumber')
-        # TODO : MUST CHECK IF BEHAVIOR IS WELL ADDED ON PORTAL_TYPE !!
         options['cbin'] = str(cbin)
         self.uniques = {}
+        self.cbin_beh = {}
         for typ in MANAGED_TYPES:
             values = safe_unicode(options.get('{}_uniques'.format(typ), '')).strip().split()
             if len(values) % 4:
@@ -291,6 +291,9 @@ class UpdatePathInserter(object):
                                 '{}_uniques'.format(typ)))
             self.uniques[typ] = [(f, i, Condition(c, transmogrifier, name, options),
                                   Condition(e, transmogrifier, name, options)) for f, i, c, e in by4wise(values)]
+            typ_fti = getattr(self.portal.portal_types, typ)
+            self.cbin_beh[typ] = 'collective.behavior.internalnumber.behavior.IInternalNumberBehavior' in \
+                                 typ_fti.behaviors
 
     def __iter__(self):
         for item in self.previous:
@@ -301,6 +304,8 @@ class UpdatePathInserter(object):
             # we will do a search for each index
             for field, idx, condition, must_exist in self.uniques[item_type]:
                 if item[field] and condition(item):
+                    if field == 'internal_number' and idx == 'internal_number' and not self.cbin_beh[item_type]:
+                        input_error(item, u"the internalnumber behavior is not defined on type {}".format(item_type))
                     brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
                     if len(brains) > 1:
                         input_error(item, u"the search with '{}'='{}' gets multiple objs: {}".format(

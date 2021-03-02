@@ -160,6 +160,7 @@ class CSVReaderSection(object):
     Parameters:
         * csv_headers = O, csv header line bool. Default: True
         * fmtparam-strict = O, raises exception on row error. Default False.
+        * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
     classProvides(ISectionBlueprint)
     implements(ISection)
@@ -170,6 +171,7 @@ class CSVReaderSection(object):
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.csv_headers = Condition(options.get('csv_headers', 'python:True'), transmogrifier, name, options)
         self.dialect = safe_unicode(options.get('dialect', 'excel'))
+        self.roe = bool(int(options.get('raise_on_error', '1')))
         self.fmtparam = dict(
             (key[len('fmtparam-'):],
              Expression(value, transmogrifier, name, options)(
@@ -204,10 +206,15 @@ class CSVReaderSection(object):
                 reader.restval = u''
                 if '_rest' in item:
                     input_error(item, u'STOPPING: some columns are not defined in fieldnames: {}'.format(item['_rest']))
+                    if self.roe:
+                        raise Exception(u'Some columns for {} are not defined in fieldnames: {}'.format(typ,
+                                                                                                        item['_rest']))
                     break
                 extra_cols = [key for (key, val) in item.items() if val == '__NO_CO_LU_MN__']
                 if extra_cols:
                     input_error(item, u'STOPPING: to much columns defined in fieldnames: {}'.format(extra_cols))
+                    if self.roe:
+                        raise Exception(u'To much columns for {} defined in fieldnames: {}'.format(typ, extra_cols))
                     break
                 # pass headers if any
                 if self.csv_headers:

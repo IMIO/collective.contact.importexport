@@ -127,6 +127,7 @@ class CommonInputChecks(object):
         * person_booleans = O, person fieldnames that must be converted to boolean.
         * held_position_uniques = O, held position fieldnames that must be uniques.
         * held_position_booleans = O, held position fieldnames that must be converted to boolean.
+        * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
     classProvides(ISectionBlueprint)
     implements(ISection)
@@ -150,6 +151,7 @@ class CommonInputChecks(object):
         self.storage['booleans'] = self.booleans
         self.dir_org_config = self.storage['dir_org_config']
         self.directory_path = self.storage['directory_path']
+        self.roe = bool(int(options.get('raise_on_error', '1')))
 
     def __iter__(self):
         idnormalizer = getUtility(IIDNormalizer)
@@ -169,10 +171,14 @@ class CommonInputChecks(object):
             # duplicated _id ?
             if not item['_id']:
                 input_error(item, u"SKIPPING: missing id '_id'")
+                if self.roe:
+                    raise Exception(u'Missing id ! See log...')
                 continue
             if item['_id'] in self.ids[item_type][item['_set']]:
-                input_error(item, u"duplicated id '{}', already present line {}".format(item['_id'],
+                input_error(item, u"SKIPPING: duplicated id '{}', already present line {}".format(item['_id'],
                             self.ids[item_type][item['_set']][item['_id']]['ln']))
+                if self.roe:
+                    raise Exception(u'Duplicated id ! See log...')
             self.ids[item_type][item['_set']][item['_id']] = {'path': '', 'ln': item['_ln']}
 
             # uniqueness
@@ -202,6 +208,8 @@ class CommonInputChecks(object):
             if item_type == 'organization':
                 if item['_id'] == item['_oid']:
                     input_error(item, u'SKIPPING: _oid is equal to _id {}'.format(item['_id']))
+                    if self.roe:
+                        raise Exception(u'Inconsistent _oid ! See log...')
                     continue
                 # keep only alphanum chars
                 if 'enterprise_number' in item and item['enterprise_number']:
@@ -225,16 +233,24 @@ class CommonInputChecks(object):
                 item['end_date'] = valid_date(item, item['end_date'])
                 if not item['_pid']:
                     input_error(item, u"SKIPPING: missing related person id")
+                    if self.roe:
+                        raise Exception(u'Missing _pid ! See log...')
                     continue
                 if not item['_oid'] and not item['_fid']:
                     input_error(item, u"SKIPPING: missing organization/position id")
+                    if self.roe:
+                        raise Exception(u'Missing _oid/_fid ! See log...')
                     continue
 
             yield item
 
 
 class RelationsInserter(object):
-    """Add relations between held position and organization."""
+    """Add relations between held position and organization.
+
+    Parameters:
+        * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
+    """
     classProvides(ISectionBlueprint)
     implements(ISection)
 
@@ -244,6 +260,7 @@ class RelationsInserter(object):
         self.catalog = self.portal.portal_catalog
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.ids = self.storage['ids']
+        self.roe = bool(int(options.get('raise_on_error', '1')))
 
     def __iter__(self):
         intids = getUtility(IIntIds)
@@ -252,6 +269,8 @@ class RelationsInserter(object):
             if item_type == 'held_position':
                 if item['_oid'] and item['_oid'] not in self.ids['organization'][item['_set']]:
                     input_error(item, u"SKIPPING: invalid related organization id '{}'".format(item['_oid']))
+                    if self.roe:
+                        raise Exception(u'Cannot find _oid ! See log...')
                     continue
                 # not using _pid yet
                 org = self.portal.unrestrictedTraverse(self.ids['organization'][item['_set']][item['_oid']]['path'])
@@ -269,6 +288,7 @@ class UpdatePathInserter(object):
         * organization_uniques = M, quartets related to organizations
         * person_uniques = M, quartets related to persons
         * held_position_uniques = M, quartets related to held positions
+        * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
     classProvides(ISectionBlueprint)
     implements(ISection)
@@ -294,6 +314,7 @@ class UpdatePathInserter(object):
             typ_fti = getattr(self.portal.portal_types, typ)
             self.cbin_beh[typ] = 'collective.behavior.internalnumber.behavior.IInternalNumberBehavior' in \
                                  typ_fti.behaviors
+        self.roe = bool(int(options.get('raise_on_error', '1')))
 
     def __iter__(self):
         for item in self.previous:
@@ -306,12 +327,16 @@ class UpdatePathInserter(object):
                 if item[field] and condition(item):
                     if field == 'internal_number' and idx == 'internal_number' and not self.cbin_beh[item_type]:
                         input_error(item, u"the internalnumber behavior is not defined on type {}".format(item_type))
+                        if self.roe:
+                            raise Exception(u'The internalnumber behavior is not defined on type {}".format(item_type)')
                         continue
                     brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
                     if len(brains) > 1:
                         input_error(item, u"the search with '{}'='{}' gets multiple objs: {}".format(
                             idx, item[field], u', '.join([b.getPath() for b in brains])))
-                        # TODO raises
+                        if self.roe:
+                            raise Exception(u'Too more results ! See log...')
+                        continue
                     elif len(brains):
                         item['_path'] = relative_path(self.portal, brains[0].getPath())
                         item['_act'] = 'update'
@@ -320,6 +345,8 @@ class UpdatePathInserter(object):
                         break
                     elif must_exist(item):
                         input_error(item, u"the search with '{}'='{}' doesn't get any result".format(idx, item[field]))
+                        if self.roe:
+                            raise Exception(u'Must find something ! See log...')
             yield item
 
 
@@ -333,6 +360,7 @@ class PathInserter(object):
         * organization_id_keys = M, organization normalized fieldnames.
         * person_id_keys = M, person normalized fieldnames.
         * held_position_id_keys = M, held position normalized fieldnames.
+        * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
     classProvides(ISectionBlueprint)
     implements(ISection)
@@ -347,6 +375,7 @@ class PathInserter(object):
         self.id_keys = {typ: [key for key in safe_unicode(options.get('{}_id_keys'.format(typ), '')).split()
                               if key in self.fieldnames[typ]]
                         for typ in MANAGED_TYPES}
+        self.roe = bool(int(options.get('raise_on_error', '1')))
 
     def __iter__(self):
         idnormalizer = getUtility(IIDNormalizer)
@@ -362,6 +391,8 @@ class PathInserter(object):
             if item_type in ('organization', 'held_position') and item['_oid']:
                 if item['_oid'] not in self.ids['organization'][item['_set']]:
                     input_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']))
+                    if self.roe:
+                        raise Exception(u'Cannot find parent ! See log...')
                     continue
                 item['_parent'] = self.ids['organization'][item['_set']][item['_oid']]['path']
                 related_title = self.portal.unrestrictedTraverse(item['_parent']).get_full_title()
@@ -369,6 +400,8 @@ class PathInserter(object):
             if item_type == 'held_position':
                 if item['_pid'] not in self.ids['person'][item['_set']]:
                     input_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']))
+                    if self.roe:
+                        raise Exception(u'Cannot find related person ! See log...')
                     continue
                 item['_parent'] = self.ids['person'][item['_set']][item['_pid']]['path']
                 if related_title:  # position not taken into account
@@ -376,6 +409,8 @@ class PathInserter(object):
 
             if not title:
                 input_error(item, u'cannot get an id from id keys {}'.format(self.id_keys[item_type]))
+                if self.roe:
+                    raise Exception(u'No title ! See log...')
                 continue
             new_id = idnormalizer.normalize(title)
             item['_path'] = '/'.join([item['_parent'], new_id])

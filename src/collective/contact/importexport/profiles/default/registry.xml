@@ -44,6 +44,7 @@ persons_filename = persons-test.csv
 persons_fieldnames = _id lastname firstname gender person_title birthday use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
 held_positions_filename = heldpositions-test.csv
 held_positions_fieldnames = _id _pid _oid _fid label start_date end_date use_parent_address street number additional_address_details zip_code city phone cell_phone fax email website region country _uid
+raise_on_error = 1
 
 [initialization]
 blueprint = collective.contact.importexport.init
@@ -70,6 +71,7 @@ held_positions_filename = ${config:held_positions_filename}
 blueprint = collective.contact.importexport.csv_reader
 fmtparam-strict = python:True
 csv_headers = python:True
+raise_on_error = ${config:raise_on_error}
 
 [common_input_checks]
 blueprint = collective.contact.importexport.common_input_checks
@@ -81,12 +83,14 @@ person_uniques = _uid
 person_booleans = use_parent_address
 held_position_uniques = _uid
 held_position_booleans = use_parent_address
+raise_on_error = ${config:raise_on_error}
 
 [dependencysorter]
 blueprint = collective.contact.importexport.dependencysorter
 
 [relationsinserter]
 blueprint = collective.contact.importexport.relationsinserter
+raise_on_error = ${config:raise_on_error}
 
 [updatepathinserter]
 blueprint = collective.contact.importexport.updatepathinserter
@@ -94,12 +98,14 @@ blueprint = collective.contact.importexport.updatepathinserter
 organization_uniques = _uid UID python:True python:True
 person_uniques = _uid UID python:True python:True
 held_position_uniques = _uid UID python:True python:True
+raise_on_error = ${config:raise_on_error}
 
 [pathinserter]
 blueprint = collective.contact.importexport.pathinserter
 organization_id_keys = title
 person_id_keys = firstname lastname
 held_position_id_keys = label
+raise_on_error = ${config:raise_on_error}
 
 [constructor]
 blueprint = collective.transmogrifier.sections.constructor

@@ -39,7 +39,8 @@ class CSVDiskSourceSection(object):
         for typ in MANAGED_TYPES:
             filename = safe_unicode(options.get('{}s_filename'.format(typ), ''))
             if filename:
-                # TODO add path if necessary
+                if not filename.startswith('/'):
+                    filename = os.path.join(self.storage['wp'], filename)
                 file_ = openFileReference(transmogrifier, filename)
                 if file_ is None:
                     raise Exception("Cannot open file '{}'".format(filename))

@@ -16,7 +16,8 @@ import unicodedata
 
 
 def shortcut(val):
-    shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'n', 'update': u'U'}
+    shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'n', 'update': u'U',
+                 'delete': u'D'}
     if val in shortcuts:
         return shortcuts[val]
     return val

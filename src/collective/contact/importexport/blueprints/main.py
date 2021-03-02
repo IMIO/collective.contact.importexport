@@ -305,6 +305,7 @@ class UpdatePathInserter(object):
                     if len(brains) > 1:
                         input_error(item, u"the search with '{}'='{}' gets multiple objs: {}".format(
                             idx, item[field], u', '.join([b.getPath() for b in brains])))
+                        # TODO raises
                     elif len(brains):
                         item['_path'] = relative_path(self.portal, brains[0].getPath())
                         item['_act'] = 'update'
@@ -441,7 +442,8 @@ class LastSection(object):
             # TODO stores msg in plone ?
             # TODO add errors count ?
             msg = "{}: {}".format(sett, ', '.join(["'{}' => ({})".format(tp,
-                                  'nb={nb}, n={n}, U={U}'.format(**self.sets[sett][tp])) for tp in ('O', 'P', 'HP')]))
+                                  'nb={nb}, n={n}, U={U}, D={D}'.format(**self.sets[sett][tp]))
+                                                                        for tp in ('O', 'P', 'HP')]))
             o_logger.info(msg)
             if self.sets[sett].pop('mode') == 'ssh':
                 registry.update({sett: self.sets[sett]})

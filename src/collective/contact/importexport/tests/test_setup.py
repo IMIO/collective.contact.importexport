@@ -21,6 +21,12 @@ class TestSetup(unittest.TestCase):
         self.assertTrue(self.installer.isProductInstalled(
             'collective.contact.importexport'))
 
+    def test_registry(self):
+        """Test if registry record is defined."""
+        value = api.portal.get_registry_record('collective.contact.importexport.interfaces.IPipelineConfiguration.'
+                                               'pipeline')
+        self.assertIn(u'transmogrifier', value)
+
     def test_browserlayer(self):
         """Test that ICollectiveContactImportexportLayer is registered."""
         from collective.contact.importexport.interfaces import (

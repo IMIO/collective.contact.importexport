@@ -10,6 +10,8 @@ logger = logging.getLogger('collective.contact.importexport')
 
 
 def modified_pipeline(obj, event):
+    if event.record.__name__ != 'collective.contact.importexport.interfaces.IPipelineConfiguration.pipeline':
+        return
     if IRecordModifiedEvent.providedBy(event) and event.oldValue == event.newValue:
         return
     if not hasattr(event, 'newValue'):

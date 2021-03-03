@@ -18,6 +18,8 @@ def modified_pipeline(obj, event):
         new_val = event.record.value
     else:
         new_val = event.newValue
+    if new_val is None:
+        return
     path = get_main_path()
     pipeline_path = os.path.join(path, 'pipeline.cfg')
     fd = open(pipeline_path, 'w')

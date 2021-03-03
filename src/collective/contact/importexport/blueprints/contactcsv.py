@@ -181,7 +181,7 @@ class CSVReaderSection(object):
     def __iter__(self):
         for item in self.previous:
             # we update 'set_lst' for lastsection
-            self.storage['set_lst'][item['set']].update({tp: {'nb': 0, 'n': 0, 'U': 0, 'D': 0}
+            self.storage['set_lst'][item['set']].update({tp: {'nb': 0, 'N': 0, 'U': 0, 'D': 0, 'e': 0}
                                                          for tp in ('O', 'P', 'HP')})
             for typ in MANAGED_TYPES:
                 if self.storage['csv_files'][typ] is None:

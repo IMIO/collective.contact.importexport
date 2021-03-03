@@ -492,16 +492,20 @@ class LastSection(object):
             if sett != 'all':
                 self.sets[sett][shortcut(item['_type'])]['nb'] += 1
                 self.sets[sett][shortcut(item['_type'])][shortcut(item['_act'])] += 1
+                if '_error' in item:
+                    self.sets[sett][shortcut(item['_type'])]['e'] += 1
             yield item
 
         # end of process
         registry = self.storage.get('registry_dic', {})
         to_send = [u'Summary of contact import:']
+        errors = 0
         for sett in sorted(self.sets):
-            msg = u"{}: {}".format(sett, u', '.join([u"'{}' => ({})".format(tp,
-                                   u'nb={nb}, N={n}, U={U}, D={D}'.format(**self.sets[sett][tp]))
-                                                                          for tp in ('O', 'P', 'HP')
-                                                                          if self.sets[sett][tp]['nb']]))
+            msg = u"{}: {}".format(sett, u', '.join([u"'{}' => ({})".format(tp, u'nb={nb}, N={N}, U={U}, D={D}, '
+                                                                                u'e={e}'.format(**self.sets[sett][tp]))
+                                                     for tp in ('O', 'P', 'HP')
+                                                     if self.sets[sett][tp]['nb']]))
+            errors += sum([self.sets[sett][tp]['e'] for tp in ('O', 'P', 'HP')])
             o_logger.info(msg)
             to_send.append(msg)
             if self.sets[sett].pop('mode') == 'ssh':
@@ -511,5 +515,7 @@ class LastSection(object):
             if registry:
                 logger.info("Updating registry in '{}'".format(self.storage['registry_filename']))
                 dump_var(self.storage['registry_filename'], registry)
+        if errors:
+            to_send.append(u'\nCheck log file because there are {} items in error !'.format(errors))
         if self.send_mail:
             send_report(self.portal, to_send)

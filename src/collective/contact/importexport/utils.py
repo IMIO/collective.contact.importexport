@@ -22,7 +22,7 @@ import unicodedata
 
 
 def shortcut(val):
-    shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'n', 'update': u'U',
+    shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'N', 'update': u'U',
                  'delete': u'D'}
     if val in shortcuts:
         return shortcuts[val]
@@ -31,6 +31,7 @@ def shortcut(val):
 
 def log_error(item, msg, level='error'):
     getattr(e_logger, level)(u'{}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type']), item['_ln'], msg))
+    item['_error'] = True
 
 
 def get_main_path(path='', subpath=''):
@@ -225,7 +226,7 @@ def send_report(portal, lines):
     emails = api.portal.get_registry_record('collective.contact.importexport.interfaces.IPipelineConfiguration.emails')
     if not emails:
         return
-    msg = create_html_email(u'\n'.join(lines))
+    msg = create_html_email(u'\n'.join([u'<p>{}</p>'.format(line) for line in lines]))
     annot = IAnnotations(portal).get(ANNOTATION_KEY)
     for filename in ('ie_input_errors.log', 'ie_shortlog.log'):
         path = os.path.join(annot['wp'], filename)

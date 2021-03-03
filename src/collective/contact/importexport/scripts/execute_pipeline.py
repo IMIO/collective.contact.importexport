@@ -4,6 +4,7 @@ from AccessControl.SecurityManagement import newSecurityManager
 from collective.contact.importexport import logger
 from collective.transmogrifier.transmogrifier import configuration_registry
 from collective.transmogrifier.transmogrifier import Transmogrifier
+from imio.helpers.security import setup_logger
 from Testing import makerequest
 from zope.component.hooks import setSite
 from zope.globalrequest import setRequest
@@ -56,6 +57,8 @@ if 'app' in locals():
     # support plone.subrequest
     app.REQUEST['PARENTS'] = [app]
     setRequest(app.REQUEST)
+    # can be used to increase temporary run verbosity
+    # setup_logger(20)
 
     portal.REQUEST.set('_pipeline_commit_', commit)
     execute_pipeline(portal, pipeline_filepath)

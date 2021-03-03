@@ -54,19 +54,24 @@ class Initialization(object):
         self.workingpath = get_main_path(safe_unicode(options.get('basepath', '')),
                                          safe_unicode(options.get('subpath', '')))
         self.portal = transmogrifier.context
-        pipe_commit = transmogrifier.context.REQUEST.get('_pipeline_commit_', False)
-        if pipe_commit:
-            efh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors_commit.log'), mode='a')
-            ofh = logging.FileHandler(os.path.join(self.workingpath, 'ie_shortlog_commit.log'), mode='a')
-        else:
-            efh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors.log'), mode='w')
-            ofh = logging.FileHandler(os.path.join(self.workingpath, 'ie_shortlog.log'), mode='w')
+        efh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors.log'), mode='w')
         efh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         efh.setLevel(logging.INFO)
         e_logger.addHandler(efh)
+        ofh = logging.FileHandler(os.path.join(self.workingpath, 'ie_shortlog.log'), mode='w')
         ofh.setFormatter(logging.Formatter('%(message)s'))
         ofh.setLevel(logging.INFO)
         o_logger.addHandler(ofh)
+        pipe_commit = transmogrifier.context.REQUEST.get('_pipeline_commit_', False)
+        if pipe_commit:
+            ecfh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors_commit.log'), mode='a')
+            ecfh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+            ecfh.setLevel(logging.INFO)
+            e_logger.addHandler(ecfh)
+            ocfh = logging.FileHandler(os.path.join(self.workingpath, 'ie_shortlog_commit.log'), mode='a')
+            ocfh.setFormatter(logging.Formatter('%(message)s'))
+            ocfh.setLevel(logging.INFO)
+            o_logger.addHandler(ocfh)
 
         # set global variables in annotation
         self.storage = IAnnotations(transmogrifier).setdefault(ANNOTATION_KEY, {})

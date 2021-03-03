@@ -23,8 +23,8 @@ def shortcut(val):
     return val
 
 
-def input_error(item, msg):
-    e_logger.error(u'{}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type']), item['_ln'], msg))
+def log_error(item, msg, level='error'):
+    getattr(e_logger, level)(u'{}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type']), item['_ln'], msg))
 
 
 def get_main_path(path='', subpath=''):
@@ -50,8 +50,8 @@ def get_main_path(path='', subpath=''):
 def to_bool(item, key):
     try:
         return bool(int(item[key] or 0))
-    except:
-        input_error(item, u"Cannot change '{}' key value '{}' to bool".format(key, item[key]))
+    except Exception:
+        log_error(item, u"Cannot change '{}' key value '{}' to bool".format(key, item[key]))
     return False
 
 
@@ -65,7 +65,7 @@ def alphanum(value):
     return filter(type(value).isalnum, value)
 
 
-def get_country_code(item, countrykey, default_country, languages=[u'en']):
+def get_country_code(item, countrykey, default_country, languages=(u'en', )):
     """ Get country code """
     # get country in lower case without accent
     country = unicodedata.normalize('NFD', item[countrykey].lower()).encode('ascii', 'ignore')
@@ -77,13 +77,13 @@ def get_country_code(item, countrykey, default_country, languages=[u'en']):
         if tr_ctry != u'':
             break
     else:
-        input_error(item, u"country col '{}' with value '{}' changed in '{}' cannot be translated: "
-                          u"complete po file if necessary ?".format(countrykey, item[countrykey], country))
+        log_error(item, u"country col '{}' with value '{}' changed in '{}' cannot be translated: "
+                        u"complete po file if necessary ?".format(countrykey, item[countrykey], country))
         return u''
     # get alpha2 country
     entry = pycountry.countries.get(name=tr_ctry)
     if entry is None:
-        input_error(item, u"country col '{}' with value '{}' translated in '{}' cannot be found".format(
+        log_error(item, u"country col '{}' with value '{}' translated in '{}' cannot be found".format(
             countrykey, item[countrykey], tr_ctry))
         return u''
     return entry.alpha_2
@@ -99,16 +99,16 @@ def valid_zip(item, zipkey, countrycode):
     if countrycode in ZIP_DIGIT:
         zipc = digit(item[zipkey])
         if item[zipkey] != zipc:
-            input_error(item, u"zip code col '{}' for country '{}' contains non digit chars, orig value '{}' => "
-                              u"'{}'".format(zipkey, countrycode, item[zipkey], zipc))
+            log_error(item, u"zip code col '{}' for country '{}' contains non digit chars, orig value '{}' => "
+                            u"'{}'".format(zipkey, countrycode, item[zipkey], zipc))
     if countrycode in ZIP_PATTERN:
         match = ZIP_PATTERN[countrycode].match(zipc)
         if match is None:
-            input_error(item, u"zip code col '{}' for country '{}' with value '{}' doesn't match pattern '{}', "
-                              u"kept '{}'".format(zipkey, countrycode, item[zipkey],
-                                                  ZIP_PATTERN[countrycode].pattern, zipc))
+            log_error(item, u"zip code col '{}' for country '{}' with value '{}' doesn't match pattern '{}', "
+                            u"kept '{}'".format(zipkey, countrycode, item[zipkey],
+                                                ZIP_PATTERN[countrycode].pattern, zipc))
     else:
-        input_error(item, u"can't check zip code col '{}' for country '{}' with value '{}', kept '{}'".format(
+        log_error(item, u"can't check zip code col '{}' for country '{}' with value '{}', kept '{}'".format(
                           zipkey, countrycode, item[zipkey], zipc))
     return zipc
 
@@ -119,7 +119,7 @@ def valid_phone(item, phonekey, countrycode, default_country):
     if not phone:
         return phone
     if countrycode == u'':  # problem converting non empty country
-        input_error(item, u"can't check phone col '{}' with value '{}', kept ''".format(
+        log_error(item, u"can't check phone col '{}' with value '{}', kept ''".format(
                           phonekey, item[phonekey]))
         return u''
     countries = [default_country]
@@ -133,12 +133,12 @@ def valid_phone(item, phonekey, countrycode, default_country):
         except phonenumbers.NumberParseException:
             pass
     else:
-        input_error(item, u"phone number col '{}' with value '{}' cannot be parsed => kept '' value".format(phonekey,
-                                                                                                            phone))
+        log_error(item, u"phone number col '{}' with value '{}' cannot be parsed => kept '' value".format(phonekey,
+                                                                                                          phone))
         return u''
 
     if not phonenumbers.is_valid_number(number):
-        input_error(item, u"phone number col '{}' with value '{}' is invalid '{}' => kept '' value".format(
+        log_error(item, u"phone number col '{}' with value '{}' is invalid '{}' => kept '' value".format(
                           phonekey, phone, number))
         return u''
     return phone
@@ -155,15 +155,15 @@ def valid_email(item, emailkey):
     try:
         validate_email(emailv)
     except InvalidEmailAddress:
-        input_error(item, u"email col '{}' with orig value '{}' changed in '{}' => kept '' value".format(emailkey,
-                    item[emailkey], emailv))
+        log_error(item, u"email col '{}' with orig value '{}' changed in '{}' => kept '' value".format(emailkey,
+                  item[emailkey], emailv))
         return u''
     return emailv
 
 
 def valid_value_in_list(item, val, lst):
     if val not in lst:
-        input_error(item, "value '%s' not in valid values '%s'" % (val, lst))
+        log_error(item, "value '%s' not in valid values '%s'" % (val, lst))
         return u''
     return val
 
@@ -175,7 +175,7 @@ def valid_date(item, val, fmt='%Y/%m/%d', can_be_empty=True):
         dtm = datetime.datetime.strptime(val, fmt)
         dt = dtm.date()
     except Exception, ex:
-        input_error(item, u"not a valid date '%s': %s" % (val, ex))
+        log_error(item, u"not a valid date '%s': %s" % (val, ex))
         return None
     return dt
 

@@ -9,7 +9,7 @@ from collective.contact.importexport.utils import by4wise
 from collective.contact.importexport.utils import correct_path
 from collective.contact.importexport.utils import get_country_code
 from collective.contact.importexport.utils import get_main_path
-from collective.contact.importexport.utils import input_error
+from collective.contact.importexport.utils import log_error
 from collective.contact.importexport.utils import relative_path
 from collective.contact.importexport.utils import shortcut
 from collective.contact.importexport.utils import valid_date
@@ -175,13 +175,13 @@ class CommonInputChecks(object):
 
             # duplicated _id ?
             if not item['_id']:
-                input_error(item, u"SKIPPING: missing id '_id'")
+                log_error(item, u"SKIPPING: missing id '_id'", level='critical')
                 if self.roe:
                     raise Exception(u'Missing id ! See log...')
                 continue
             if item['_id'] in self.ids[item_type][item['_set']]:
-                input_error(item, u"SKIPPING: duplicated id '{}', already present line {}".format(item['_id'],
-                            self.ids[item_type][item['_set']][item['_id']]['ln']))
+                log_error(item, u"SKIPPING: duplicated id '{}', already present line {}".format(item['_id'],
+                          self.ids[item_type][item['_set']][item['_id']]['ln']), level='critical')
                 if self.roe:
                     raise Exception(u'Duplicated id ! See log...')
             self.ids[item_type][item['_set']][item['_id']] = {'path': '', 'ln': item['_ln']}
@@ -189,8 +189,8 @@ class CommonInputChecks(object):
             # uniqueness
             for key in self.uniques[item_type]:
                 if item[key] in self.uniques[item_type][key]:
-                    input_error(item, u"duplicated {} '{}', already present line {:d}".format(key, item[key],
-                                self.uniques[item_type][key][item[key]]))
+                    log_error(item, u"duplicated {} '{}', already present line {:d}".format(key, item[key],
+                              self.uniques[item_type][key][item[key]]))
                 elif item[key]:
                     self.uniques[item_type][key][item[key]] = item['_ln']
 
@@ -212,7 +212,7 @@ class CommonInputChecks(object):
             # organization checks
             if item_type == 'organization':
                 if item['_id'] == item['_oid']:
-                    input_error(item, u'SKIPPING: _oid is equal to _id {}'.format(item['_id']))
+                    log_error(item, u'SKIPPING: _oid is equal to _id {}'.format(item['_id']), level='critical')
                     if self.roe:
                         raise Exception(u'Inconsistent _oid ! See log...')
                     continue
@@ -237,12 +237,12 @@ class CommonInputChecks(object):
                 item['start_date'] = valid_date(item, item['start_date'])
                 item['end_date'] = valid_date(item, item['end_date'])
                 if not item['_pid']:
-                    input_error(item, u"SKIPPING: missing related person id")
+                    log_error(item, u"SKIPPING: missing related person id", level='critical')
                     if self.roe:
                         raise Exception(u'Missing _pid ! See log...')
                     continue
                 if not item['_oid'] and not item['_fid']:
-                    input_error(item, u"SKIPPING: missing organization/position id")
+                    log_error(item, u"SKIPPING: missing organization/position id", level='critical')
                     if self.roe:
                         raise Exception(u'Missing _oid/_fid ! See log...')
                     continue
@@ -273,7 +273,8 @@ class RelationsInserter(object):
             item_type = item['_type']
             if item_type == 'held_position':
                 if item['_oid'] and item['_oid'] not in self.ids['organization'][item['_set']]:
-                    input_error(item, u"SKIPPING: invalid related organization id '{}'".format(item['_oid']))
+                    log_error(item, u"SKIPPING: invalid related organization id '{}'".format(item['_oid']),
+                              level='critical')
                     if self.roe:
                         raise Exception(u'Cannot find _oid ! See log...')
                     continue
@@ -331,14 +332,15 @@ class UpdatePathInserter(object):
             for field, idx, condition, must_exist in self.uniques[item_type]:
                 if item[field] and condition(item):
                     if field == 'internal_number' and idx == 'internal_number' and not self.cbin_beh[item_type]:
-                        input_error(item, u"the internalnumber behavior is not defined on type {}".format(item_type))
+                        log_error(item, u"the internalnumber behavior is not defined on type {}".format(item_type),
+                                  level='critical')
                         if self.roe:
                             raise Exception(u'The internalnumber behavior is not defined on type {}".format(item_type)')
                         continue
                     brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
                     if len(brains) > 1:
-                        input_error(item, u"the search with '{}'='{}' gets multiple objs: {}".format(
-                            idx, item[field], u', '.join([b.getPath() for b in brains])))
+                        log_error(item, u"the search with '{}'='{}' gets multiple objs: {}".format(
+                            idx, item[field], u', '.join([b.getPath() for b in brains])), level='critical')
                         if self.roe:
                             raise Exception(u'Too more results ! See log...')
                         continue
@@ -349,7 +351,8 @@ class UpdatePathInserter(object):
                         self.ids[item_type][item['_set']][item['_id']]['path'] = item['_path']
                         break
                     elif must_exist(item):
-                        input_error(item, u"the search with '{}'='{}' doesn't get any result".format(idx, item[field]))
+                        log_error(item, u"the search with '{}'='{}' doesn't get any result".format(idx, item[field]),
+                                  level='critical')
                         if self.roe:
                             raise Exception(u'Must find something ! See log...')
             yield item
@@ -395,7 +398,8 @@ class PathInserter(object):
             # organization parent ?
             if item_type in ('organization', 'held_position') and item['_oid']:
                 if item['_oid'] not in self.ids['organization'][item['_set']]:
-                    input_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']))
+                    log_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']),
+                              level='critical')
                     if self.roe:
                         raise Exception(u'Cannot find parent ! See log...')
                     continue
@@ -404,7 +408,7 @@ class PathInserter(object):
             # person parent ?
             if item_type == 'held_position':
                 if item['_pid'] not in self.ids['person'][item['_set']]:
-                    input_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']))
+                    log_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']), level='critical')
                     if self.roe:
                         raise Exception(u'Cannot find related person ! See log...')
                     continue
@@ -413,7 +417,7 @@ class PathInserter(object):
                     title = u'-'.join([title, related_title])
 
             if not title:
-                input_error(item, u'cannot get an id from id keys {}'.format(self.id_keys[item_type]))
+                log_error(item, u'cannot get an id from id keys {}'.format(self.id_keys[item_type]), level='critical')
                 if self.roe:
                     raise Exception(u'No title ! See log...')
                 continue
@@ -453,7 +457,7 @@ class TransitionsInserter(object):
                 if item['_inactive'] and state == 'active':
                     item['_transitions'] = 'deactivate'
                 elif not item['_inactive'] and state == 'deactivated':
-                    input_error(item, u'_inactive is False and current state is deactivated: we do not activate')
+                    log_error(item, u'_inactive is False and current state is deactivated: we do not activate')
             yield item
 
 

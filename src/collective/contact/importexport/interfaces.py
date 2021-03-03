@@ -18,3 +18,9 @@ class IPipelineConfiguration(model.Schema):
         title=_("Pipeline to import contacts"),
         description=_(u'Will be saved on disk as pipeline.cfg'),
     )
+
+    emails = schema.TextLine(
+        title=_("Emails list where to send report"),
+        description=_(u'Values separated by comma. If empty, no report will be send'),
+        required=False,
+    )

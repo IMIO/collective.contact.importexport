@@ -3,8 +3,14 @@ from collective.contact.core.behaviors import InvalidEmailAddress
 from future.builtins import zip
 from collective.contact.core.behaviors import validate_email
 from collective.contact.importexport import e_logger
+from collective.contact.importexport.config import ANNOTATION_KEY
 from collective.contact.importexport.config import ZIP_DIGIT
 from collective.contact.importexport.config import ZIP_PATTERN
+from imio.helpers.emailer import add_attachment
+from imio.helpers.emailer import create_html_email
+from imio.helpers.emailer import send_email
+from plone import api
+from zope.annotation.interfaces import IAnnotations
 from zope.i18n import translate
 
 import datetime
@@ -212,3 +218,20 @@ def relative_path(portal, fullpath):
     """ return relative path """
     portal_path = '/'.join(portal.getPhysicalPath())
     return fullpath[len(portal_path) + 1:]
+
+
+def send_report(portal, lines):
+    """Send email if required."""
+    emails = api.portal.get_registry_record('collective.contact.importexport.interfaces.IPipelineConfiguration.emails')
+    if not emails:
+        return
+    msg = create_html_email(u'\n'.join(lines))
+    annot = IAnnotations(portal).get(ANNOTATION_KEY)
+    for filename in ('ie_input_errors.log', 'ie_shortlog.log'):
+        path = os.path.join(annot['wp'], filename)
+        add_attachment(msg, filename, filepath=path)
+    mfrom = portal.getProperty('email_from_address')
+    ret, error = send_email(msg, u'Contact import report', mfrom, emails)
+    if not ret:
+        with open(os.path.join(annot['wp'], 'ie_input_errors.log'), 'a') as f:
+            f.write('Your email has not been sent: {}'.format(error))

@@ -4,6 +4,7 @@ from collections import OrderedDict
 from collective.contact.importexport import e_logger
 from collective.contact.importexport import logger
 from collective.contact.importexport import o_logger
+from collective.contact.importexport.config import ANNOTATION_KEY
 from collective.contact.importexport.utils import alphanum
 from collective.contact.importexport.utils import by4wise
 from collective.contact.importexport.utils import correct_path
@@ -11,6 +12,7 @@ from collective.contact.importexport.utils import get_country_code
 from collective.contact.importexport.utils import get_main_path
 from collective.contact.importexport.utils import log_error
 from collective.contact.importexport.utils import relative_path
+from collective.contact.importexport.utils import send_report
 from collective.contact.importexport.utils import shortcut
 from collective.contact.importexport.utils import valid_date
 from collective.contact.importexport.utils import valid_email
@@ -35,7 +37,6 @@ from zope.intid.interfaces import IIntIds
 import logging
 import os
 
-ANNOTATION_KEY = 'collective.contact.importexport'
 MANAGED_TYPES = ['organization', 'person', 'held_position']
 
 
@@ -73,6 +74,9 @@ class Initialization(object):
             ocfh.setLevel(logging.INFO)
             o_logger.addHandler(ocfh)
 
+        # set working path in portal annotation to retrieve log files
+        annot = IAnnotations(self.portal).setdefault(ANNOTATION_KEY, {})
+        annot['wp'] = self.workingpath
         # set global variables in annotation
         self.storage = IAnnotations(transmogrifier).setdefault(ANNOTATION_KEY, {})
         self.storage['wp'] = self.workingpath
@@ -467,6 +471,9 @@ class LastSection(object):
     * counts by type and action.
     * logs totals.
     * updates and dumps registry.
+
+    Parameters:
+        * send_mail = O, Send a mail with summary and errors. Default 0.
     """
     classProvides(ISectionBlueprint)
     implements(ISection)
@@ -477,6 +484,7 @@ class LastSection(object):
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.portal = transmogrifier.context
         self.sets = self.storage['set_lst']
+        self.send_mail = bool(int(options.get('send_mail', '0')))
 
     def __iter__(self):
         for item in self.previous:
@@ -488,13 +496,14 @@ class LastSection(object):
 
         # end of process
         registry = self.storage.get('registry_dic', {})
+        to_send = [u'Summary of contact import:']
         for sett in sorted(self.sets):
-            # TODO stores msg in plone ?
-            # TODO add errors count ?
-            msg = "{}: {}".format(sett, ', '.join(["'{}' => ({})".format(tp,
-                                  'nb={nb}, n={n}, U={U}, D={D}'.format(**self.sets[sett][tp]))
-                                                                        for tp in ('O', 'P', 'HP')]))
+            msg = u"{}: {}".format(sett, u', '.join([u"'{}' => ({})".format(tp,
+                                   u'nb={nb}, N={n}, U={U}, D={D}'.format(**self.sets[sett][tp]))
+                                                                          for tp in ('O', 'P', 'HP')
+                                                                          if self.sets[sett][tp]['nb']]))
             o_logger.info(msg)
+            to_send.append(msg)
             if self.sets[sett].pop('mode') == 'ssh':
                 registry.update({sett: self.sets[sett]})
         # dump registry if CSVSshSourceSection section is used
@@ -502,3 +511,5 @@ class LastSection(object):
             if registry:
                 logger.info("Updating registry in '{}'".format(self.storage['registry_filename']))
                 dump_var(self.storage['registry_filename'], registry)
+        if self.send_mail:
+            send_report(self.portal, to_send)

@@ -144,6 +144,7 @@ level = INFO
 
 [lastsection]
 blueprint = collective.contact.importexport.lastsection
+send_mail = 1
 
 [stop]
 blueprint = collective.contact.importexport.stop

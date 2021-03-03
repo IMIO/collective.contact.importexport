@@ -2,6 +2,8 @@
 
 import re
 
+ANNOTATION_KEY = 'collective.contact.importexport'
+
 ZIP_DIGIT = [u'BE', u'CH', u'CN', u'DE', u'DK', u'ES', u'FI', u'FR', u'GF', u'HR', u'HU', u'IT', u'LU', u'LV', u'LT',
              u'MD', u'NL', u'RE', u'US']
 ZIP_PATTERN = {

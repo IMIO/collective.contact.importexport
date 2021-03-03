@@ -2,6 +2,7 @@
 
 from AccessControl.SecurityManagement import newSecurityManager
 from collective.contact.importexport import logger
+from collective.contact.importexport.utils import send_report
 from collective.transmogrifier.transmogrifier import configuration_registry
 from collective.transmogrifier.transmogrifier import Transmogrifier
 from imio.helpers.security import setup_logger
@@ -26,8 +27,12 @@ def execute_pipeline(portal, filepath):
         configuration_registry.getConfiguration(PIPELINE_ID)
     except KeyError:
         configuration_registry.registerConfiguration(PIPELINE_ID, u'', u'', filepath)
-    transmogrifier = Transmogrifier(portal)
-    transmogrifier(PIPELINE_ID)
+    try:
+        transmogrifier = Transmogrifier(portal)
+        transmogrifier(PIPELINE_ID)
+    except Exception as error:
+        to_send = [u'Critical error during pipeline: {}'.format(error)]
+        send_report(portal, to_send)
 
 
 if 'app' in locals():

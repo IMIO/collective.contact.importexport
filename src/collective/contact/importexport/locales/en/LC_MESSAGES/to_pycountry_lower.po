@@ -535,6 +535,9 @@ msgstr "Nauru"
 msgid "new zealand"
 msgstr "New Zealand"
 
+msgid "new zeland"
+msgstr "New Zealand"
+
 msgid "oman"
 msgstr "Oman"
 

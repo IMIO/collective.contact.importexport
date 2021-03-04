@@ -43,6 +43,9 @@ msgstr "Andorra"
 msgid "emirats arabes unis"
 msgstr "United Arab Emirates"
 
+msgid "dubai"
+msgstr "United Arab Emirates"
+
 msgid "argentine"
 msgstr "Argentina"
 
@@ -175,6 +178,9 @@ msgstr "Cameroon"
 msgid "republique democratique du congo"
 msgstr "Congo, The Democratic Republic of the"
 
+msgid "republique populaire du congo"
+msgstr "Congo"
+
 msgid "congo"
 msgstr "Congo"
 
@@ -253,6 +259,9 @@ msgstr "Western Sahara"
 msgid "espagne"
 msgstr "Spain"
 
+msgid "iles canaries"
+msgstr "Spain"
+
 msgid "estonie"
 msgstr "Estonia"
 
@@ -263,6 +272,9 @@ msgid "finlande"
 msgstr "Finland"
 
 msgid "fiji"
+msgstr "Fiji"
+
+msgid "fidji"
 msgstr "Fiji"
 
 msgid "iles falkland"
@@ -400,7 +412,7 @@ msgstr "Jamaica"
 msgid "jersey"
 msgstr "Jersey"
 
-msgid "jordan"
+msgid "jordanie"
 msgstr "Jordan"
 
 msgid "japon"
@@ -431,6 +443,9 @@ msgid "coree du sud"
 msgstr "Korea, Republic of"
 
 msgid "koweit"
+msgstr "Kuwait"
+
+msgid "bahrain - principaute de koweit"
 msgstr "Kuwait"
 
 msgid "laos"
@@ -613,6 +628,9 @@ msgstr "Pakistan"
 msgid "panama"
 msgstr "Panama"
 
+msgid "republique de panama"
+msgstr "Panama"
+
 msgid "pitcairn"
 msgstr "Pitcairn"
 
@@ -661,6 +679,9 @@ msgstr "French Polynesia"
 msgid "qatar"
 msgstr "Qatar"
 
+msgid "quatar"
+msgstr "Qatar"
+
 msgid "la reunion"
 msgstr "Réunion"
 
@@ -671,6 +692,9 @@ msgid "roumanie"
 msgstr "Romania"
 
 msgid "russie"
+msgstr "Russian Federation"
+
+msgid "russie (federation de)"
 msgstr "Russian Federation"
 
 msgid "rwanda"

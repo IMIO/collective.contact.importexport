@@ -105,9 +105,9 @@ def valid_zip(item, zipkey, countrycode):
         countrycode = u'BE'
     if countrycode in ZIP_DIGIT:
         zipc = digit(item[zipkey])
-        if item[zipkey] != zipc:
-            log_error(item, u"zip code col '{}' for country '{}' contains non digit chars, orig value '{}' => "
-                            u"'{}'".format(zipkey, countrycode, item[zipkey], zipc))
+        # if item[zipkey] != zipc:
+        #     log_error(item, u"zip code col '{}' for country '{}' contains non digit chars, orig value '{}' => "
+        #                     u"'{}'".format(zipkey, countrycode, item[zipkey], zipc))
     if countrycode in ZIP_PATTERN:
         match = ZIP_PATTERN[countrycode].match(zipc)
         if match is None:

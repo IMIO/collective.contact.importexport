@@ -33,6 +33,7 @@ def execute_pipeline(portal, filepath):
     except Exception as error:
         to_send = [u'Critical error during pipeline: {}'.format(error)]
         send_report(portal, to_send)
+        raise error
 
 
 if 'app' in locals():

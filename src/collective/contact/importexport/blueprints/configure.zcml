@@ -50,6 +50,12 @@
     />
 
   <utility
+    component=".main.ParentPathInserter"
+    name="collective.contact.importexport.parentpathinserter"
+    provides="collective.transmogrifier.interfaces.ISectionBlueprint"
+    />
+
+  <utility
     component=".main.PathInserter"
     name="collective.contact.importexport.pathinserter"
     provides="collective.transmogrifier.interfaces.ISectionBlueprint"

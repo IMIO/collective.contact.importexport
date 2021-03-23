@@ -362,6 +362,49 @@ class UpdatePathInserter(object):
             yield item
 
 
+class ParentPathInserter(object):
+    """Updates _parent following linked elements.
+
+    * Finds parent for sub organization and held position.
+
+    Parameters:
+        * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
+    """
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+        self.portal = transmogrifier.context
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+        self.fieldnames = self.storage['fieldnames']
+        self.ids = self.storage['ids']
+        self.roe = bool(int(options.get('raise_on_error', '1')))
+
+    def __iter__(self):
+        for item in self.previous:
+            # organization parent ?
+            item_type = item['_type']
+            if item_type in ('organization', 'held_position') and item['_oid']:
+                if item['_oid'] not in self.ids['organization'][item['_set']]:
+                    log_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']),
+                              level='critical')
+                    if self.roe:
+                        raise Exception(u'Cannot find parent ! See log...')
+                    continue
+                item['_parent'] = self.ids['organization'][item['_set']][item['_oid']]['path']
+                item['_related_title'] = self.portal.unrestrictedTraverse(item['_parent']).get_full_title()
+            # person parent ?
+            if item_type == 'held_position':
+                if item['_pid'] not in self.ids['person'][item['_set']]:
+                    log_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']), level='critical')
+                    if self.roe:
+                        raise Exception(u'Cannot find related person ! See log...')
+                    continue
+                item['_parent'] = self.ids['person'][item['_set']][item['_pid']]['path']
+            yield item
+
+
 class PathInserter(object):
     """Adds _path for new element.
 
@@ -396,29 +439,10 @@ class PathInserter(object):
                 yield item
                 continue
             item_type = item['_type']
-            related_title = ''
             title = u'-'.join([item[key] for key in self.id_keys[item_type] if item[key]])
 
-            # organization parent ?
-            if item_type in ('organization', 'held_position') and item['_oid']:
-                if item['_oid'] not in self.ids['organization'][item['_set']]:
-                    log_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']),
-                              level='critical')
-                    if self.roe:
-                        raise Exception(u'Cannot find parent ! See log...')
-                    continue
-                item['_parent'] = self.ids['organization'][item['_set']][item['_oid']]['path']
-                related_title = self.portal.unrestrictedTraverse(item['_parent']).get_full_title()
-            # person parent ?
-            if item_type == 'held_position':
-                if item['_pid'] not in self.ids['person'][item['_set']]:
-                    log_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']), level='critical')
-                    if self.roe:
-                        raise Exception(u'Cannot find related person ! See log...')
-                    continue
-                item['_parent'] = self.ids['person'][item['_set']][item['_pid']]['path']
-                if related_title:  # position not taken into account
-                    title = u'-'.join([title, related_title])
+            if item_type == 'held_position' and '_related_title' in item:
+                title = u'-'.join([title, item.pop('_related_title')])
 
             if not title:
                 log_error(item, u'cannot get an id from id keys {}'.format(self.id_keys[item_type]), level='critical')

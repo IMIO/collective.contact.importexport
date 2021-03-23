@@ -33,6 +33,7 @@ pipeline =
     relationsinserter
 #    stop
     updatepathinserter
+    parentpathinserter
     pathinserter
     constructor
 # personal attributes bp came here
@@ -110,6 +111,10 @@ blueprint = collective.contact.importexport.updatepathinserter
 organization_uniques = _uid UID python:True python:True
 person_uniques = _uid UID python:True python:True
 held_position_uniques = _uid UID python:True python:True
+raise_on_error = ${config:raise_on_error}
+
+[parentpathinserter]
+blueprint = collective.contact.importexport.parentpathinserter
 raise_on_error = ${config:raise_on_error}
 
 [pathinserter]

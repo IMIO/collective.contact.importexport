@@ -34,6 +34,7 @@ pipeline =
 #    stop
     updatepathinserter
     parentpathinserter
+    moveobject
     pathinserter
     constructor
 # personal attributes bp came here
@@ -115,6 +116,10 @@ raise_on_error = ${config:raise_on_error}
 
 [parentpathinserter]
 blueprint = collective.contact.importexport.parentpathinserter
+raise_on_error = ${config:raise_on_error}
+
+[moveobject]
+blueprint = collective.contact.importexport.moveobject
 raise_on_error = ${config:raise_on_error}
 
 [pathinserter]

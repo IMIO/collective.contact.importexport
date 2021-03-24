@@ -363,9 +363,7 @@ class UpdatePathInserter(object):
 
 
 class ParentPathInserter(object):
-    """Updates _parent following linked elements.
-
-    * Finds parent for sub organization and held position.
+    """Updates _parent following 'linked' elements in sub organization or held position.
 
     Parameters:
         * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
@@ -402,6 +400,51 @@ class ParentPathInserter(object):
                         raise Exception(u'Cannot find related person ! See log...')
                     continue
                 item['_parent'] = self.ids['person'][item['_set']][item['_pid']]['path']
+            yield item
+
+
+class MoveObject(object):
+    """Moves existing object if necessary.
+
+    Parameters:
+        * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
+    """
+    classProvides(ISectionBlueprint)
+    implements(ISection)
+
+    def __init__(self, transmogrifier, name, options, previous):
+        self.previous = previous
+        self.portal = transmogrifier.context
+        self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
+        self.fieldnames = self.storage['fieldnames']
+        self.ids = self.storage['ids']
+        self.roe = bool(int(options.get('raise_on_error', '1')))
+
+    def __iter__(self):
+        for item in self.previous:
+            if item['_type'] != 'directory' and item.get('_act', 'no') == 'update' and \
+                    item['_parent'] != os.path.dirname(item['_path']):
+                obj = self.portal.unrestrictedTraverse(item['_path'], default=None)
+                if obj is None:
+                    log_error(item, u"SKIPPING: cannot find existing object '{}'".format(item['_path']),
+                              level='critical')
+                    if self.roe:
+                        raise Exception(u'Cannot find existing object ! See log...')
+                    continue
+                target = self.portal.unrestrictedTraverse(item['_parent'], default=None)
+                if target is None:
+                    log_error(item, u"SKIPPING: cannot find new parent '{}'".format(item['_parent']),
+                              level='critical')
+                    if self.roe:
+                        raise Exception(u'Cannot find new parent ! See log...')
+                    continue
+                # we move the object and update path, so all the next sections will work on this path
+                # constructor NO, update YES
+                moved_obj = api.content.move(obj, target)
+                # print("'{}' moved to '{}'".format(item['_path'], item['_parent']))
+                item['_path'] = relative_path(self.portal, '/'.join(moved_obj.getPhysicalPath()))
+                self.ids[item['_type']][item['_set']][item['_id']]['path'] = item['_path']
+                # indexes and relations are well updated
             yield item
 
 

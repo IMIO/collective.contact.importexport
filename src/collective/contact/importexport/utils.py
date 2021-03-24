@@ -216,8 +216,14 @@ def by4wise(iterable):
 
 
 def relative_path(portal, fullpath):
-    """ return relative path """
-    portal_path = '/'.join(portal.getPhysicalPath())
+    """Returns relative path following given portal (without leading slash).
+    :param portal: leading object to remove from path
+    :param fullpath: path to update
+    :return: new path relative to portal object parameter
+    """
+    portal_path = '/'.join(portal.getPhysicalPath())  # not unicode, brain.getPath is also encoded
+    if not fullpath.startswith(portal_path):
+        return fullpath
     return fullpath[len(portal_path) + 1:]
 
 

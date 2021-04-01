@@ -41,7 +41,7 @@ setup(
         'collective.contact.core',
         'collective.transmogrifier',
         'future',
-        'imio.helpers',
+        'imio.helpers>=0.40',
         'imio.pyutils',
         'ipdb',
         'phonenumbers',

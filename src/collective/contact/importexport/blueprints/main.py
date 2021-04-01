@@ -446,6 +446,7 @@ class MoveObject(object):
                 # we move the object and update path, so all the next sections will work on this path
                 # constructor NO, update YES
                 moved_obj = api.content.move(obj, target)
+                # TODO manage organization_type see dir_org_config
                 # print("'{}' moved to '{}'".format(item['_path'], item['_parent']))
                 item['_path'] = relative_path(self.portal, '/'.join(moved_obj.getPhysicalPath()))
                 self.ids[item['_type']][item['_set']][item['_id']]['path'] = item['_path']

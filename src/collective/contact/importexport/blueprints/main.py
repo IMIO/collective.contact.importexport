@@ -202,16 +202,21 @@ class CommonInputChecks(object):
             for key in self.booleans[item_type]:
                 item[key] = to_bool(item, key)
 
+            if 'country' in item:
+                country_code = get_country_code(item, 'country', self.phone_country, self.languages)
+
             # check zip
-            country_code = get_country_code(item, 'country', self.phone_country, self.languages)
-            item['zip_code'] = valid_zip(item, 'zip_code', country_code)
+            if 'zip_code' in item:
+                item['zip_code'] = valid_zip(item, 'zip_code', country_code)
 
             # check phones
             for key in ('phone', 'cell_phone', 'fax'):
-                item[key] = valid_phone(item, key, country_code, self.phone_country)
+                if key in item:
+                    item[key] = valid_phone(item, key, country_code, self.phone_country)
 
             # check email
-            item['email'] = valid_email(item, 'email')
+            if 'email' in item:
+                item['email'] = valid_email(item, 'email')
 
             # organization checks
             if item_type == 'organization':

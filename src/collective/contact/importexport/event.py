@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from imio.helpers.content import safe_encode
 from plone.registry.interfaces import IRecordModifiedEvent
 from collective.contact.importexport.utils import get_main_path
 
@@ -20,6 +20,7 @@ def modified_pipeline(obj, event):
         new_val = event.newValue
     if new_val is None:
         return
+    new_val = safe_encode(new_val)
     path = get_main_path()
     pipeline_path = os.path.join(path, 'pipeline.cfg')
     fd = open(pipeline_path, 'w')

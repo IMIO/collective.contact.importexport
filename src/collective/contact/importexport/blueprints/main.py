@@ -344,7 +344,7 @@ class UpdatePathInserter(object):
                         log_error(item, u"the internalnumber behavior is not defined on type {}".format(item_type),
                                   level='critical')
                         if self.roe:
-                            raise Exception(u'The internalnumber behavior is not defined on type {}".format(item_type)')
+                            raise Exception(u'The internalnumber behavior is not defined on type {}'.format(item_type))
                         continue
                     brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
                     if len(brains) > 1:

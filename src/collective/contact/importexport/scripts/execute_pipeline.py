@@ -31,7 +31,8 @@ def execute_pipeline(portal, filepath):
         transmogrifier = Transmogrifier(portal)
         transmogrifier(PIPELINE_ID)
     except Exception as error:
-        to_send = [u'Critical error during pipeline: {}'.format(error)]
+        error_msg = u"type: '{}', msg: '{}'".format(type(error), error)
+        to_send = [u'Critical error during pipeline: {}'.format(error_msg)]
         send_report(portal, to_send)
         raise error
 

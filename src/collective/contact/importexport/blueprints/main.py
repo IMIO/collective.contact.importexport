@@ -192,11 +192,14 @@ class CommonInputChecks(object):
 
             # uniqueness
             for key in self.uniques[item_type]:
-                if item[key] in self.uniques[item_type][key]:
+                if not item[key]:
+                    continue
+                uniques = self.uniques[item_type][key].setdefault(item['_set'], {})
+                if item[key] in uniques:
                     log_error(item, u"duplicated {} '{}', already present line {:d}".format(key, item[key],
-                              self.uniques[item_type][key][item[key]]))
-                elif item[key]:
-                    self.uniques[item_type][key][item[key]] = item['_ln']
+                              uniques[item[key]]))
+                else:
+                    uniques[item[key]] = item['_ln']
 
             # to bool from int
             for key in self.booleans[item_type]:

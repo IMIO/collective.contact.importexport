@@ -165,7 +165,7 @@ def valid_email(item, emailkey):
         log_error(item, u"email col '{}' with orig value '{}' changed in '{}' => kept '' value".format(emailkey,
                   item[emailkey], emailv))
         return u''
-    return emailv
+    return emailv.lower()
 
 
 def valid_value_in_list(item, val, lst):

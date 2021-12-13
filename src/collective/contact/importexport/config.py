@@ -25,6 +25,7 @@ ZIP_PATTERN = {
     u'CD': re.compile(r'.+$'),  # no standard
     u'CG': re.compile(r'.+$'),  # no standard
     u'CH': re.compile(r'\d{4}$'),  # 4 digits
+    u'CI': re.compile(r'.+$'),  # no standard
     u'CN': re.compile(r'\d{6}$'),  # 6 digits
     u'CY': re.compile(r'\d{4}$'),  # 4 digits
     u'CZ': re.compile(r'\d{3} *\d{2}$'),  # 3 dig 2 dig

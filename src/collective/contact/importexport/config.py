@@ -5,7 +5,7 @@ import re
 ANNOTATION_KEY = 'collective.contact.importexport'
 
 ZIP_DIGIT = [u'AT', u'AU', u'BE', u'BG', u'CH', u'CN', u'CY', u'DE', u'DK', u'DZ', u'EE', u'ES', u'FI', u'FR',
-             u'GF', u'HR', u'HU', u'ID', u'IL', u'IN', u'IS', u'IT', u'JO', u'KE', u'KR', u'KW', u'KZ', u'LK',
+             u'GF', u'GP', u'HR', u'HU', u'ID', u'IL', u'IN', u'IS', u'IT', u'JO', u'KE', u'KR', u'KW', u'KZ', u'LK',
              u'LU', u'LV', u'LT', u'MC', u'MD', u'MG', u'MU', u'MX', u'MY', u'MZ', u'NC', u'NO', u'NZ', u'PH',
              u'RE', u'RO', u'RS', u'RU', u'SG', u'SI', u'SN', u'TH', u'TN', u'TR', u'US', u'UY', u'VN', u'ZA']
 # Based on https://en.wikipedia.org/wiki/List_of_postal_codes
@@ -40,6 +40,7 @@ ZIP_PATTERN = {
     u'GF': re.compile(r'\d{5}$'),  # 5 digits
     u'GG': re.compile(r'.+$'),  # to funny
     u'GI': re.compile(r'.+$'),  # to funny
+    u'GP': re.compile(r'\d{5}$'),  # 5 digits
     u'GR': re.compile(r'\d{3} *\d{2}$'),  # 3 dig 2 dig
     u'HK': re.compile(r'.+$'),  # no standard
     u'HR': re.compile(r'\d{5}$'),  # 5 digits

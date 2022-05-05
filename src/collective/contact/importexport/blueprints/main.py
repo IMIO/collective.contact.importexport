@@ -132,6 +132,7 @@ class CommonInputChecks(object):
         * language = O, country language. Default: fr.
         * organization_uniques = O, organization fieldnames that must be uniques.
         * organization_booleans = O, organization fieldnames that must be converted to boolean.
+        * organization_hyphen_newline = fieldnames where \n is replace by -
         * person_uniques = O, person fieldnames that must be uniques.
         * person_booleans = O, person fieldnames that must be converted to boolean.
         * held_position_uniques = O, held position fieldnames that must be uniques.
@@ -157,6 +158,9 @@ class CommonInputChecks(object):
         self.booleans = {typ: [key for key in safe_unicode(options.get('{}_booleans'.format(typ), '')).split()
                                if key in self.fieldnames[typ]]
                          for typ in MANAGED_TYPES}
+        self.hyphens = {typ: [key for key in safe_unicode(options.get('{}_hyphen_newline'.format(typ), '')).split()
+                              if key in self.fieldnames[typ]]
+                        for typ in MANAGED_TYPES}
         self.storage['booleans'] = self.booleans
         self.dir_org_config = self.storage['dir_org_config']
         self.directory_path = self.storage['directory_path']
@@ -170,6 +174,9 @@ class CommonInputChecks(object):
             # set correct values
             for fld in self.fieldnames[item_type]:
                 item[fld] = safe_unicode(item[fld].strip(' '), encoding=self.csv_encoding)
+            for fld in self.hyphens.get(item_type, []):
+                if '\n' in item[fld]:
+                    item[fld] = ' - '.join([part.strip() for part in item[fld].split('\n') if part.strip()])
 
             if item_type == 'held_position':
                 item['_fid'] = None  # we don't yet manage position

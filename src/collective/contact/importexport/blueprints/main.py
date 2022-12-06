@@ -132,7 +132,7 @@ class CommonInputChecks(object):
         * language = O, country language. Default: fr.
         * organization_uniques = O, organization fieldnames that must be uniques.
         * organization_booleans = O, organization fieldnames that must be converted to boolean.
-        * organization_hyphen_newline = fieldnames where \n is replace by -
+        * organization_hyphen_newline = fieldnames where newline character is replaced by -
         * person_uniques = O, person fieldnames that must be uniques.
         * person_booleans = O, person fieldnames that must be converted to boolean.
         * held_position_uniques = O, held position fieldnames that must be uniques.

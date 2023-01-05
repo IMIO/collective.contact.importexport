@@ -34,26 +34,6 @@ def log_error(item, msg, level='error'):
     item['_error'] = True
 
 
-def get_main_path(path='', subpath=''):
-    """
-        Return path/subpath if it exists.
-        If path is empty, return buildout path.
-    """
-    if not path:
-        # Are we in a classic buildout
-        INSTANCE_HOME = os.getenv('INSTANCE_HOME')  # to avoid getting pyflakes error on INSTANCE_HOME
-        match = re.match('(.+)/parts/.+', INSTANCE_HOME)
-        if match:
-            path = match.group(1)
-        else:
-            path = os.getenv('PWD')
-    if subpath:
-        path = os.path.join(path, subpath)
-    if os.path.exists(path):
-        return path
-    raise Exception("Path '{}' doesn't exist".format(path))
-
-
 def to_bool(item, key):
     try:
         return bool(int(item[key] or 0))
@@ -213,18 +193,6 @@ def by4wise(iterable):
     """ Returns tuples of 4 elements: s -> (s0, s1, s3, s4), (s5, s6, s7, s8) ... """
     a = iter(iterable)
     return zip(a, a, a, a)
-
-
-def relative_path(portal, fullpath):
-    """Returns relative path following given portal (without leading slash).
-    :param portal: leading object to remove from path
-    :param fullpath: path to update
-    :return: new path relative to portal object parameter
-    """
-    portal_path = '/'.join(portal.getPhysicalPath())  # not unicode, brain.getPath is also encoded
-    if not fullpath.startswith(portal_path):
-        return fullpath
-    return fullpath[len(portal_path) + 1:]
 
 
 def send_report(portal, lines):

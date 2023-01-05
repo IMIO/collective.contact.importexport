@@ -9,9 +9,7 @@ from collective.contact.importexport.utils import alphanum
 from collective.contact.importexport.utils import by4wise
 from collective.contact.importexport.utils import correct_path
 from collective.contact.importexport.utils import get_country_code
-from collective.contact.importexport.utils import get_main_path
 from collective.contact.importexport.utils import log_error
-from collective.contact.importexport.utils import relative_path
 from collective.contact.importexport.utils import send_report
 from collective.contact.importexport.utils import shortcut
 from collective.contact.importexport.utils import valid_date
@@ -23,6 +21,8 @@ from collective.contact.importexport.utils import to_bool
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
+from imio.helpers.transmogrifier import get_main_path
+from imio.helpers.transmogrifier import relative_path
 from imio.pyutils.system import dump_var
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from plone import api

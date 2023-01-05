@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from imio.helpers.content import safe_encode
+from imio.helpers.transmogrifier import get_main_path
 from plone.registry.interfaces import IRecordModifiedEvent
-from collective.contact.importexport.utils import get_main_path
 
 import logging
 import os

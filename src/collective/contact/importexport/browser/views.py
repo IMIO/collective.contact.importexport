@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collective.contact.importexport.scripts.execute_pipeline import execute_pipeline
-from collective.contact.importexport.utils import get_main_path
+from imio.helpers.transmogrifier import get_main_path
 from Products.Five import BrowserView
 
 import os

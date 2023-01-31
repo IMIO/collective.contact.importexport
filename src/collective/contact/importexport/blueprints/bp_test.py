@@ -96,7 +96,7 @@ class Constructor2(object):
 
 
 """
-Results: source1 source2 constructor1 c2, sans continue dans s2
+Results: source1 source2 constructor1 c2, sans continue dans s2 previous
 --------
 source1 init
 source2 init
@@ -135,7 +135,7 @@ constructor1 after previous loop
 constructor2 after previous loop
 
 
-Results: source1 source2 constructor1 c2, avec continue dans s2
+Results: source1 source2 constructor1 c2, avec continue dans s2 previous
 --------
 source1 init
 source2 init

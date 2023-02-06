@@ -221,7 +221,7 @@ class CSVReaderSection(object):
                         raise Exception(u'To much columns for {} defined in fieldnames: {}'.format(typ, extra_cols))
                     break
                 # pass headers if any
-                if self.csv_headers:
+                if self.csv_headers(None):
                     continue
             yield item
         self.storage['csv_files'][typ].close()

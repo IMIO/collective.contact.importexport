@@ -159,24 +159,6 @@ def valid_date(item, val, fmt='%Y/%m/%d', can_be_empty=True):
     return dt
 
 
-def pairwise(iterable):
-    """ s -> (s0, s1), (s2, s3), (s4, s5), ... """
-    a = iter(iterable)
-    return zip(a, a)
-
-
-def by3wise(iterable):
-    """ Returns tuples of 3 elements: s -> (s0, s1, s3), (s4, s5, s6) ... """
-    a = iter(iterable)
-    return zip(a, a, a)
-
-
-def by4wise(iterable):
-    """ Returns tuples of 4 elements: s -> (s0, s1, s3, s4), (s5, s6, s7, s8) ... """
-    a = iter(iterable)
-    return zip(a, a, a, a)
-
-
 def send_report(portal, lines):
     """Send email if required."""
     emails = api.portal.get_registry_record('collective.contact.importexport.interfaces.IPipelineConfiguration.emails')

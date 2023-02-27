@@ -6,7 +6,6 @@ from collective.contact.importexport import logger
 from collective.contact.importexport import o_logger
 from collective.contact.importexport.config import ANNOTATION_KEY
 from collective.contact.importexport.utils import alphanum
-from collective.contact.importexport.utils import by4wise
 from collective.contact.importexport.utils import get_country_code
 from collective.contact.importexport.utils import log_error
 from collective.contact.importexport.utils import send_report
@@ -21,6 +20,7 @@ from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
 from imio.helpers.transmogrifier import correct_path
 from imio.helpers.transmogrifier import get_main_path
+from imio.helpers.transmogrifier import pool_tuples
 from imio.helpers.transmogrifier import relative_path
 from imio.helpers.transmogrifier import text_to_bool
 from imio.pyutils.system import dump_var
@@ -335,7 +335,7 @@ class UpdatePathInserter(object):
                 raise Exception("The '{}' section '{}' option must contain a multiple of 4 elements".format(name,
                                 '{}_uniques'.format(typ)))
             self.uniques[typ] = [(f, i, Condition(c, transmogrifier, name, options),
-                                  Condition(e, transmogrifier, name, options)) for f, i, c, e in by4wise(values)]
+                                  Condition(e, transmogrifier, name, options)) for f, i, c, e in pool_tuples(values, 4)]
             typ_fti = getattr(self.portal.portal_types, typ)
             self.cbin_beh[typ] = 'collective.behavior.internalnumber.behavior.IInternalNumberBehavior' in \
                                  typ_fti.behaviors

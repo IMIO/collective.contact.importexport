@@ -161,20 +161,10 @@ def valid_date(item, val, fmt='%Y/%m/%d', can_be_empty=True):
     try:
         dtm = datetime.datetime.strptime(val, fmt)
         dt = dtm.date()
-    except Exception, ex:
+    except Exception as ex:
         log_error(item, u"not a valid date '%s': %s" % (val, ex))
         return None
     return dt
-
-
-def correct_path(portal, path):
-    """ Check if a path already exists on obj """
-    original = path
-    i = 1
-    while portal.unrestrictedTraverse(path, default=None) is not None:  # path exists
-        path = '{}-{:d}'.format(original, i)
-        i += 1
-    return path
 
 
 def pairwise(iterable):

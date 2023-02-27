@@ -16,13 +16,13 @@ from collective.contact.importexport.utils import valid_email
 from collective.contact.importexport.utils import valid_phone
 from collective.contact.importexport.utils import valid_value_in_list
 from collective.contact.importexport.utils import valid_zip
-from collective.contact.importexport.utils import to_bool
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
 from imio.helpers.transmogrifier import correct_path
 from imio.helpers.transmogrifier import get_main_path
 from imio.helpers.transmogrifier import relative_path
+from imio.helpers.transmogrifier import text_to_bool
 from imio.pyutils.system import dump_var
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from plone import api
@@ -210,7 +210,7 @@ class CommonInputChecks(object):
 
             # to bool from int
             for key in self.booleans[item_type]:
-                item[key] = to_bool(item, key)
+                item[key] = text_to_bool(item, key, log_error)
 
             if 'country' in item:
                 country_code = get_country_code(item, 'country', self.phone_country, self.languages)

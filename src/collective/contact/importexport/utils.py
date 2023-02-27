@@ -34,14 +34,6 @@ def log_error(item, msg, level='error'):
     item['_error'] = True
 
 
-def to_bool(item, key):
-    try:
-        return bool(int(item[key] or 0))
-    except Exception:
-        log_error(item, u"Cannot change '{}' key value '{}' to bool".format(key, item[key]))
-    return False
-
-
 def digit(phone):
     # filter with str.isdigit or unicode.isdigit
     return filter(type(phone).isdigit, phone)

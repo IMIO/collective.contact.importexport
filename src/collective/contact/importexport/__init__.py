@@ -3,6 +3,10 @@
 from zope.i18nmessageid import MessageFactory
 import logging
 
+# type shortcuts and action shortcuts
+T_S = {u'organization': u'O', u'person': u'P', u'held_position': u'HP'}
+A_S = {'new': u'N', 'update': u'U', 'delete': u'D'}
+
 logger = logging.getLogger('ccie')
 logger.setLevel(logging.INFO)  # needed to be displayed with instance run
 

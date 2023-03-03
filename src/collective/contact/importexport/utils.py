@@ -1,36 +1,28 @@
 # -*- coding: utf-8 -*-
 from collective.contact.core.behaviors import InvalidEmailAddress
-from future.builtins import zip
 from collective.contact.core.behaviors import validate_email
 from collective.contact.importexport import e_logger
+from collective.contact.importexport import T_S
 from collective.contact.importexport.config import ANNOTATION_KEY
 from collective.contact.importexport.config import ZIP_DIGIT
 from collective.contact.importexport.config import ZIP_PATTERN
 from imio.helpers.emailer import add_attachment
 from imio.helpers.emailer import create_html_email
 from imio.helpers.emailer import send_email
+from imio.helpers.transmogrifier import key_val as shortcut
 from plone import api
 from zope.annotation.interfaces import IAnnotations
 from zope.i18n import translate
 
-import datetime
 import os
 import phonenumbers
 import pycountry
-import re
 import unicodedata
 
 
-def shortcut(val):
-    shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'N', 'update': u'U',
-                 'delete': u'D'}
-    if val in shortcuts:
-        return shortcuts[val]
-    return val
-
-
 def log_error(item, msg, level='error'):
-    getattr(e_logger, level)(u'{}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type']), item['_ln'], msg))
+    getattr(e_logger, level)(u'{}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type'], T_S),
+                                                           item['_ln'], msg))
     item['_error'] = True
 
 

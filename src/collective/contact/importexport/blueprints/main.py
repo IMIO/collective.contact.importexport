@@ -10,7 +10,6 @@ from collective.contact.importexport.utils import get_country_code
 from collective.contact.importexport.utils import log_error
 from collective.contact.importexport.utils import send_report
 from collective.contact.importexport.utils import shortcut
-from collective.contact.importexport.utils import valid_date
 from collective.contact.importexport.utils import valid_email
 from collective.contact.importexport.utils import valid_phone
 from collective.contact.importexport.utils import valid_value_in_list
@@ -22,7 +21,8 @@ from imio.helpers.transmogrifier import correct_path
 from imio.helpers.transmogrifier import get_main_path
 from imio.helpers.transmogrifier import pool_tuples
 from imio.helpers.transmogrifier import relative_path
-from imio.helpers.transmogrifier import text_to_bool
+from imio.helpers.transmogrifier import str_to_bool
+from imio.helpers.transmogrifier import str_to_date
 from imio.pyutils.system import dump_var
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from plone import api
@@ -210,7 +210,7 @@ class CommonInputChecks(object):
 
             # to bool from int
             for key in self.booleans[item_type]:
-                item[key] = text_to_bool(item, key, log_error)
+                item[key] = str_to_bool(item, key, log_error)
 
             if 'country' in item:
                 country_code = get_country_code(item, 'country', self.phone_country, self.languages)
@@ -251,10 +251,10 @@ class CommonInputChecks(object):
                         item['organization_type'] = self.dir_org_config[type_type].values()[0]
             elif item_type == 'person':
                 item['gender'] = valid_value_in_list(item, item['gender'], ('', 'F', 'M'))
-                item['birthday'] = valid_date(item, item['birthday'])
+                item['birthday'] = str_to_date(item, 'birthday', log_error)
             elif item_type == 'held_position':
-                item['start_date'] = valid_date(item, item['start_date'])
-                item['end_date'] = valid_date(item, item['end_date'])
+                item['start_date'] = str_to_date(item, 'start_date', log_error)
+                item['end_date'] = str_to_date(item, 'end_date', log_error)
                 if not item['_pid']:
                     log_error(item, u"SKIPPING: missing related person id", level='critical')
                     if self.roe:

@@ -147,18 +147,6 @@ def valid_value_in_list(item, val, lst):
     return val
 
 
-def valid_date(item, val, fmt='%Y/%m/%d', can_be_empty=True):
-    if not val and can_be_empty:
-        return None
-    try:
-        dtm = datetime.datetime.strptime(val, fmt)
-        dt = dtm.date()
-    except Exception as ex:
-        log_error(item, u"not a valid date '%s': %s" % (val, ex))
-        return None
-    return dt
-
-
 def send_report(portal, lines):
     """Send email if required."""
     emails = api.portal.get_registry_record('collective.contact.importexport.interfaces.IPipelineConfiguration.emails')

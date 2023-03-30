@@ -1,45 +1,29 @@
 # -*- coding: utf-8 -*-
 from collective.contact.core.behaviors import InvalidEmailAddress
-from future.builtins import zip
 from collective.contact.core.behaviors import validate_email
 from collective.contact.importexport import e_logger
+from collective.contact.importexport import T_S
 from collective.contact.importexport.config import ANNOTATION_KEY
 from collective.contact.importexport.config import ZIP_DIGIT
 from collective.contact.importexport.config import ZIP_PATTERN
 from imio.helpers.emailer import add_attachment
 from imio.helpers.emailer import create_html_email
 from imio.helpers.emailer import send_email
+from imio.helpers.transmogrifier import key_val as shortcut
 from plone import api
 from zope.annotation.interfaces import IAnnotations
 from zope.i18n import translate
 
-import datetime
 import os
 import phonenumbers
 import pycountry
-import re
 import unicodedata
 
 
-def shortcut(val):
-    shortcuts = {u'organization': u'O', u'person': u'P', u'held_position': u'HP', 'new': u'N', 'update': u'U',
-                 'delete': u'D'}
-    if val in shortcuts:
-        return shortcuts[val]
-    return val
-
-
 def log_error(item, msg, level='error'):
-    getattr(e_logger, level)(u'{}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type']), item['_ln'], msg))
+    getattr(e_logger, level)(u'{}: {}, ln {:d}, {}'.format(item['_set'], shortcut(item['_type'], T_S),
+                                                           item['_ln'], msg))
     item['_error'] = True
-
-
-def to_bool(item, key):
-    try:
-        return bool(int(item[key] or 0))
-    except Exception:
-        log_error(item, u"Cannot change '{}' key value '{}' to bool".format(key, item[key]))
-    return False
 
 
 def digit(phone):
@@ -153,46 +137,6 @@ def valid_value_in_list(item, val, lst):
         log_error(item, "value '%s' not in valid values '%s'" % (val, lst))
         return u''
     return val
-
-
-def valid_date(item, val, fmt='%Y/%m/%d', can_be_empty=True):
-    if not val and can_be_empty:
-        return None
-    try:
-        dtm = datetime.datetime.strptime(val, fmt)
-        dt = dtm.date()
-    except Exception, ex:
-        log_error(item, u"not a valid date '%s': %s" % (val, ex))
-        return None
-    return dt
-
-
-def correct_path(portal, path):
-    """ Check if a path already exists on obj """
-    original = path
-    i = 1
-    while portal.unrestrictedTraverse(path, default=None) is not None:  # path exists
-        path = '{}-{:d}'.format(original, i)
-        i += 1
-    return path
-
-
-def pairwise(iterable):
-    """ s -> (s0, s1), (s2, s3), (s4, s5), ... """
-    a = iter(iterable)
-    return zip(a, a)
-
-
-def by3wise(iterable):
-    """ Returns tuples of 3 elements: s -> (s0, s1, s3), (s4, s5, s6) ... """
-    a = iter(iterable)
-    return zip(a, a, a)
-
-
-def by4wise(iterable):
-    """ Returns tuples of 4 elements: s -> (s0, s1, s3, s4), (s5, s6, s7, s8) ... """
-    a = iter(iterable)
-    return zip(a, a, a, a)
 
 
 def send_report(portal, lines):

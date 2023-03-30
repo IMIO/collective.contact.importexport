@@ -1,28 +1,30 @@
 # -*- coding: utf-8 -*-
 
 from collections import OrderedDict
+from collective.contact.importexport import A_S
 from collective.contact.importexport import e_logger
 from collective.contact.importexport import logger
 from collective.contact.importexport import o_logger
+from collective.contact.importexport import T_S
 from collective.contact.importexport.config import ANNOTATION_KEY
 from collective.contact.importexport.utils import alphanum
-from collective.contact.importexport.utils import by4wise
-from collective.contact.importexport.utils import correct_path
 from collective.contact.importexport.utils import get_country_code
 from collective.contact.importexport.utils import log_error
 from collective.contact.importexport.utils import send_report
-from collective.contact.importexport.utils import shortcut
-from collective.contact.importexport.utils import valid_date
 from collective.contact.importexport.utils import valid_email
 from collective.contact.importexport.utils import valid_phone
 from collective.contact.importexport.utils import valid_value_in_list
 from collective.contact.importexport.utils import valid_zip
-from collective.contact.importexport.utils import to_bool
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
+from imio.helpers.transmogrifier import correct_path
 from imio.helpers.transmogrifier import get_main_path
+from imio.helpers.transmogrifier import key_val as shortcut
+from imio.helpers.transmogrifier import pool_tuples
 from imio.helpers.transmogrifier import relative_path
+from imio.helpers.transmogrifier import str_to_bool
+from imio.helpers.transmogrifier import str_to_date
 from imio.pyutils.system import dump_var
 from plone.i18n.normalizer.interfaces import IIDNormalizer
 from plone import api
@@ -210,7 +212,7 @@ class CommonInputChecks(object):
 
             # to bool from int
             for key in self.booleans[item_type]:
-                item[key] = to_bool(item, key)
+                item[key] = str_to_bool(item, key, log_error)
 
             if 'country' in item:
                 country_code = get_country_code(item, 'country', self.phone_country, self.languages)
@@ -251,10 +253,10 @@ class CommonInputChecks(object):
                         item['organization_type'] = self.dir_org_config[type_type].values()[0]
             elif item_type == 'person':
                 item['gender'] = valid_value_in_list(item, item['gender'], ('', 'F', 'M'))
-                item['birthday'] = valid_date(item, item['birthday'])
+                item['birthday'] = str_to_date(item, 'birthday', log_error)
             elif item_type == 'held_position':
-                item['start_date'] = valid_date(item, item['start_date'])
-                item['end_date'] = valid_date(item, item['end_date'])
+                item['start_date'] = str_to_date(item, 'start_date', log_error)
+                item['end_date'] = str_to_date(item, 'end_date', log_error)
                 if not item['_pid']:
                     log_error(item, u"SKIPPING: missing related person id", level='critical')
                     if self.roe:
@@ -335,7 +337,7 @@ class UpdatePathInserter(object):
                 raise Exception("The '{}' section '{}' option must contain a multiple of 4 elements".format(name,
                                 '{}_uniques'.format(typ)))
             self.uniques[typ] = [(f, i, Condition(c, transmogrifier, name, options),
-                                  Condition(e, transmogrifier, name, options)) for f, i, c, e in by4wise(values)]
+                                  Condition(e, transmogrifier, name, options)) for f, i, c, e in pool_tuples(values, 4)]
             typ_fti = getattr(self.portal.portal_types, typ)
             self.cbin_beh[typ] = 'collective.behavior.internalnumber.behavior.IInternalNumberBehavior' in \
                                  typ_fti.behaviors
@@ -481,7 +483,6 @@ class PathInserter(object):
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
-        self.title_keys = safe_unicode(options.get('title-keys', 'title'))
         self.portal = transmogrifier.context
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.fieldnames = self.storage['fieldnames']
@@ -573,10 +574,10 @@ class LastSection(object):
         for item in self.previous:
             sett = item['_set']
             if sett != 'all':
-                self.sets[sett][shortcut(item['_type'])]['nb'] += 1
-                self.sets[sett][shortcut(item['_type'])][shortcut(item['_act'])] += 1
+                self.sets[sett][shortcut(item['_type'], T_S)]['nb'] += 1
+                self.sets[sett][shortcut(item['_type'], T_S)][shortcut(item['_act'], A_S)] += 1
                 if '_error' in item:
-                    self.sets[sett][shortcut(item['_type'])]['e'] += 1
+                    self.sets[sett][shortcut(item['_type'], T_S)]['e'] += 1
             yield item
 
         # end of process

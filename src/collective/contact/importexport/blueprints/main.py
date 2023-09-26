@@ -18,7 +18,7 @@ from collective.contact.importexport.utils import valid_zip
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
-from imio.helpers.transmogrifier import correct_path
+from imio.helpers.transmogrifier import get_correct_path
 from imio.helpers.transmogrifier import get_main_path
 from imio.helpers.transmogrifier import key_val as shortcut
 from imio.helpers.transmogrifier import pool_tuples
@@ -512,7 +512,7 @@ class PathInserter(object):
             new_id = idnormalizer.normalize(title)
             item['_path'] = '/'.join([item['_parent'], new_id])
             # we rename id if it already exists
-            item['_path'] = correct_path(self.portal, item['_path'])
+            item['_path'] = get_correct_path(self.portal, item['_path'])
             item['_act'] = 'new'
             # we store _path for each _id
             self.ids[item_type][item['_set']][item['_id']]['path'] = item['_path']

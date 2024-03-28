@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from imio.helpers.content import safe_encode
 from imio.helpers.transmogrifier import get_main_path
+from imio.pyutils.utils import safe_encode
 from plone.registry.interfaces import IRecordModifiedEvent
 
 import logging

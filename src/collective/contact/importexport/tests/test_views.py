@@ -10,7 +10,6 @@ from unittest import mock
 from zope.interface import alsoProvides
 
 import os
-import unittest
 
 
 def read_log(directory, filename):
@@ -48,9 +47,8 @@ class TestExecutePipeline(PipelineTestCase):
         with self.assertRaises(Unauthorized):
             self.portal.restrictedTraverse("@@execute-contact-pipeline")
 
-    @unittest.expectedFailure
     def test_call_published(self):
-        """Plone 6 regression: plone.protect aborts the import of a GET without CSRF token (MIGRATION.md)."""
+        """An authenticated GET without CSRF token (cron, curl) commits the import."""
         self.prepare_pipeline(
             organizations=[{"_id": "1", "title": "Commune", "organization_type": "Commune"}], filename="pipeline.cfg"
         )

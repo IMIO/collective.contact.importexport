@@ -3,8 +3,8 @@
 from collective.contact.importexport.interfaces import ICollectiveContactImportexportLayer
 from collective.contact.importexport.testing import COLLECTIVE_CONTACT_IMPORTEXPORT_INTEGRATION_TESTING  # noqa
 from plone import api
+from plone.base.utils import get_installer
 from plone.browserlayer import utils
-from Products.CMFPlone.utils import get_installer
 
 import unittest
 
@@ -31,12 +31,8 @@ class TestSetup(unittest.TestCase):
         self.assertIn("transmogrifier", value)
 
     def test_directory_import_action(self):
-        """The Import action of directories (its view doesn't exist: see MIGRATION.md)."""
-        action = self.portal.portal_types.directory.getActionObject("object/collective_contact_import")
-        self.assertEqual(
-            (action.title, action.permissions, action.getActionExpression()),
-            ("Import", ("Modify portal content",), "string:${object_url}/collective_contact_importexport_import_view"),
-        )
+        """No Import action on directories (its view was removed in 1.0.0)."""
+        self.assertIsNone(self.portal.portal_types.directory.getActionObject("object/collective_contact_import"))
 
     def test_browserlayer(self):
         """Test that ICollectiveContactImportexportLayer is registered."""

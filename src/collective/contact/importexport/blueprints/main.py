@@ -25,9 +25,9 @@ from imio.helpers.transmogrifier import str_to_bool
 from imio.helpers.transmogrifier import str_to_date
 from imio.pyutils.system import dump_var
 from plone import api
+from plone.base.utils import get_installer
 from plone.base.utils import safe_text
 from plone.i18n.normalizer.interfaces import IIDNormalizer
-from Products.CMFPlone.utils import get_installer
 from z3c.relationfield.relation import RelationValue
 from zope.annotation.interfaces import IAnnotations
 from zope.component import getUtility

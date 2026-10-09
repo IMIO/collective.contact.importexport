@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from collections import OrderedDict
 from collective.contact.importexport import A_S
@@ -26,37 +25,44 @@ from imio.helpers.transmogrifier import relative_path
 from imio.helpers.transmogrifier import str_to_bool
 from imio.helpers.transmogrifier import str_to_date
 from imio.pyutils.system import dump_var
-from plone.i18n.normalizer.interfaces import IIDNormalizer
 from plone import api
-from Products.CMFPlone.utils import safe_unicode
+from plone.base.utils import safe_text
+from plone.i18n.normalizer.interfaces import IIDNormalizer
+from Products.CMFPlone.utils import get_installer
 from z3c.relationfield.relation import RelationValue
 from zope.annotation.interfaces import IAnnotations
 from zope.component import getUtility
-from zope.interface import classProvides
-from zope.interface import implements
+from zope.interface import implementer
+from zope.interface import provider
 from zope.intid.interfaces import IIntIds
 
 import logging
 import os
 
+
 MANAGED_TYPES = ['organization', 'person', 'held_position']
 
 
-class Initialization(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class Initialization:
     """Initializes global variables to be used in next sections.
 
     Parameters:
         * basepath = O, absolute directory. If empty, buildout dir will be used.
         * subpath = O, if given, it will be appended to basepath.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
-        self.workingpath = get_main_path(safe_unicode(options.get('basepath', '')),
-                                         safe_unicode(options.get('subpath', '')))
+        self.workingpath = get_main_path(safe_text(options.get('basepath', '')),
+                                         safe_text(options.get('subpath', '')))
         self.portal = transmogrifier.context
+        # remove handlers of previous runs, otherwise log lines are duplicated
+        for logger_ in (e_logger, o_logger):
+            for handler in [hdl for hdl in logger_.handlers if isinstance(hdl, logging.FileHandler)]:
+                handler.close()
+                logger_.removeHandler(handler)
         efh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors.log'), mode='w')
         efh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         efh.setLevel(logging.INFO)
@@ -97,7 +103,7 @@ class Initialization(object):
             brains = api.content.find(portal_type='directory')
             if brains:
                 directory = brains[0].getObject()
-                dir_path = relative_path(self.portal, brains[0].getPath())
+                dir_path = relative_path(self.portal, brains[0].getPath(), with_slash=False)
         if not directory:
             raise Exception("{}: Directory not found !".format(name))
         self.storage['directory'] = directory
@@ -106,7 +112,7 @@ class Initialization(object):
         dir_org_config = {}
         dir_org_config_len = {}
         for typ in ['types', 'levels']:
-            dir_org_config[typ] = OrderedDict([(safe_unicode(t['name']), safe_unicode(t['token'])) for t in
+            dir_org_config[typ] = OrderedDict([(safe_text(t['name']), safe_text(t['token'])) for t in
                                                getattr(self.storage['directory'], 'organization_%s' % typ)])
             if not len(dir_org_config[typ]):
                 dir_org_config[typ] = OrderedDict([(u'Non défini', u'non-defini')])
@@ -119,7 +125,9 @@ class Initialization(object):
             yield item
 
 
-class CommonInputChecks(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class CommonInputChecks:
     """Checks input values.
 
     * check uniqueness of _id
@@ -141,26 +149,23 @@ class CommonInputChecks(object):
         * held_position_booleans = O, held position fieldnames that must be converted to boolean.
         * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.fieldnames = self.storage['fieldnames']
         self.ids = self.storage['ids']
-        self.csv_encoding = transmogrifier['config'].get('csv_encoding', 'utf8')
-        self.phone_country = safe_unicode(options.get('phone_country', 'BE')).upper()
-        self.languages = [safe_unicode(options.get('language', u'fr')).lower()]
+        self.phone_country = safe_text(options.get('phone_country', 'BE')).upper()
+        self.languages = [safe_text(options.get('language', u'fr')).lower()]
         if 'en' not in self.languages:
             self.languages.append(u'en')
-        self.uniques = {typ: {key: {} for key in safe_unicode(options.get('{}_uniques'.format(typ), '')).split()
+        self.uniques = {typ: {key: {} for key in safe_text(options.get('{}_uniques'.format(typ), '')).split()
                               if key in self.fieldnames[typ]}
                         for typ in MANAGED_TYPES}
-        self.booleans = {typ: [key for key in safe_unicode(options.get('{}_booleans'.format(typ), '')).split()
+        self.booleans = {typ: [key for key in safe_text(options.get('{}_booleans'.format(typ), '')).split()
                                if key in self.fieldnames[typ]]
                          for typ in MANAGED_TYPES}
-        self.hyphens = {typ: [key for key in safe_unicode(options.get('{}_hyphen_newline'.format(typ), '')).split()
+        self.hyphens = {typ: [key for key in safe_text(options.get('{}_hyphen_newline'.format(typ), '')).split()
                               if key in self.fieldnames[typ]]
                         for typ in MANAGED_TYPES}
         self.storage['booleans'] = self.booleans
@@ -175,7 +180,7 @@ class CommonInputChecks(object):
 
             # set correct values
             for fld in self.fieldnames[item_type]:
-                item[fld] = safe_unicode(item[fld].strip(' '), encoding=self.csv_encoding)
+                item[fld] = item[fld].strip(' ')
             for fld in self.hyphens.get(item_type, []):
                 if '\n' in item[fld]:
                     item[fld] = ' - '.join([part.strip() for part in item[fld].split('\n') if part.strip()])
@@ -247,10 +252,10 @@ class CommonInputChecks(object):
                     if item['organization_type']:
                         if item['organization_type'] not in self.dir_org_config[type_type]:
                             self.dir_org_config[type_type][item['organization_type']] = \
-                                safe_unicode(idnormalizer.normalize(item['organization_type']))
+                                safe_text(idnormalizer.normalize(item['organization_type']))
                         item['organization_type'] = self.dir_org_config[type_type][item['organization_type']]
                     else:  # we take the first value
-                        item['organization_type'] = self.dir_org_config[type_type].values()[0]
+                        item['organization_type'] = list(self.dir_org_config[type_type].values())[0]
             elif item_type == 'person':
                 item['gender'] = valid_value_in_list(item, item['gender'], ('', 'F', 'M'))
                 item['birthday'] = str_to_date(item, 'birthday', log_error)
@@ -271,14 +276,14 @@ class CommonInputChecks(object):
             yield item
 
 
-class RelationsInserter(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class RelationsInserter:
     """Add relations between held position and organization.
 
     Parameters:
         * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -305,7 +310,9 @@ class RelationsInserter(object):
             yield item
 
 
-class UpdatePathInserter(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class UpdatePathInserter:
     """Add _path if we have to do an element update.
 
     * searches existing objects following parameter, composed of quartet (field index item-condition must-exist)
@@ -317,8 +324,6 @@ class UpdatePathInserter(object):
         * held_position_uniques = M, quartets related to held positions
         * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -327,12 +332,12 @@ class UpdatePathInserter(object):
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.ids = self.storage['ids']
         # we add in options the following information, used in imio.dms.mail context
-        cbin = self.portal.portal_quickinstaller.isProductInstalled('collective.behavior.internalnumber')
+        cbin = get_installer(self.portal).is_product_installed('collective.behavior.internalnumber')
         options['cbin'] = str(cbin)
         self.uniques = {}
         self.cbin_beh = {}
         for typ in MANAGED_TYPES:
-            values = safe_unicode(options.get('{}_uniques'.format(typ), '')).strip().split()
+            values = safe_text(options.get('{}_uniques'.format(typ), '')).strip().split()
             if len(values) % 4:
                 raise Exception("The '{}' section '{}' option must contain a multiple of 4 elements".format(name,
                                 '{}_uniques'.format(typ)))
@@ -366,7 +371,7 @@ class UpdatePathInserter(object):
                             raise Exception(u'Too more results ! See log...')
                         continue
                     elif len(brains):
-                        item['_path'] = relative_path(self.portal, brains[0].getPath())
+                        item['_path'] = relative_path(self.portal, brains[0].getPath(), with_slash=False)
                         item['_act'] = 'update'
                         # we store _path for each _id
                         self.ids[item_type][item['_set']][item['_id']]['path'] = item['_path']
@@ -379,14 +384,14 @@ class UpdatePathInserter(object):
             yield item
 
 
-class ParentPathInserter(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class ParentPathInserter:
     """Updates _parent following 'linked' elements in sub organization or held position.
 
     Parameters:
         * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -420,14 +425,14 @@ class ParentPathInserter(object):
             yield item
 
 
-class MoveObject(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class MoveObject:
     """Moves existing object if necessary.
 
     Parameters:
         * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -460,13 +465,15 @@ class MoveObject(object):
                 moved_obj = api.content.move(obj, target)
                 # TODO manage organization_type see dir_org_config
                 # print("'{}' moved to '{}'".format(item['_path'], item['_parent']))
-                item['_path'] = relative_path(self.portal, '/'.join(moved_obj.getPhysicalPath()))
+                item['_path'] = relative_path(self.portal, '/'.join(moved_obj.getPhysicalPath()), with_slash=False)
                 self.ids[item['_type']][item['_set']][item['_id']]['path'] = item['_path']
                 # indexes and relations are well updated
             yield item
 
 
-class PathInserter(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class PathInserter:
     """Adds _path for new element.
 
     * Finds parent for sub organization and held position.
@@ -478,8 +485,6 @@ class PathInserter(object):
         * held_position_id_keys = M, held position normalized fieldnames.
         * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -487,7 +492,7 @@ class PathInserter(object):
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.fieldnames = self.storage['fieldnames']
         self.ids = self.storage['ids']
-        self.id_keys = {typ: [key for key in safe_unicode(options.get('{}_id_keys'.format(typ), '')).split()
+        self.id_keys = {typ: [key for key in safe_text(options.get('{}_id_keys'.format(typ), '')).split()
                               if key in self.fieldnames[typ]]
                         for typ in MANAGED_TYPES}
         self.roe = bool(int(options.get('raise_on_error', '1')))
@@ -519,10 +524,10 @@ class PathInserter(object):
             yield item
 
 
-class TransitionsInserter(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class TransitionsInserter:
     """Adds _transitions following _inactive column."""
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -549,7 +554,9 @@ class TransitionsInserter(object):
             yield item
 
 
-class LastSection(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class LastSection:
     """Last section to do things at the end of each item process.
 
     * counts by type and action.
@@ -559,8 +566,6 @@ class LastSection(object):
     Parameters:
         * send_mail = O, Send a mail with summary and errors. Default 0.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous

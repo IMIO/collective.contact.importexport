@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from collective.contact.importexport import A_S
 from collective.contact.importexport import o_logger
 from collective.contact.importexport import T_S
@@ -10,21 +8,18 @@ from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
 from imio.helpers.transmogrifier import key_val as shortcut
 from zope.annotation.interfaces import IAnnotations
-from zope.interface import classProvides
-from zope.interface import implements
-
-import ipdb
-# import sys
+from zope.interface import implementer
+from zope.interface import provider
 
 
-class BreakpointSection(object):
-    """Stops with ipdb if condition is matched.
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class BreakpointSection:
+    """Stops in the debugger if condition is matched.
 
     Parameters:
         * condition = M, matching condition.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         condition = options['condition']
@@ -36,15 +31,14 @@ class BreakpointSection(object):
     def __iter__(self):
         for item in self.previous:
             if self.condition(item):
-                # ipdb.set_trace(sys._getframe().f_back)  # Break!
-                ipdb.set_trace()  # Break!
+                breakpoint()  # Break! (PYTHONBREAKPOINT can select the debugger)
             yield item
 
 
-class ShortLog(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class ShortLog:
     """Logs shortly item."""
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -61,14 +55,14 @@ class ShortLog(object):
             yield item
 
 
-class StopSection(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class StopSection:
     """Stops if condition is matched.
 
     Parameters:
         * condition = M, matching condition.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         condition = options['condition']

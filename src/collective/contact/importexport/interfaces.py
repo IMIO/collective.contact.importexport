@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Module where all interfaces, events and exceptions live."""
 
 from collective.contact.importexport import _
 from plone.supermodel import model
-from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope import schema
+from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 
 
 class ICollectiveContactImportexportLayer(IDefaultBrowserLayer):

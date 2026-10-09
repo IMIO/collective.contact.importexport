@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 from imio.helpers.transmogrifier import get_main_path
-from imio.pyutils.utils import safe_encode
 from plone.registry.interfaces import IRecordModifiedEvent
 
 import logging
 import os
+
 
 logger = logging.getLogger('collective.contact.importexport')
 
@@ -20,10 +19,8 @@ def modified_pipeline(obj, event):
         new_val = event.newValue
     if new_val is None:
         return
-    new_val = safe_encode(new_val)
     path = get_main_path()
     pipeline_path = os.path.join(path, 'pipeline.cfg')
-    fd = open(pipeline_path, 'w')
-    fd.writelines(new_val)
-    fd.close()
+    with open(pipeline_path, 'w', encoding='utf-8') as fd:
+        fd.write(new_val)
     logger.info('Pipeline was placed in {}'.format(pipeline_path))

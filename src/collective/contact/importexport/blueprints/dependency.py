@@ -1,23 +1,22 @@
-# -*- coding: utf-8 -*-
 
 from collective.contact.importexport import logger
 from collective.contact.importexport.blueprints.main import ANNOTATION_KEY
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from zope.annotation.interfaces import IAnnotations
-from zope.interface import classProvides
-from zope.interface import implements
+from zope.interface import implementer
+from zope.interface import provider
 
 
-class DependencySorter(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class DependencySorter:
     """Sorts organizations by hierarchy.
 
     * Sets to None empty values.
     * Updates directory if necessary.
     * yields again all items by set.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous

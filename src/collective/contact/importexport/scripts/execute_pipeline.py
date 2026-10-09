@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 
 from AccessControl.SecurityManagement import newSecurityManager
 from collective.contact.importexport import logger
 from collective.contact.importexport.utils import send_report
 from collective.transmogrifier.transmogrifier import configuration_registry
 from collective.transmogrifier.transmogrifier import Transmogrifier
-from imio.helpers.security import setup_logger
 from Testing import makerequest
 from zope.component.hooks import setSite
 from zope.globalrequest import setRequest
@@ -41,7 +39,7 @@ if 'app' in locals():
     # Called from bin/instance run
     args = sys.argv
     if len(args) < 6 or sys.argv[5] not in ('0', '1'):
-        print USAGE
+        print(USAGE)
         sys.exit(0)
     pipeline_filepath = sys.argv[3]
     plone_id = sys.argv[4]

@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
 """Init and utils."""
 from zope.i18nmessageid import MessageFactory
+
 import logging
+
 
 # type shortcuts and action shortcuts
 T_S = {u'organization': u'O', u'person': u'P', u'held_position': u'HP'}

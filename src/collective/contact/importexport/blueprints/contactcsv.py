@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from collective.contact.importexport import logger
 from collective.contact.importexport import o_logger
 from collective.contact.importexport.blueprints.main import ANNOTATION_KEY
@@ -8,20 +7,31 @@ from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from collective.transmogrifier.utils import Condition
 from collective.transmogrifier.utils import Expression
-from collective.transmogrifier.utils import openFileReference
+from collective.transmogrifier.utils import resolvePackageReferenceOrFile
 from datetime import datetime
 from imio.pyutils.system import load_var
 from imio.pyutils.system import runCommand
-from Products.CMFPlone.utils import safe_unicode
+from plone.base.utils import safe_text
 from zope.annotation import IAnnotations
-from zope.interface import classProvides
-from zope.interface import implements
+from zope.interface import implementer
+from zope.interface import provider
 
 import csv
 import os
 
 
-class CSVDiskSourceSection(object):
+def open_csv(transmogrifier, filename):
+    """Opens a csv file as text, using the pipeline csv_encoding option (default utf-8)."""
+    encoding = transmogrifier['config'].get('csv_encoding') or 'utf-8'
+    filename = resolvePackageReferenceOrFile(filename)
+    if not os.path.isfile(filename):
+        return None
+    return open(filename, encoding=encoding, newline='')
+
+
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class CSVDiskSourceSection:
     """Opens disk files from filenames and stores handlers.
 
     Parameters:
@@ -29,19 +39,17 @@ class CSVDiskSourceSection(object):
         * persons_filename = O, persons csv file path.
         * held_positions_filename = O, held positions csv file path.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         for typ in MANAGED_TYPES:
-            filename = safe_unicode(options.get('{}s_filename'.format(typ), ''))
+            filename = safe_text(options.get('{}s_filename'.format(typ), ''))
             if filename:
                 if not os.path.isabs(filename):
                     filename = os.path.join(self.storage['wp'], filename)
-                file_ = openFileReference(transmogrifier, filename)
+                file_ = open_csv(transmogrifier, filename)
                 if file_ is None:
                     raise Exception("Cannot open file '{}'".format(filename))
                 self.storage['csv_files'][typ] = file_
@@ -58,7 +66,9 @@ class CSVDiskSourceSection(object):
         yield {'set': self.sett}
 
 
-class CSVSshSourceSection(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class CSVSshSourceSection:
     """Gets new distant files regularly uploaded with ssh.
 
     * Lists distant files ending with .txt.
@@ -70,12 +80,10 @@ class CSVSshSourceSection(object):
     Parameters:
         * servername = M, ssh host
         * username = M, ssh user
-        * server_files_path = M, csv path
+        * server_files_path = M, csv path (``server_path`` is accepted too)
         * registry_filename = M, registry filename storing treated files basenames
         * transfer_path = O, local path to transfer files in
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -83,11 +91,11 @@ class CSVSshSourceSection(object):
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
 
         # setup
-        servername = safe_unicode(options.get('servername', ''))
-        username = safe_unicode(options.get('username', ''))
-        files_path = safe_unicode(options.get('server_files_path', ''))
-        self.registry_filename = safe_unicode(options.get('registry_filename', ''))
-        transfer_path = safe_unicode(options.get('transfer_path', '')) or u'/tmp'
+        servername = safe_text(options.get('servername', ''))
+        username = safe_text(options.get('username', ''))
+        files_path = safe_text(options.get('server_files_path') or options.get('server_path', ''))
+        self.registry_filename = safe_text(options.get('registry_filename', ''))
+        transfer_path = safe_text(options.get('transfer_path', '')) or u'/tmp'
         if not os.path.isabs(transfer_path):
             transfer_path = os.path.join(self.storage['wp'], transfer_path)
         if not os.path.exists(transfer_path):
@@ -141,7 +149,7 @@ class CSVSshSourceSection(object):
             for i, typ in enumerate(MANAGED_TYPES, 1):
                 filename = rec[i]
                 if filename:
-                    file_ = openFileReference(self.transmogrifier, filename)
+                    file_ = open_csv(self.transmogrifier, filename)
                     if file_ is None:
                         raise Exception("Cannot open file '{}'".format(filename))
                     self.storage['csv_files'][typ] = file_
@@ -153,7 +161,9 @@ class CSVSshSourceSection(object):
             yield {'set': rec[0]}
 
 
-class CSVReaderSection(object):
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class CSVReaderSection:
     """Reads, as csv, file handlers stored in self.storage['csv_files'][typ].
 
     Works by set to treat multiple sets by order (following date basename).
@@ -164,21 +174,19 @@ class CSVReaderSection(object):
         * fmtparam-strict = O, raises exception on row error. Default False.
         * raise_on_error = O, raises exception if 1. Default 1. Can be set to 0.
     """
-    classProvides(ISectionBlueprint)
-    implements(ISection)
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.csv_headers = Condition(options.get('csv_headers', 'python:True'), transmogrifier, name, options)
-        self.dialect = safe_unicode(options.get('dialect', 'excel'))
+        self.dialect = safe_text(options.get('dialect', 'excel'))
         self.roe = bool(int(options.get('raise_on_error', '1')))
         self.fmtparam = dict(
             (key[len('fmtparam-'):],
              Expression(value, transmogrifier, name, options)(
                  options, key=key[len('fmtparam-'):])) for key, value
-            in options.iteritems() if key.startswith('fmtparam-'))
+            in options.items() if key.startswith('fmtparam-'))
 
     def __iter__(self):
         for item in self.previous:

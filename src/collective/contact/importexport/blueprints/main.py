@@ -1,4 +1,3 @@
-
 from collections import OrderedDict
 from collective.contact.importexport import A_S
 from collective.contact.importexport import e_logger
@@ -40,7 +39,7 @@ import logging
 import os
 
 
-MANAGED_TYPES = ['organization', 'person', 'held_position']
+MANAGED_TYPES = ["organization", "person", "held_position"]
 
 
 @provider(ISectionBlueprint)
@@ -55,70 +54,74 @@ class Initialization:
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
-        self.workingpath = get_main_path(safe_text(options.get('basepath', '')),
-                                         safe_text(options.get('subpath', '')))
+        self.workingpath = get_main_path(safe_text(options.get("basepath", "")), safe_text(options.get("subpath", "")))
         self.portal = transmogrifier.context
         # remove handlers of previous runs, otherwise log lines are duplicated
         for logger_ in (e_logger, o_logger):
             for handler in [hdl for hdl in logger_.handlers if isinstance(hdl, logging.FileHandler)]:
                 handler.close()
                 logger_.removeHandler(handler)
-        efh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors.log'), mode='w')
-        efh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+        efh = logging.FileHandler(os.path.join(self.workingpath, "ie_input_errors.log"), mode="w")
+        efh.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
         efh.setLevel(logging.INFO)
         e_logger.addHandler(efh)
-        ofh = logging.FileHandler(os.path.join(self.workingpath, 'ie_shortlog.log'), mode='w')
-        ofh.setFormatter(logging.Formatter('%(message)s'))
+        ofh = logging.FileHandler(os.path.join(self.workingpath, "ie_shortlog.log"), mode="w")
+        ofh.setFormatter(logging.Formatter("%(message)s"))
         ofh.setLevel(logging.INFO)
         o_logger.addHandler(ofh)
-        pipe_commit = transmogrifier.context.REQUEST.get('_pipeline_commit_', False)
+        pipe_commit = transmogrifier.context.REQUEST.get("_pipeline_commit_", False)
         if pipe_commit:
-            ecfh = logging.FileHandler(os.path.join(self.workingpath, 'ie_input_errors_commit.log'), mode='a')
-            ecfh.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
+            ecfh = logging.FileHandler(os.path.join(self.workingpath, "ie_input_errors_commit.log"), mode="a")
+            ecfh.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
             ecfh.setLevel(logging.INFO)
             e_logger.addHandler(ecfh)
-            ocfh = logging.FileHandler(os.path.join(self.workingpath, 'ie_shortlog_commit.log'), mode='a')
-            ocfh.setFormatter(logging.Formatter('%(message)s'))
+            ocfh = logging.FileHandler(os.path.join(self.workingpath, "ie_shortlog_commit.log"), mode="a")
+            ocfh.setFormatter(logging.Formatter("%(message)s"))
             ocfh.setLevel(logging.INFO)
             o_logger.addHandler(ocfh)
 
         # set working path in portal annotation to retrieve log files
         annot = IAnnotations(self.portal).setdefault(ANNOTATION_KEY, {})
-        annot['wp'] = self.workingpath
+        annot["wp"] = self.workingpath
         # set global variables in annotation
         self.storage = IAnnotations(transmogrifier).setdefault(ANNOTATION_KEY, {})
-        self.storage['wp'] = self.workingpath
-        self.storage['ids'] = {typ: {} for typ in MANAGED_TYPES}
-        self.storage['csv_files'] = {typ: None for typ in MANAGED_TYPES}
-        self.storage['fieldnames'] = {typ: transmogrifier['config'].get('{}s_fieldnames'.format(typ), '').split()
-                                      for typ in MANAGED_TYPES}
-        self.storage['set_lst'] = {}  # to store set and associated date
+        self.storage["wp"] = self.workingpath
+        self.storage["ids"] = {typ: {} for typ in MANAGED_TYPES}
+        self.storage["csv_files"] = {typ: None for typ in MANAGED_TYPES}
+        self.storage["fieldnames"] = {
+            typ: transmogrifier["config"].get("{}s_fieldnames".format(typ), "").split() for typ in MANAGED_TYPES
+        }
+        self.storage["set_lst"] = {}  # to store set and associated date
         # find directory
         directory = None
-        dir_path = transmogrifier['config'].get('directory_path', '')
+        dir_path = transmogrifier["config"].get("directory_path", "")
         if dir_path:
-            dir_path = dir_path.lstrip('/')
+            dir_path = dir_path.lstrip("/")
             directory = self.portal.unrestrictedTraverse(dir_path, default=None)
         else:
-            brains = api.content.find(portal_type='directory')
+            brains = api.content.find(portal_type="directory")
             if brains:
                 directory = brains[0].getObject()
                 dir_path = relative_path(self.portal, brains[0].getPath(), with_slash=False)
         if not directory:
             raise Exception("{}: Directory not found !".format(name))
-        self.storage['directory'] = directory
-        self.storage['directory_path'] = dir_path
+        self.storage["directory"] = directory
+        self.storage["directory_path"] = dir_path
         # store directory configuration
         dir_org_config = {}
         dir_org_config_len = {}
-        for typ in ['types', 'levels']:
-            dir_org_config[typ] = OrderedDict([(safe_text(t['name']), safe_text(t['token'])) for t in
-                                               getattr(self.storage['directory'], 'organization_%s' % typ)])
+        for typ in ["types", "levels"]:
+            dir_org_config[typ] = OrderedDict(
+                [
+                    (safe_text(t["name"]), safe_text(t["token"]))
+                    for t in getattr(self.storage["directory"], "organization_%s" % typ)
+                ]
+            )
             if not len(dir_org_config[typ]):
-                dir_org_config[typ] = OrderedDict([(u'Non défini', u'non-defini')])
+                dir_org_config[typ] = OrderedDict([("Non défini", "non-defini")])
             dir_org_config_len[typ] = len(dir_org_config[typ])
-        self.storage['dir_org_config'] = dir_org_config
-        self.storage['dir_org_config_len'] = dir_org_config_len
+        self.storage["dir_org_config"] = dir_org_config
+        self.storage["dir_org_config_len"] = dir_org_config_len
 
     def __iter__(self):
         for item in self.previous:
@@ -153,124 +156,146 @@ class CommonInputChecks:
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.fieldnames = self.storage['fieldnames']
-        self.ids = self.storage['ids']
-        self.phone_country = safe_text(options.get('phone_country', 'BE')).upper()
-        self.languages = [safe_text(options.get('language', u'fr')).lower()]
-        if 'en' not in self.languages:
-            self.languages.append(u'en')
-        self.uniques = {typ: {key: {} for key in safe_text(options.get('{}_uniques'.format(typ), '')).split()
-                              if key in self.fieldnames[typ]}
-                        for typ in MANAGED_TYPES}
-        self.booleans = {typ: [key for key in safe_text(options.get('{}_booleans'.format(typ), '')).split()
-                               if key in self.fieldnames[typ]]
-                         for typ in MANAGED_TYPES}
-        self.hyphens = {typ: [key for key in safe_text(options.get('{}_hyphen_newline'.format(typ), '')).split()
-                              if key in self.fieldnames[typ]]
-                        for typ in MANAGED_TYPES}
-        self.storage['booleans'] = self.booleans
-        self.dir_org_config = self.storage['dir_org_config']
-        self.directory_path = self.storage['directory_path']
-        self.roe = bool(int(options.get('raise_on_error', '1')))
+        self.fieldnames = self.storage["fieldnames"]
+        self.ids = self.storage["ids"]
+        self.phone_country = safe_text(options.get("phone_country", "BE")).upper()
+        self.languages = [safe_text(options.get("language", "fr")).lower()]
+        if "en" not in self.languages:
+            self.languages.append("en")
+        self.uniques = {
+            typ: {
+                key: {}
+                for key in safe_text(options.get("{}_uniques".format(typ), "")).split()
+                if key in self.fieldnames[typ]
+            }
+            for typ in MANAGED_TYPES
+        }
+        self.booleans = {
+            typ: [
+                key
+                for key in safe_text(options.get("{}_booleans".format(typ), "")).split()
+                if key in self.fieldnames[typ]
+            ]
+            for typ in MANAGED_TYPES
+        }
+        self.hyphens = {
+            typ: [
+                key
+                for key in safe_text(options.get("{}_hyphen_newline".format(typ), "")).split()
+                if key in self.fieldnames[typ]
+            ]
+            for typ in MANAGED_TYPES
+        }
+        self.storage["booleans"] = self.booleans
+        self.dir_org_config = self.storage["dir_org_config"]
+        self.directory_path = self.storage["directory_path"]
+        self.roe = bool(int(options.get("raise_on_error", "1")))
 
     def __iter__(self):
         idnormalizer = getUtility(IIDNormalizer)
         for item in self.previous:
-            item_type = item['_type']
+            item_type = item["_type"]
 
             # set correct values
             for fld in self.fieldnames[item_type]:
-                item[fld] = item[fld].strip(' ')
+                item[fld] = item[fld].strip(" ")
             for fld in self.hyphens.get(item_type, []):
-                if '\n' in item[fld]:
-                    item[fld] = ' - '.join([part.strip() for part in item[fld].split('\n') if part.strip()])
+                if "\n" in item[fld]:
+                    item[fld] = " - ".join([part.strip() for part in item[fld].split("\n") if part.strip()])
 
-            if item_type == 'held_position':
-                item['_fid'] = None  # we don't yet manage position
+            if item_type == "held_position":
+                item["_fid"] = None  # we don't yet manage position
 
             # set directory as default parent
-            item['_parent'] = self.directory_path
+            item["_parent"] = self.directory_path
 
             # duplicated _id ?
-            if not item['_id']:
-                log_error(item, u"SKIPPING: missing id '_id'", level='critical')
+            if not item["_id"]:
+                log_error(item, "SKIPPING: missing id '_id'", level="critical")
                 if self.roe:
-                    raise Exception(u'Missing id ! See log...')
+                    raise Exception("Missing id ! See log...")
                 continue
-            if item['_id'] in self.ids[item_type][item['_set']]:
-                log_error(item, u"SKIPPING: duplicated id '{}', already present line {}".format(item['_id'],
-                          self.ids[item_type][item['_set']][item['_id']]['ln']), level='critical')
+            if item["_id"] in self.ids[item_type][item["_set"]]:
+                log_error(
+                    item,
+                    "SKIPPING: duplicated id '{}', already present line {}".format(
+                        item["_id"], self.ids[item_type][item["_set"]][item["_id"]]["ln"]
+                    ),
+                    level="critical",
+                )
                 if self.roe:
-                    raise Exception(u'Duplicated id ! See log...')
-            self.ids[item_type][item['_set']][item['_id']] = {'path': '', 'ln': item['_ln']}
+                    raise Exception("Duplicated id ! See log...")
+            self.ids[item_type][item["_set"]][item["_id"]] = {"path": "", "ln": item["_ln"]}
 
             # uniqueness
             for key in self.uniques[item_type]:
                 if not item[key]:
                     continue
-                uniques = self.uniques[item_type][key].setdefault(item['_set'], {})
+                uniques = self.uniques[item_type][key].setdefault(item["_set"], {})
                 if item[key] in uniques:
-                    log_error(item, u"duplicated {} '{}', already present line {:d}".format(key, item[key],
-                              uniques[item[key]]))
+                    log_error(
+                        item, "duplicated {} '{}', already present line {:d}".format(key, item[key], uniques[item[key]])
+                    )
                 else:
-                    uniques[item[key]] = item['_ln']
+                    uniques[item[key]] = item["_ln"]
 
             # to bool from int
             for key in self.booleans[item_type]:
                 item[key] = str_to_bool(item, key, log_error)
 
-            if 'country' in item:
-                country_code = get_country_code(item, 'country', self.phone_country, self.languages)
+            if "country" in item:
+                country_code = get_country_code(item, "country", self.phone_country, self.languages)
 
             # check zip
-            if 'zip_code' in item:
-                item['zip_code'] = valid_zip(item, 'zip_code', country_code)
+            if "zip_code" in item:
+                item["zip_code"] = valid_zip(item, "zip_code", country_code)
 
             # check phones
-            for key in ('phone', 'cell_phone', 'fax'):
+            for key in ("phone", "cell_phone", "fax"):
                 if key in item:
                     item[key] = valid_phone(item, key, country_code, self.phone_country)
 
             # check email
-            if 'email' in item:
-                item['email'] = valid_email(item, 'email')
+            if "email" in item:
+                item["email"] = valid_email(item, "email")
 
             # organization checks
-            if item_type == 'organization':
-                if item['_id'] == item['_oid']:
-                    log_error(item, u'SKIPPING: _oid is equal to _id {}'.format(item['_id']), level='critical')
+            if item_type == "organization":
+                if item["_id"] == item["_oid"]:
+                    log_error(item, "SKIPPING: _oid is equal to _id {}".format(item["_id"]), level="critical")
                     if self.roe:
-                        raise Exception(u'Inconsistent _oid ! See log...')
+                        raise Exception("Inconsistent _oid ! See log...")
                     continue
                 # keep only alphanum chars
-                if 'enterprise_number' in item and item['enterprise_number']:
-                    item['enterprise_number'] = alphanum(item['enterprise_number']).strip()
+                if "enterprise_number" in item and item["enterprise_number"]:
+                    item["enterprise_number"] = alphanum(item["enterprise_number"]).strip()
                 # manage org type if 'organization_type' column is defined
                 # (some clients use this column to put something else)
-                if 'organization_type' in item:
-                    type_type = item['_oid'] and 'levels' or 'types'
-                    if item['organization_type']:
-                        if item['organization_type'] not in self.dir_org_config[type_type]:
-                            self.dir_org_config[type_type][item['organization_type']] = \
-                                safe_text(idnormalizer.normalize(item['organization_type']))
-                        item['organization_type'] = self.dir_org_config[type_type][item['organization_type']]
+                if "organization_type" in item:
+                    type_type = item["_oid"] and "levels" or "types"
+                    if item["organization_type"]:
+                        if item["organization_type"] not in self.dir_org_config[type_type]:
+                            self.dir_org_config[type_type][item["organization_type"]] = safe_text(
+                                idnormalizer.normalize(item["organization_type"])
+                            )
+                        item["organization_type"] = self.dir_org_config[type_type][item["organization_type"]]
                     else:  # we take the first value
-                        item['organization_type'] = list(self.dir_org_config[type_type].values())[0]
-            elif item_type == 'person':
-                item['gender'] = valid_value_in_list(item, item['gender'], ('', 'F', 'M'))
-                item['birthday'] = str_to_date(item, 'birthday', log_error)
-            elif item_type == 'held_position':
-                item['start_date'] = str_to_date(item, 'start_date', log_error)
-                item['end_date'] = str_to_date(item, 'end_date', log_error)
-                if not item['_pid']:
-                    log_error(item, u"SKIPPING: missing related person id", level='critical')
+                        item["organization_type"] = list(self.dir_org_config[type_type].values())[0]
+            elif item_type == "person":
+                item["gender"] = valid_value_in_list(item, item["gender"], ("", "F", "M"))
+                item["birthday"] = str_to_date(item, "birthday", log_error)
+            elif item_type == "held_position":
+                item["start_date"] = str_to_date(item, "start_date", log_error)
+                item["end_date"] = str_to_date(item, "end_date", log_error)
+                if not item["_pid"]:
+                    log_error(item, "SKIPPING: missing related person id", level="critical")
                     if self.roe:
-                        raise Exception(u'Missing _pid ! See log...')
+                        raise Exception("Missing _pid ! See log...")
                     continue
-                if not item['_oid'] and not item['_fid']:
-                    log_error(item, u"SKIPPING: missing organization/position id", level='critical')
+                if not item["_oid"] and not item["_fid"]:
+                    log_error(item, "SKIPPING: missing organization/position id", level="critical")
                     if self.roe:
-                        raise Exception(u'Missing _oid/_fid ! See log...')
+                        raise Exception("Missing _oid/_fid ! See log...")
                     continue
 
             yield item
@@ -290,23 +315,24 @@ class RelationsInserter:
         self.portal = transmogrifier.context
         self.catalog = self.portal.portal_catalog
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.ids = self.storage['ids']
-        self.roe = bool(int(options.get('raise_on_error', '1')))
+        self.ids = self.storage["ids"]
+        self.roe = bool(int(options.get("raise_on_error", "1")))
 
     def __iter__(self):
         intids = getUtility(IIntIds)
         for item in self.previous:
-            item_type = item['_type']
-            if item_type == 'held_position':
-                if item['_oid'] and item['_oid'] not in self.ids['organization'][item['_set']]:
-                    log_error(item, u"SKIPPING: invalid related organization id '{}'".format(item['_oid']),
-                              level='critical')
+            item_type = item["_type"]
+            if item_type == "held_position":
+                if item["_oid"] and item["_oid"] not in self.ids["organization"][item["_set"]]:
+                    log_error(
+                        item, "SKIPPING: invalid related organization id '{}'".format(item["_oid"]), level="critical"
+                    )
                     if self.roe:
-                        raise Exception(u'Cannot find _oid ! See log...')
+                        raise Exception("Cannot find _oid ! See log...")
                     continue
                 # not using _pid yet
-                org = self.portal.unrestrictedTraverse(self.ids['organization'][item['_set']][item['_oid']]['path'])
-                item['position'] = RelationValue(intids.getId(org))
+                org = self.portal.unrestrictedTraverse(self.ids["organization"][item["_set"]][item["_oid"]]["path"])
+                item["position"] = RelationValue(intids.getId(org))
             yield item
 
 
@@ -330,57 +356,74 @@ class UpdatePathInserter:
         self.portal = transmogrifier.context
         self.catalog = self.portal.portal_catalog
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.ids = self.storage['ids']
+        self.ids = self.storage["ids"]
         # we add in options the following information, used in imio.dms.mail context
-        cbin = get_installer(self.portal).is_product_installed('collective.behavior.internalnumber')
-        options['cbin'] = str(cbin)
+        cbin = get_installer(self.portal).is_product_installed("collective.behavior.internalnumber")
+        options["cbin"] = str(cbin)
         self.uniques = {}
         self.cbin_beh = {}
         for typ in MANAGED_TYPES:
-            values = safe_text(options.get('{}_uniques'.format(typ), '')).strip().split()
+            values = safe_text(options.get("{}_uniques".format(typ), "")).strip().split()
             if len(values) % 4:
-                raise Exception("The '{}' section '{}' option must contain a multiple of 4 elements".format(name,
-                                '{}_uniques'.format(typ)))
-            self.uniques[typ] = [(f, i, Condition(c, transmogrifier, name, options),
-                                  Condition(e, transmogrifier, name, options)) for f, i, c, e in pool_tuples(values, 4)]
+                raise Exception(
+                    "The '{}' section '{}' option must contain a multiple of 4 elements".format(
+                        name, "{}_uniques".format(typ)
+                    )
+                )
+            self.uniques[typ] = [
+                (f, i, Condition(c, transmogrifier, name, options), Condition(e, transmogrifier, name, options))
+                for f, i, c, e in pool_tuples(values, 4)
+            ]
             typ_fti = getattr(self.portal.portal_types, typ)
-            self.cbin_beh[typ] = 'collective.behavior.internalnumber.behavior.IInternalNumberBehavior' in \
-                                 typ_fti.behaviors
-        self.roe = bool(int(options.get('raise_on_error', '1')))
+            self.cbin_beh[typ] = (
+                "collective.behavior.internalnumber.behavior.IInternalNumberBehavior" in typ_fti.behaviors
+            )
+        self.roe = bool(int(options.get("raise_on_error", "1")))
 
     def __iter__(self):
         for item in self.previous:
-            if '_path' in item:  # _path has already be set
+            if "_path" in item:  # _path has already be set
                 yield item
                 continue
-            item_type = item['_type']
+            item_type = item["_type"]
             # we will do a search for each index
             for field, idx, condition, must_exist in self.uniques[item_type]:
                 if item[field] and condition(item):
-                    if field == 'internal_number' and idx == 'internal_number' and not self.cbin_beh[item_type]:
-                        log_error(item, u"the internalnumber behavior is not defined on type {}".format(item_type),
-                                  level='critical')
+                    if field == "internal_number" and idx == "internal_number" and not self.cbin_beh[item_type]:
+                        log_error(
+                            item,
+                            "the internalnumber behavior is not defined on type {}".format(item_type),
+                            level="critical",
+                        )
                         if self.roe:
-                            raise Exception(u'The internalnumber behavior is not defined on type {}'.format(item_type))
+                            raise Exception("The internalnumber behavior is not defined on type {}".format(item_type))
                         continue
-                    brains = self.catalog.unrestrictedSearchResults({'portal_type': item_type, idx: item[field]})
+                    brains = self.catalog.unrestrictedSearchResults({"portal_type": item_type, idx: item[field]})
                     if len(brains) > 1:
-                        log_error(item, u"the search with '{}'='{}' gets multiple objs: {}".format(
-                            idx, item[field], u', '.join([b.getPath() for b in brains])), level='critical')
+                        log_error(
+                            item,
+                            "the search with '{}'='{}' gets multiple objs: {}".format(
+                                idx, item[field], ", ".join([b.getPath() for b in brains])
+                            ),
+                            level="critical",
+                        )
                         if self.roe:
-                            raise Exception(u'Too more results ! See log...')
+                            raise Exception("Too more results ! See log...")
                         continue
                     elif len(brains):
-                        item['_path'] = relative_path(self.portal, brains[0].getPath(), with_slash=False)
-                        item['_act'] = 'update'
+                        item["_path"] = relative_path(self.portal, brains[0].getPath(), with_slash=False)
+                        item["_act"] = "update"
                         # we store _path for each _id
-                        self.ids[item_type][item['_set']][item['_id']]['path'] = item['_path']
+                        self.ids[item_type][item["_set"]][item["_id"]]["path"] = item["_path"]
                         break
                     elif must_exist(item):
-                        log_error(item, u"the search with '{}'='{}' doesn't get any result".format(idx, item[field]),
-                                  level='critical')
+                        log_error(
+                            item,
+                            "the search with '{}'='{}' doesn't get any result".format(idx, item[field]),
+                            level="critical",
+                        )
                         if self.roe:
-                            raise Exception(u'Must find something ! See log...')
+                            raise Exception("Must find something ! See log...")
             yield item
 
 
@@ -397,31 +440,32 @@ class ParentPathInserter:
         self.previous = previous
         self.portal = transmogrifier.context
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.fieldnames = self.storage['fieldnames']
-        self.ids = self.storage['ids']
-        self.roe = bool(int(options.get('raise_on_error', '1')))
+        self.fieldnames = self.storage["fieldnames"]
+        self.ids = self.storage["ids"]
+        self.roe = bool(int(options.get("raise_on_error", "1")))
 
     def __iter__(self):
         for item in self.previous:
             # organization parent ?
-            item_type = item['_type']
-            if item_type in ('organization', 'held_position') and item['_oid']:
-                if item['_oid'] not in self.ids['organization'][item['_set']]:
-                    log_error(item, u"SKIPPING: invalid parent organization id '{}'".format(item['_oid']),
-                              level='critical')
+            item_type = item["_type"]
+            if item_type in ("organization", "held_position") and item["_oid"]:
+                if item["_oid"] not in self.ids["organization"][item["_set"]]:
+                    log_error(
+                        item, "SKIPPING: invalid parent organization id '{}'".format(item["_oid"]), level="critical"
+                    )
                     if self.roe:
-                        raise Exception(u'Cannot find parent ! See log...')
+                        raise Exception("Cannot find parent ! See log...")
                     continue
-                item['_parent'] = self.ids['organization'][item['_set']][item['_oid']]['path']
-                item['_related_title'] = self.portal.unrestrictedTraverse(item['_parent']).get_full_title()
+                item["_parent"] = self.ids["organization"][item["_set"]][item["_oid"]]["path"]
+                item["_related_title"] = self.portal.unrestrictedTraverse(item["_parent"]).get_full_title()
             # person parent ?
-            if item_type == 'held_position':
-                if item['_pid'] not in self.ids['person'][item['_set']]:
-                    log_error(item, u"SKIPPING: invalid related person id '{}'".format(item['_pid']), level='critical')
+            if item_type == "held_position":
+                if item["_pid"] not in self.ids["person"][item["_set"]]:
+                    log_error(item, "SKIPPING: invalid related person id '{}'".format(item["_pid"]), level="critical")
                     if self.roe:
-                        raise Exception(u'Cannot find related person ! See log...')
+                        raise Exception("Cannot find related person ! See log...")
                     continue
-                item['_parent'] = self.ids['person'][item['_set']][item['_pid']]['path']
+                item["_parent"] = self.ids["person"][item["_set"]][item["_pid"]]["path"]
             yield item
 
 
@@ -438,35 +482,38 @@ class MoveObject:
         self.previous = previous
         self.portal = transmogrifier.context
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.fieldnames = self.storage['fieldnames']
-        self.ids = self.storage['ids']
-        self.roe = bool(int(options.get('raise_on_error', '1')))
+        self.fieldnames = self.storage["fieldnames"]
+        self.ids = self.storage["ids"]
+        self.roe = bool(int(options.get("raise_on_error", "1")))
 
     def __iter__(self):
         for item in self.previous:
-            if item['_type'] != 'directory' and item.get('_act', 'no') == 'update' and \
-                    item['_parent'] != os.path.dirname(item['_path']):
-                obj = self.portal.unrestrictedTraverse(item['_path'], default=None)
+            if (
+                item["_type"] != "directory"
+                and item.get("_act", "no") == "update"
+                and item["_parent"] != os.path.dirname(item["_path"])
+            ):
+                obj = self.portal.unrestrictedTraverse(item["_path"], default=None)
                 if obj is None:
-                    log_error(item, u"SKIPPING: cannot find existing object '{}'".format(item['_path']),
-                              level='critical')
+                    log_error(
+                        item, "SKIPPING: cannot find existing object '{}'".format(item["_path"]), level="critical"
+                    )
                     if self.roe:
-                        raise Exception(u'Cannot find existing object ! See log...')
+                        raise Exception("Cannot find existing object ! See log...")
                     continue
-                target = self.portal.unrestrictedTraverse(item['_parent'], default=None)
+                target = self.portal.unrestrictedTraverse(item["_parent"], default=None)
                 if target is None:
-                    log_error(item, u"SKIPPING: cannot find new parent '{}'".format(item['_parent']),
-                              level='critical')
+                    log_error(item, "SKIPPING: cannot find new parent '{}'".format(item["_parent"]), level="critical")
                     if self.roe:
-                        raise Exception(u'Cannot find new parent ! See log...')
+                        raise Exception("Cannot find new parent ! See log...")
                     continue
                 # we move the object and update path, so all the next sections will work on this path
                 # constructor NO, update YES
                 moved_obj = api.content.move(obj, target)
                 # TODO manage organization_type see dir_org_config
                 # print("'{}' moved to '{}'".format(item['_path'], item['_parent']))
-                item['_path'] = relative_path(self.portal, '/'.join(moved_obj.getPhysicalPath()), with_slash=False)
-                self.ids[item['_type']][item['_set']][item['_id']]['path'] = item['_path']
+                item["_path"] = relative_path(self.portal, "/".join(moved_obj.getPhysicalPath()), with_slash=False)
+                self.ids[item["_type"]][item["_set"]][item["_id"]]["path"] = item["_path"]
                 # indexes and relations are well updated
             yield item
 
@@ -490,37 +537,42 @@ class PathInserter:
         self.previous = previous
         self.portal = transmogrifier.context
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.fieldnames = self.storage['fieldnames']
-        self.ids = self.storage['ids']
-        self.id_keys = {typ: [key for key in safe_text(options.get('{}_id_keys'.format(typ), '')).split()
-                              if key in self.fieldnames[typ]]
-                        for typ in MANAGED_TYPES}
-        self.roe = bool(int(options.get('raise_on_error', '1')))
+        self.fieldnames = self.storage["fieldnames"]
+        self.ids = self.storage["ids"]
+        self.id_keys = {
+            typ: [
+                key
+                for key in safe_text(options.get("{}_id_keys".format(typ), "")).split()
+                if key in self.fieldnames[typ]
+            ]
+            for typ in MANAGED_TYPES
+        }
+        self.roe = bool(int(options.get("raise_on_error", "1")))
 
     def __iter__(self):
         idnormalizer = getUtility(IIDNormalizer)
         for item in self.previous:
-            if '_path' in item:  # _path has already be set
+            if "_path" in item:  # _path has already be set
                 yield item
                 continue
-            item_type = item['_type']
-            title = u'-'.join([item[key] for key in self.id_keys[item_type] if item[key]])
+            item_type = item["_type"]
+            title = "-".join([item[key] for key in self.id_keys[item_type] if item[key]])
 
-            if item_type == 'held_position' and '_related_title' in item:
-                title = u'-'.join([title, item.pop('_related_title')])
+            if item_type == "held_position" and "_related_title" in item:
+                title = "-".join([title, item.pop("_related_title")])
 
             if not title:
-                log_error(item, u'cannot get an id from id keys {}'.format(self.id_keys[item_type]), level='critical')
+                log_error(item, "cannot get an id from id keys {}".format(self.id_keys[item_type]), level="critical")
                 if self.roe:
-                    raise Exception(u'No title ! See log...')
+                    raise Exception("No title ! See log...")
                 continue
             new_id = idnormalizer.normalize(title)
-            item['_path'] = '/'.join([item['_parent'], new_id])
+            item["_path"] = "/".join([item["_parent"], new_id])
             # we rename id if it already exists
-            item['_path'] = get_correct_path(self.portal, item['_path'])
-            item['_act'] = 'new'
+            item["_path"] = get_correct_path(self.portal, item["_path"])
+            item["_act"] = "new"
             # we store _path for each _id
-            self.ids[item_type][item['_set']][item['_id']]['path'] = item['_path']
+            self.ids[item_type][item["_set"]][item["_id"]]["path"] = item["_path"]
             yield item
 
 
@@ -534,23 +586,23 @@ class TransitionsInserter:
         self.portal = transmogrifier.context
         self.name = name
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.fieldnames = self.storage['fieldnames']
+        self.fieldnames = self.storage["fieldnames"]
         for typ in MANAGED_TYPES:
-            if '_inactive' in self.fieldnames[typ] and '_inactive' not in self.storage['booleans'][typ]:
+            if "_inactive" in self.fieldnames[typ] and "_inactive" not in self.storage["booleans"][typ]:
                 raise Exception("{}: _inactive field is not configured as boolean for type {} !".format(self.name, typ))
 
     def __iter__(self):
         for item in self.previous:
-            if '_path' not in item:
+            if "_path" not in item:
                 yield item
                 continue
-            if '_inactive' in item:
-                obj = self.portal.unrestrictedTraverse(item['_path'], default=None)
+            if "_inactive" in item:
+                obj = self.portal.unrestrictedTraverse(item["_path"], default=None)
                 state = api.content.get_state(obj=obj)
-                if item['_inactive'] and state == 'active':
-                    item['_transitions'] = 'deactivate'
-                elif not item['_inactive'] and state == 'deactivated':
-                    log_error(item, u'_inactive is False and current state is deactivated: we do not activate')
+                if item["_inactive"] and state == "active":
+                    item["_transitions"] = "deactivate"
+                elif not item["_inactive"] and state == "deactivated":
+                    log_error(item, "_inactive is False and current state is deactivated: we do not activate")
             yield item
 
 
@@ -572,39 +624,47 @@ class LastSection:
         self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         self.portal = transmogrifier.context
-        self.sets = self.storage['set_lst']
-        self.send_mail = bool(int(options.get('send_mail', '0')))
+        self.sets = self.storage["set_lst"]
+        self.send_mail = bool(int(options.get("send_mail", "0")))
 
     def __iter__(self):
         for item in self.previous:
-            sett = item['_set']
-            if sett != 'all':
-                self.sets[sett][shortcut(item['_type'], T_S)]['nb'] += 1
-                self.sets[sett][shortcut(item['_type'], T_S)][shortcut(item['_act'], A_S)] += 1
-                if '_error' in item:
-                    self.sets[sett][shortcut(item['_type'], T_S)]['e'] += 1
+            sett = item["_set"]
+            if sett != "all":
+                self.sets[sett][shortcut(item["_type"], T_S)]["nb"] += 1
+                self.sets[sett][shortcut(item["_type"], T_S)][shortcut(item["_act"], A_S)] += 1
+                if "_error" in item:
+                    self.sets[sett][shortcut(item["_type"], T_S)]["e"] += 1
             yield item
 
         # end of process
-        registry = self.storage.get('registry_dic', {})
-        to_send = [u'Summary of contact import:']
+        registry = self.storage.get("registry_dic", {})
+        to_send = ["Summary of contact import:"]
         errors = 0
         for sett in sorted(self.sets):
-            msg = u"{}: {}".format(sett, u', '.join([u"'{}' => ({})".format(tp, u'nb={nb}, N={N}, U={U}, D={D}, '
-                                                                                u'e={e}'.format(**self.sets[sett][tp]))
-                                                     for tp in ('O', 'P', 'HP')
-                                                     if self.sets[sett][tp]['nb']]))
-            errors += sum([self.sets[sett][tp]['e'] for tp in ('O', 'P', 'HP')])
+            msg = "{}: {}".format(
+                sett,
+                ", ".join(
+                    [
+                        "'{}' => ({})".format(
+                            tp, "nb={nb}, N={N}, U={U}, D={D}, " "e={e}".format(**self.sets[sett][tp])
+                        )
+                        for tp in ("O", "P", "HP")
+                        if self.sets[sett][tp]["nb"]
+                    ]
+                ),
+            )
+            errors += sum([self.sets[sett][tp]["e"] for tp in ("O", "P", "HP")])
             o_logger.info(msg)
             to_send.append(msg)
-            if self.sets[sett].pop('mode') == 'ssh':
+            if self.sets[sett].pop("mode") == "ssh":
                 registry.update({sett: self.sets[sett]})
         # dump registry if CSVSshSourceSection section is used
-        if 'registry_filename' in self.storage and self.transmogrifier.context.REQUEST.get('_pipeline_commit_', False):
+        if "registry_filename" in self.storage and self.transmogrifier.context.REQUEST.get("_pipeline_commit_", False):
             if registry:
-                logger.info("Updating registry in '{}'".format(self.storage['registry_filename']))
-                dump_var(self.storage['registry_filename'], registry)
+                logger.info("Updating registry in '{}'".format(self.storage["registry_filename"]))
+                dump_var(self.storage["registry_filename"], registry)
         if errors:
-            to_send.append(u'\nCheck log file because there are {} items in error !'.format(errors))
+            to_send.append("\nCheck log file because there are {} items in error !".format(errors))
         if self.send_mail:
             send_report(self.portal, to_send)

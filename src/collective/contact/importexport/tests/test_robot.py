@@ -3,6 +3,7 @@
 ROBOT_PLONE_MAJOR (4 or 6) selects the UI keywords: robotsuite passes the
 ROBOT_* environment variables to the suites as robot variables.
 """
+
 from ..testing import ACCEPTANCE
 from plone.testing import layered
 
@@ -25,13 +26,16 @@ SUITE_LAYERS = {}
 
 
 def test_suite():
-    os.environ.setdefault('ROBOT_PLONE_MAJOR', version('Products.CMFPlone').split('.')[0])
+    os.environ.setdefault("ROBOT_PLONE_MAJOR", version("Products.CMFPlone").split(".")[0])
     suite = unittest.TestSuite()
-    robot_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'robot')
+    robot_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "robot")
     for name in sorted(os.listdir(robot_dir)):
-        if name.startswith('test_') and name.endswith('.robot'):
-            suite.addTests([
-                layered(robotsuite.RobotTestSuite(os.path.join('robot', name)),
-                        layer=SUITE_LAYERS.get(name, ACCEPTANCE)),
-            ])
+        if name.startswith("test_") and name.endswith(".robot"):
+            suite.addTests(
+                [
+                    layered(
+                        robotsuite.RobotTestSuite(os.path.join("robot", name)), layer=SUITE_LAYERS.get(name, ACCEPTANCE)
+                    ),
+                ]
+            )
     return suite

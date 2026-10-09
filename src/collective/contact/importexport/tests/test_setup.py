@@ -1,7 +1,9 @@
-# -*- coding: utf-8 -*-
 """Setup tests for this package."""
+from collective.contact.importexport.interfaces import ICollectiveContactImportexportLayer
 from collective.contact.importexport.testing import COLLECTIVE_CONTACT_IMPORTEXPORT_INTEGRATION_TESTING  # noqa
 from plone import api
+from plone.browserlayer import utils
+from Products.CMFPlone.utils import get_installer
 
 import unittest
 
@@ -14,11 +16,11 @@ class TestSetup(unittest.TestCase):
     def setUp(self):
         """Custom shared utility setup for tests."""
         self.portal = self.layer['portal']
-        self.installer = api.portal.get_tool('portal_quickinstaller')
+        self.installer = get_installer(self.portal)
 
     def test_product_installed(self):
         """Test if collective.contact.importexport is installed."""
-        self.assertTrue(self.installer.isProductInstalled(
+        self.assertTrue(self.installer.is_product_installed(
             'collective.contact.importexport'))
 
     def test_registry(self):
@@ -29,9 +31,6 @@ class TestSetup(unittest.TestCase):
 
     def test_browserlayer(self):
         """Test that ICollectiveContactImportexportLayer is registered."""
-        from collective.contact.importexport.interfaces import (
-            ICollectiveContactImportexportLayer)
-        from plone.browserlayer import utils
         self.assertIn(
             ICollectiveContactImportexportLayer,
             utils.registered_layers())
@@ -43,19 +42,16 @@ class TestUninstall(unittest.TestCase):
 
     def setUp(self):
         self.portal = self.layer['portal']
-        self.installer = api.portal.get_tool('portal_quickinstaller')
-        self.installer.uninstallProducts(['collective.contact.importexport'])
+        self.installer = get_installer(self.portal)
+        self.installer.uninstall_product('collective.contact.importexport')
 
     def test_product_uninstalled(self):
         """Test if collective.contact.importexport is cleanly uninstalled."""
-        self.assertFalse(self.installer.isProductInstalled(
+        self.assertFalse(self.installer.is_product_installed(
             'collective.contact.importexport'))
 
     def test_browserlayer_removed(self):
         """Test that ICollectiveContactImportexportLayer is removed."""
-        from collective.contact.importexport.interfaces import \
-            ICollectiveContactImportexportLayer
-        from plone.browserlayer import utils
         self.assertNotIn(
-           ICollectiveContactImportexportLayer,
-           utils.registered_layers())
+            ICollectiveContactImportexportLayer,
+            utils.registered_layers())

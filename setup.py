@@ -56,6 +56,7 @@ setup(
         'test': [
             'collective.contact.core[test]',
             'collective.taxonomy',
+            'plone.app.robotframework',
             'plone.app.testing',
             'plone.app.contenttypes',
         ],

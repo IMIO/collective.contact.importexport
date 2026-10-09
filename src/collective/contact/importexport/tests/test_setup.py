@@ -29,6 +29,13 @@ class TestSetup(unittest.TestCase):
                                                'pipeline')
         self.assertIn(u'transmogrifier', value)
 
+    def test_directory_import_action(self):
+        """The Import action of directories (its view doesn't exist: see MIGRATION.md)."""
+        action = self.portal.portal_types.directory.getActionObject('object/collective_contact_import')
+        self.assertEqual((action.title, action.permissions, action.getActionExpression()),
+                         ('Import', ('Modify portal content',),
+                          'string:${object_url}/collective_contact_importexport_import_view'))
+
     def test_browserlayer(self):
         """Test that ICollectiveContactImportexportLayer is registered."""
         self.assertIn(

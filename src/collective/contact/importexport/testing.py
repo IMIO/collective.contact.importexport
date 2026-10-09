@@ -1,3 +1,4 @@
+from plone.app.robotframework.testing import REMOTE_LIBRARY_BUNDLE_FIXTURE
 from plone.app.testing import applyProfile
 from plone.app.testing import FunctionalTesting
 from plone.app.testing import IntegrationTesting
@@ -5,6 +6,7 @@ from plone.app.testing import PLONE_FIXTURE
 from plone.app.testing import PloneSandboxLayer
 from plone.app.testing import setRoles
 from plone.app.testing import TEST_USER_ID
+from plone.testing import zope
 from zope.globalrequest import setLocal
 
 import collective.contact.core
@@ -41,4 +43,10 @@ COLLECTIVE_CONTACT_IMPORTEXPORT_INTEGRATION_TESTING = IntegrationTesting(
 COLLECTIVE_CONTACT_IMPORTEXPORT_FUNCTIONAL_TESTING = FunctionalTesting(
     bases=(COLLECTIVE_CONTACT_IMPORTEXPORT_FIXTURE,),
     name='CollectiveContactImportexportLayer:FunctionalTesting'
+)
+
+
+ACCEPTANCE = FunctionalTesting(
+    bases=(COLLECTIVE_CONTACT_IMPORTEXPORT_FIXTURE, REMOTE_LIBRARY_BUNDLE_FIXTURE, zope.WSGI_SERVER_FIXTURE),
+    name='CollectiveContactImportexportLayer:AcceptanceTesting'
 )

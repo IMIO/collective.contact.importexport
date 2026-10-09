@@ -35,6 +35,12 @@ class TestInitialization(PipelineTestCase):
         with self.assertRaisesRegex(Exception, 'Directory not found'):
             self.run_pipeline(last_section='initialization', replacements={'directory_path =': 'directory_path = nothing'})
 
+    def test_initialization_log_handlers(self):
+        """The log file handlers of the previous imports are removed: lines are written once."""
+        self.run_pipeline(organizations=[{'_id': '1', 'title': u'Commune', 'organization_type': u'Commune'}])
+        self.run_pipeline(organizations=[{'_id': '1', 'title': u'CPAS', 'organization_type': u'CPAS'}])
+        self.assertEqual(read_log(self.tmpdir, 'ie_shortlog.log').count(u"'O' =>"), 1)
+
 
 class TestCommonInputChecks(PipelineTestCase):
 
@@ -105,6 +111,22 @@ class TestCommonInputChecks(PipelineTestCase):
             with self.assertRaisesRegex(Exception, message):
                 self.run_pipeline(last_section='common_input_checks', **rows)
 
+        # newlines replaced by hyphens and enterprise number cleaned
+        replacements = {'organizations_fieldnames = _id': 'organizations_fieldnames = enterprise_number _id',
+                        'organization_booleans =': 'organization_hyphen_newline = title street\norganization_booleans ='}
+        organizations = [{'enterprise_number': u'BE 0123.456.749', '_id': '1', 'title': u'IMIO\nIntercommunale',
+                          'street': u'Rue Léon Morel\n\n', 'organization_type': u'Intercommunale'}]
+        items = self.run_pipeline(last_section='common_input_checks', organizations=organizations,
+                                  replacements=replacements)
+        self.assertEqual((items[0]['title'], items[0]['street'], items[0]['enterprise_number']),
+                         (u'IMIO - Intercommunale', u'Rue Léon Morel', u'BE0123456749'))
+
+    def test_common_input_checks_default_encoding(self):
+        """The empty csv_encoding of the default pipeline reads utf-8."""
+        items = self.run_pipeline(last_section='common_input_checks', replacements={'csv_encoding =': 'csv_encoding ='},
+                                  organizations=[{'_id': '1', 'title': u'Liège', 'organization_type': u'Commune'}])
+        self.assertEqual(items[0]['title'], u'Liège')
+
 
 class TestRelationsInserter(PipelineTestCase):
 
@@ -158,6 +180,12 @@ class TestUpdatePathInserter(PipelineTestCase):
         with self.assertRaisesRegex(Exception, 'multiple of 4'):
             self.run_pipeline(last_section='updatepathinserter',
                               replacements={uniques: 'organization_uniques = _uid UID'})
+        # a search on internal_number needs the collective.behavior.internalnumber behavior
+        with self.assertRaisesRegex(Exception, 'The internalnumber behavior is not defined on type organization'):
+            self.run_pipeline(last_section='updatepathinserter', organizations=[
+                {'internal_number': u'ORG-1', '_id': '1', 'title': u'Commune', 'organization_type': u'Commune'}],
+                replacements={'organizations_fieldnames = _id': 'organizations_fieldnames = internal_number _id',
+                              uniques: 'organization_uniques = internal_number internal_number python:True python:False'})
 
 
 class TestParentPathInserter(PipelineTestCase):

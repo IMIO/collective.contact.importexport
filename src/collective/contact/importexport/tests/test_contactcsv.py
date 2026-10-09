@@ -1,5 +1,8 @@
 from collective.contact.importexport.blueprints.contactcsv import open_csv
 from collective.contact.importexport.tests.base import PipelineTestCase
+from collective.transmogrifier.transmogrifier import configuration_registry
+from collective.transmogrifier.transmogrifier import Transmogrifier
+from imio.pyutils.system import load_var
 from unittest import mock
 
 import os
@@ -41,6 +44,17 @@ class TestCSVDiskSourceSection(PipelineTestCase):
             'organizations_filename = organizations.csv': 'organizations_filename = {}'.format(
                 os.path.join(self.tmpdir, 'absolute.csv'))})
         self.assertEqual(items[0]['title'], u'é')
+        # a latin-1 file read as utf-8 (Excel export)
+        filepath = self.prepare_pipeline(
+            last_section='common_input_checks', replacements={'csv_encoding =': 'csv_encoding = utf8'},
+            organizations=[{'_id': '1', 'title': u'Liège', 'organization_type': u'Commune'}])
+        with open(os.path.join(self.tmpdir, 'organizations.csv'), encoding='utf-8') as csv_file:
+            text = csv_file.read()
+        with open(os.path.join(self.tmpdir, 'organizations.csv'), 'w', encoding='latin-1') as csv_file:
+            csv_file.write(text)
+        configuration_registry.registerConfiguration('collective.contact.importexport.tests.latin', u'', u'', filepath)
+        with self.assertRaises(UnicodeDecodeError):
+            Transmogrifier(self.portal)('collective.contact.importexport.tests.latin')
         # missing file
         with self.assertRaisesRegex(Exception, "Cannot open file '{}".format(self.tmpdir)):
             self.run_pipeline(sections=sections, replacements={'persons.csv': 'unknown.csv'})
@@ -98,6 +112,19 @@ class TestCSVSshSourceSection(PipelineTestCase):
                         return_value=([], ['error'], 1)):
             with self.assertRaisesRegex(Exception, 'Cannot list server files'):
                 self.run_pipeline(sections=self.sections, replacements=self.replacements)
+        # a committed import stores the set in the registry file: the next import skips it
+        sections = ['initialization', 'csv_ssh_source', 'csv_reader', 'common_input_checks', 'dependencysorter',
+                    'relationsinserter', 'updatepathinserter', 'parentpathinserter', 'moveobject', 'pathinserter',
+                    'constructor', 'schemaupdater', 'reindexobject', 'short_log', 'lastsection']
+        self.portal.REQUEST.set('_pipeline_commit_', True)
+        with mock.patch('collective.contact.importexport.blueprints.contactcsv.runCommand', side_effect=self.fake_ssh):
+            items = self.run_pipeline(sections=sections, organizations=organizations, replacements=self.replacements)
+            self.assertEqual([(item['_set'], item['_act']) for item in items[1:]], [('20991231-2359', 'new')])
+            registry = {}
+            load_var(self.registry_path, registry)
+            self.assertEqual(registry['20991231-2359']['O'], {'nb': 1, 'N': 1, 'U': 0, 'D': 0, 'e': 0})
+            items = self.run_pipeline(sections=sections, organizations=organizations, replacements=self.replacements)
+        self.assertEqual(items, [])
 
 
 class TestCSVReaderSection(PipelineTestCase):

@@ -1,10 +1,16 @@
+from AccessControl import Unauthorized
 from collective.contact.importexport.interfaces import ICollectiveContactImportexportLayer
 from collective.contact.importexport.tests.base import PipelineTestCase
 from plone import api
+from plone.app.testing import logout
+from plone.app.testing import SITE_OWNER_NAME
+from plone.app.testing import SITE_OWNER_PASSWORD
+from plone.testing.zope import Browser
 from unittest import mock
 from zope.interface import alsoProvides
 
 import os
+import unittest
 
 
 def read_log(directory, filename):
@@ -34,3 +40,19 @@ class TestExecutePipeline(PipelineTestCase):
         self.assertNotIn('SKIPPING', read_log(self.tmpdir, 'ie_input_errors.log'))
         self.assertTrue(request.get('_pipeline_commit_'))
         self.assertTrue(os.path.exists(os.path.join(self.tmpdir, 'ie_shortlog_commit.log')))
+        # only managers can run the import
+        logout()
+        with self.assertRaises(Unauthorized):
+            self.portal.restrictedTraverse('@@execute-contact-pipeline')
+
+    @unittest.expectedFailure
+    def test_call_published(self):
+        """Plone 6 regression: plone.protect aborts the import of a GET without CSRF token (MIGRATION.md)."""
+        self.prepare_pipeline(organizations=[{'_id': '1', 'title': u'Commune', 'organization_type': u'Commune'}],
+                              filename='pipeline.cfg')
+        browser = Browser(self.layer['app'])
+        browser.addHeader('Authorization', 'Basic {}:{}'.format(SITE_OWNER_NAME, SITE_OWNER_PASSWORD))
+        with mock.patch.dict(os.environ, {'INSTANCE_HOME': os.path.join(self.tmpdir, 'parts', 'instance')}):
+            browser.open(self.portal.absolute_url() + '/@@execute-contact-pipeline')
+        browser.open(self.directory.absolute_url() + '/commune')
+        self.assertIn('Commune', browser.contents)

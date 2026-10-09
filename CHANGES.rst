@@ -2,11 +2,11 @@ Changelog
 =========
 
 
-1.0.1 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Migrate to Plone 6 / drop Plone 4 compatibility
+  [laulaz]
 
 1.0.0 (2026-10-09)
 ------------------

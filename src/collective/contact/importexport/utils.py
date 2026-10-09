@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from collective.contact.core.behaviors import InvalidEmailAddress
 from collective.contact.core.behaviors import validate_email
 from collective.contact.importexport import e_logger
@@ -28,18 +27,18 @@ def log_error(item, msg, level='error'):
 
 def digit(phone):
     # filter with str.isdigit or unicode.isdigit
-    return filter(type(phone).isdigit, phone)
+    return ''.join(filter(str.isdigit, phone))
 
 
 def alphanum(value):
     # filter with str.isalnum or unicode.isalnum
-    return filter(type(value).isalnum, value)
+    return ''.join(filter(str.isalnum, value))
 
 
 def get_country_code(item, countrykey, default_country, languages=(u'en', )):
     """ Get country code """
     # get country in lower case without accent
-    country = unicodedata.normalize('NFD', item[countrykey].lower()).encode('ascii', 'ignore')
+    country = unicodedata.normalize('NFD', item[countrykey].lower()).encode('ascii', 'ignore').decode()
     if not country:
         return None
     # get english country translation
@@ -122,7 +121,7 @@ def valid_email(item, emailkey):
     emailv = item[emailkey].strip(',; ')
     if not emailv:
         return u''
-    emailv = unicodedata.normalize('NFD', emailv.lower()).encode('ascii', 'ignore')
+    emailv = unicodedata.normalize('NFD', emailv.lower()).encode('ascii', 'ignore').decode()
     try:
         validate_email(emailv)
     except InvalidEmailAddress:
@@ -149,7 +148,7 @@ def send_report(portal, lines):
     for filename in ('ie_input_errors.log', 'ie_shortlog.log'):
         path = os.path.join(annot['wp'], filename)
         add_attachment(msg, filename, filepath=path)
-    mfrom = portal.getProperty('email_from_address')
+    mfrom = api.portal.get_registry_record('plone.email_from_address')
     ret, error = send_email(msg, u'Contact import report', mfrom, emails)
     if not ret:
         with open(os.path.join(annot['wp'], 'ie_input_errors.log'), 'a') as f:

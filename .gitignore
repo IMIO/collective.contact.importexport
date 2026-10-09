@@ -33,5 +33,9 @@ report.html
 !.gitattributes
 !.gitignore
 !.gitkeep
-!.travis.yml
 !src/collective
+.plone-version
+.plone*
+checkversion*.html
+.python-version
+pyvenv.cfg

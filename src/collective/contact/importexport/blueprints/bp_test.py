@@ -1,11 +1,13 @@
-# -*- coding: utf-8 -*-
 
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from zope.annotation.interfaces import IAnnotations
-from zope.interface import classProvides
-from zope.interface import implements
+from zope.interface import implementer
+from zope.interface import provider
+
 import logging
+
+
 logger = logging.getLogger('transmo')
 logger.setLevel(20)
 for handler in logging.root.handlers:
@@ -14,9 +16,9 @@ for handler in logging.root.handlers:
         break
 
 
-class Source1(object):
-    classProvides(ISectionBlueprint)
-    implements(ISection)
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class Source1:
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -37,9 +39,9 @@ class Source1(object):
         logger.info('{0} after elem loop'.format(self.name))
 
 
-class Source2(object):
-    classProvides(ISectionBlueprint)
-    implements(ISection)
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class Source2:
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -61,9 +63,9 @@ class Source2(object):
         logger.info('{0} after elem loop'.format(self.name))
 
 
-class Constructor1(object):
-    classProvides(ISectionBlueprint)
-    implements(ISection)
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class Constructor1:
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
@@ -78,9 +80,9 @@ class Constructor1(object):
         logger.info('{0} after previous loop'.format(self.name))
 
 
-class Constructor2(object):
-    classProvides(ISectionBlueprint)
-    implements(ISection)
+@provider(ISectionBlueprint)
+@implementer(ISection)
+class Constructor2:
 
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous

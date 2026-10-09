@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
 
 import re
+
 
 ANNOTATION_KEY = 'collective.contact.importexport'
 

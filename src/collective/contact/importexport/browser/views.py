@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 from collective.contact.importexport.scripts.execute_pipeline import execute_pipeline
 from imio.helpers.transmogrifier import get_main_path

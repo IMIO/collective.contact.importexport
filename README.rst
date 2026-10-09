@@ -68,6 +68,13 @@ Install collective.contact.importexport by adding it to your buildout::
 and then running ``bin/buildout``
 
 
+Versions
+--------
+
+- Version 2.x is for Plone 6.1+ only
+- Version 1.x is for Plone 4
+
+
 Contribute
 ----------
 

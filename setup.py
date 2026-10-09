@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Installer for the collective.contact.importexport package."""
 
 from setuptools import find_packages
@@ -14,16 +13,19 @@ long_description = '\n\n'.join([
 
 setup(
     name='collective.contact.importexport',
-    version='1.0.1.dev0',
+    version='2.0.0.dev0',
+    python_requires='>=3.10',
     description="An add-on for Plone for collective.contact suite",
     long_description=long_description,
     # Get more from https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Plone",
-        "Framework :: Plone :: 4.3",
+        "Framework :: Plone :: Addon",
+        "Framework :: Plone :: 6.1",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.13",
         "Operating System :: OS Independent",
         "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     ],
@@ -40,10 +42,8 @@ setup(
     install_requires=[
         'collective.contact.core',
         'collective.transmogrifier',
-        'future',
-        'imio.helpers>=0.40',
+        'imio.helpers>=0.71',
         'imio.pyutils',
-        'ipdb',
         'phonenumbers',
         'plone.api',
         'plone.app.transmogrifier',
@@ -54,14 +54,10 @@ setup(
     ],
     extras_require={
         'test': [
+            'collective.contact.core[test]',
             'collective.taxonomy',
             'plone.app.testing',
-            # Plone KGS does not use this version, because it would break
-            # Remove if your package shall be part of coredev.
-            # plone_coredev tests as of 2016-04-01.
-            'plone.testing',
             'plone.app.contenttypes',
-            'plone.app.robotframework[debug]',
         ],
     },
     entry_points="""

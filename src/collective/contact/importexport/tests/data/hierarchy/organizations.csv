@@ -1,0 +1,5 @@
+Inactif,ID,ID parent,Intitulé,Description,Type,Adresse du parent,Rue,Numéro,Complément d'adresse,Code postal,Localité,Tél,Tél portable,Fax,Courriel,Site web,Région,Pays,UID
+0,1,,IMIO,Intercommunale de Mutualisation Informatique et Organisationnelle,Intercommunale,0,Rue Léon Morel,1,,5032,Isnes,081/586.100,,,contact@imio.be,https://www.imio.be,,Belgique,
+0,2,1,Département Logiciels,,Département,1,,,,,,,,,,,,,
+0,3,2,Cellule Courrier,Gestion du courrier,Cellule,1,,,,,,,,,courrier@imio.be,,,,
+1,4,1,Service Formations,Remplacé par la Cellule Courrier,Service,1,,,,,,,,,,,,,

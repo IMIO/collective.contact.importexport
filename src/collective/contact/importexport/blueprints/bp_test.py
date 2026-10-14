@@ -1,4 +1,3 @@
-
 from collective.transmogrifier.interfaces import ISection
 from collective.transmogrifier.interfaces import ISectionBlueprint
 from zope.annotation.interfaces import IAnnotations
@@ -8,7 +7,7 @@ from zope.interface import provider
 import logging
 
 
-logger = logging.getLogger('transmo')
+logger = logging.getLogger("transmo")
 logger.setLevel(20)
 for handler in logging.root.handlers:
     if handler.level == 30 and handler.formatter is not None:
@@ -23,20 +22,20 @@ class Source1:
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.name = name
-        self.source_list = options.get('source-list', '').split()
-        self.storage = IAnnotations(transmogrifier).setdefault('source1', {})
-        logger.info('{0} init'.format(name))
+        self.source_list = options.get("source-list", "").split()
+        self.storage = IAnnotations(transmogrifier).setdefault("source1", {})
+        logger.info("{0} init".format(name))
 
     def __iter__(self):
-        logger.info('{0} before previous loop'.format(self.name))
+        logger.info("{0} before previous loop".format(self.name))
         for item in self.previous:
-            logger.info('{0} yield previous'.format(self.name))
+            logger.info("{0} yield previous".format(self.name))
             yield item
-        logger.info('{0} after previous loop'.format(self.name))
+        logger.info("{0} after previous loop".format(self.name))
         for elem in self.source_list:
-            logger.info('{0} yield elem'.format(self.name))
+            logger.info("{0} yield elem".format(self.name))
             yield elem
-        logger.info('{0} after elem loop'.format(self.name))
+        logger.info("{0} after elem loop".format(self.name))
 
 
 @provider(ISectionBlueprint)
@@ -46,21 +45,21 @@ class Source2:
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.name = name
-        self.source_list = options.get('source-list', '').split()
-        self.storage = IAnnotations(transmogrifier).get('source1')
-        logger.info('{0} init'.format(name))
+        self.source_list = options.get("source-list", "").split()
+        self.storage = IAnnotations(transmogrifier).get("source1")
+        logger.info("{0} init".format(name))
 
     def __iter__(self):
-        logger.info('{0} before previous loop'.format(self.name))
+        logger.info("{0} before previous loop".format(self.name))
         for item in self.previous:
-            logger.info('{0} yield previous'.format(self.name))
+            logger.info("{0} yield previous".format(self.name))
             continue
             yield item
-        logger.info('{0} after previous loop'.format(self.name))
+        logger.info("{0} after previous loop".format(self.name))
         for elem in self.source_list:
-            logger.info('{0} yield elem'.format(self.name))
+            logger.info("{0} yield elem".format(self.name))
             yield elem
-        logger.info('{0} after elem loop'.format(self.name))
+        logger.info("{0} after elem loop".format(self.name))
 
 
 @provider(ISectionBlueprint)
@@ -70,14 +69,14 @@ class Constructor1:
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.name = name
-        logger.info('{0} init'.format(name))
+        logger.info("{0} init".format(name))
 
     def __iter__(self):
-        logger.info('{0} before previous loop'.format(self.name))
+        logger.info("{0} before previous loop".format(self.name))
         for item in self.previous:
-            logger.info('{0} yield previous'.format(self.name))
+            logger.info("{0} yield previous".format(self.name))
             yield item
-        logger.info('{0} after previous loop'.format(self.name))
+        logger.info("{0} after previous loop".format(self.name))
 
 
 @provider(ISectionBlueprint)
@@ -87,14 +86,14 @@ class Constructor2:
     def __init__(self, transmogrifier, name, options, previous):
         self.previous = previous
         self.name = name
-        logger.info('{0} init'.format(name))
+        logger.info("{0} init".format(name))
 
     def __iter__(self):
-        logger.info('{0} before previous loop'.format(self.name))
+        logger.info("{0} before previous loop".format(self.name))
         for item in self.previous:
-            logger.info('{0} yield previous'.format(self.name))
+            logger.info("{0} yield previous".format(self.name))
             yield item
-        logger.info('{0} after previous loop'.format(self.name))
+        logger.info("{0} after previous loop".format(self.name))
 
 
 """

@@ -7,10 +7,11 @@ name: Push tests
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +23,7 @@ jobs:
 #          - python: 3.10.11
 #            plone: "6.0"
           - python: 3.13.1
-            plone: "6.1"
+            plone: "6.2"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,13 +51,13 @@ jobs:
         run: |
           bin/test -t !robot
   coverage:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
         include:
           - python: 3.13.1
-            plone: "6.1"
+            plone: "6.2"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

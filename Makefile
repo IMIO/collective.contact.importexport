@@ -4,7 +4,7 @@
 # The original Makefile can be found on https://github.com/IMIO/scripts-buildout
 
 SHELL=/bin/bash
-plones=6.1
+plones=6.1 6.2
 b_o=
 old_plone=$(shell [ -e .plone-version ] && cat .plone-version)
 
@@ -24,6 +24,9 @@ endif
 
 ifndef python
 ifeq ($(plone),6.1)
+  python=3.13
+endif
+ifeq ($(plone),6.2)
   python=3.13
 endif
 endif
@@ -57,6 +60,16 @@ buildout: oneof-plone bin/buildout  ## Runs setup and buildout
 test: oneof-plone bin/buildout  ## run bin/test without robot
 	# can be run by example with: make test opt='-t "settings"'
 	bin/test -t \!robot ${opt}
+
+.PHONY: robot
+robot: oneof-plone bin/buildout  ## run robot tests in headless firefox
+	# can be run by example with: make robot opt='-t "*import*"'
+	MOZ_HEADLESS=1 bin/test --all -t robot ${opt}
+
+.PHONY: robot-server
+robot-server:  ## Starts robot server (layer=<layer name in testing.py>, default ACCEPTANCE)
+	# run a robot file against it with: ZSERVER_PORT=$${ZSERVER_PORT:-55001} bin/robot src/collective/contact/importexport/tests/robot/test_import.robot
+	env ZSERVER_HOST=localhost ZSERVER_PORT=$${ZSERVER_PORT:-55001} bin/robot-server --no-reload collective.contact.importexport.testing.$(or $(layer),ACCEPTANCE)
 
 .PHONY: cleanall
 cleanall:  ## Cleans all installed buildout files

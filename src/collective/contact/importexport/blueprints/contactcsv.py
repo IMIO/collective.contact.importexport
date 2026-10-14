@@ -22,11 +22,11 @@ import os
 
 def open_csv(transmogrifier, filename):
     """Opens a csv file as text, using the pipeline csv_encoding option (default utf-8)."""
-    encoding = transmogrifier['config'].get('csv_encoding') or 'utf-8'
+    encoding = transmogrifier["config"].get("csv_encoding") or "utf-8"
     filename = resolvePackageReferenceOrFile(filename)
     if not os.path.isfile(filename):
         return None
-    return open(filename, encoding=encoding, newline='')
+    return open(filename, encoding=encoding, newline="")
 
 
 @provider(ISectionBlueprint)
@@ -45,25 +45,25 @@ class CSVDiskSourceSection:
         self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
         for typ in MANAGED_TYPES:
-            filename = safe_text(options.get('{}s_filename'.format(typ), ''))
+            filename = safe_text(options.get("{}s_filename".format(typ), ""))
             if filename:
                 if not os.path.isabs(filename):
-                    filename = os.path.join(self.storage['wp'], filename)
+                    filename = os.path.join(self.storage["wp"], filename)
                 file_ = open_csv(transmogrifier, filename)
                 if file_ is None:
                     raise Exception("Cannot open file '{}'".format(filename))
-                self.storage['csv_files'][typ] = file_
-        if self.storage['csv_files']['organization'] is None and self.storage['csv_files']['person'] is None:
-            raise Exception('You must specify at least organizations or persons CSV')
-        self.sett = datetime.now().strftime('%Y%m%d-%H%M')
-        if self.sett in self.storage['set_lst']:
+                self.storage["csv_files"][typ] = file_
+        if self.storage["csv_files"]["organization"] is None and self.storage["csv_files"]["person"] is None:
+            raise Exception("You must specify at least organizations or persons CSV")
+        self.sett = datetime.now().strftime("%Y%m%d-%H%M")
+        if self.sett in self.storage["set_lst"]:
             raise Exception("This set '{}' is already in set list".format(self.sett))
-        self.storage['set_lst'].update({self.sett: {'mode': 'disk'}})
+        self.storage["set_lst"].update({self.sett: {"mode": "disk"}})
 
     def __iter__(self):
         for item in self.previous:
             yield item
-        yield {'set': self.sett}
+        yield {"set": self.sett}
 
 
 @provider(ISectionBlueprint)
@@ -91,38 +91,38 @@ class CSVSshSourceSection:
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
 
         # setup
-        servername = safe_text(options.get('servername', ''))
-        username = safe_text(options.get('username', ''))
-        files_path = safe_text(options.get('server_files_path') or options.get('server_path', ''))
-        self.registry_filename = safe_text(options.get('registry_filename', ''))
-        transfer_path = safe_text(options.get('transfer_path', '')) or u'/tmp'
+        servername = safe_text(options.get("servername", ""))
+        username = safe_text(options.get("username", ""))
+        files_path = safe_text(options.get("server_files_path") or options.get("server_path", ""))
+        self.registry_filename = safe_text(options.get("registry_filename", ""))
+        transfer_path = safe_text(options.get("transfer_path", "")) or "/tmp"
         if not os.path.isabs(transfer_path):
-            transfer_path = os.path.join(self.storage['wp'], transfer_path)
+            transfer_path = os.path.join(self.storage["wp"], transfer_path)
         if not os.path.exists(transfer_path):
             raise Exception("scp transfert path '{}' doesn't exist".format(transfer_path))
         if not servername or not username or not files_path or not self.registry_filename:
-            logger.error('Missing server parameters or registry in csv_ssh_source section')
-            raise Exception('Missing server parameters or registry in csv_ssh_source section')
-        sshcmd = u'ssh {}@{} "{{}}"'.format(username, servername)
-        scpcmd = u'scp {}@{}:{{}} {}'.format(username, servername, transfer_path)
+            logger.error("Missing server parameters or registry in csv_ssh_source section")
+            raise Exception("Missing server parameters or registry in csv_ssh_source section")
+        sshcmd = 'ssh {}@{} "{{}}"'.format(username, servername)
+        scpcmd = "scp {}@{}:{{}} {}".format(username, servername, transfer_path)
         if not os.path.dirname(self.registry_filename):
-            self.registry_filename = os.path.join(self.storage['wp'], self.registry_filename)
-        self.storage['registry_filename'] = self.registry_filename
+            self.registry_filename = os.path.join(self.storage["wp"], self.registry_filename)
+        self.storage["registry_filename"] = self.registry_filename
         self.registry = {}
         load_var(self.registry_filename, self.registry)
-        self.storage['registry_dic'] = self.registry
-        last_done = self.registry and max(self.registry) or ''
+        self.storage["registry_dic"] = self.registry
+        last_done = self.registry and max(self.registry) or ""
 
         # get files list
-        (out, err, code) = runCommand(sshcmd.format(u'cd {}; ls'.format(files_path)))
+        (out, err, code) = runCommand(sshcmd.format("cd {}; ls".format(files_path)))
         if code:
-            logger.error("ERR:{}".format(''.join(err)))
-            raise Exception('Cannot list server files')
-        files = dict([(fil.strip('\n'), '') for fil in out])
+            logger.error("ERR:{}".format("".join(err)))
+            raise Exception("Cannot list server files")
+        files = dict([(fil.strip("\n"), "") for fil in out])
 
         # take newer files
         to_do = []
-        for dt in sorted([fil[:-4] for fil in files if fil.endswith('.txt')], reverse=True):
+        for dt in sorted([fil[:-4] for fil in files if fil.endswith(".txt")], reverse=True):
             if dt <= last_done:
                 break
             to_do.insert(0, dt)
@@ -130,14 +130,14 @@ class CSVSshSourceSection:
         # transfer files
         self.input_files = []
         for dt in to_do:
-            rec = [dt, '', '', '']
+            rec = [dt, "", "", ""]
             for i, typ in enumerate(MANAGED_TYPES, 1):
-                filename = '{}_{}s.csv'.format(dt, typ)
+                filename = "{}_{}s.csv".format(dt, typ)
                 if filename in files:
                     cmd = scpcmd.format(os.path.join(files_path, filename))
                     (out, err, code) = runCommand(cmd)
                     if code:
-                        logger.error("ERR:{}".format(''.join(err)))
+                        logger.error("ERR:{}".format("".join(err)))
                         raise Exception("Cannot run command '{}'".format(cmd))
                     rec[i] = os.path.join(transfer_path, filename)
             self.input_files.append(rec)
@@ -152,13 +152,13 @@ class CSVSshSourceSection:
                     file_ = open_csv(self.transmogrifier, filename)
                     if file_ is None:
                         raise Exception("Cannot open file '{}'".format(filename))
-                    self.storage['csv_files'][typ] = file_
-            if self.storage['csv_files']['organization'] is None and self.storage['csv_files']['person'] is None:
-                raise Exception('You must specify at least organizations or persons CSV')
-            if rec[0] in self.storage['set_lst']:
+                    self.storage["csv_files"][typ] = file_
+            if self.storage["csv_files"]["organization"] is None and self.storage["csv_files"]["person"] is None:
+                raise Exception("You must specify at least organizations or persons CSV")
+            if rec[0] in self.storage["set_lst"]:
                 raise Exception("This set '{}' is already in set list".format(rec[0]))
-            self.storage['set_lst'].update({rec[0]: {'mode': 'ssh'}})
-            yield {'set': rec[0]}
+            self.storage["set_lst"].update({rec[0]: {"mode": "ssh"}})
+            yield {"set": rec[0]}
 
 
 @provider(ISectionBlueprint)
@@ -179,57 +179,71 @@ class CSVReaderSection:
         self.previous = previous
         self.transmogrifier = transmogrifier
         self.storage = IAnnotations(transmogrifier).get(ANNOTATION_KEY)
-        self.csv_headers = Condition(options.get('csv_headers', 'python:True'), transmogrifier, name, options)
-        self.dialect = safe_text(options.get('dialect', 'excel'))
-        self.roe = bool(int(options.get('raise_on_error', '1')))
+        self.csv_headers = Condition(options.get("csv_headers", "python:True"), transmogrifier, name, options)
+        self.dialect = safe_text(options.get("dialect", "excel"))
+        self.roe = bool(int(options.get("raise_on_error", "1")))
         self.fmtparam = dict(
-            (key[len('fmtparam-'):],
-             Expression(value, transmogrifier, name, options)(
-                 options, key=key[len('fmtparam-'):])) for key, value
-            in options.items() if key.startswith('fmtparam-'))
+            (
+                key[len("fmtparam-") :],
+                Expression(value, transmogrifier, name, options)(options, key=key[len("fmtparam-") :]),
+            )
+            for key, value in options.items()
+            if key.startswith("fmtparam-")
+        )
 
     def __iter__(self):
         for item in self.previous:
             # we update 'set_lst' for lastsection
-            self.storage['set_lst'][item['set']].update({tp: {'nb': 0, 'N': 0, 'U': 0, 'D': 0, 'e': 0}
-                                                         for tp in ('O', 'P', 'HP')})
+            self.storage["set_lst"][item["set"]].update(
+                {tp: {"nb": 0, "N": 0, "U": 0, "D": 0, "e": 0} for tp in ("O", "P", "HP")}
+            )
             for typ in MANAGED_TYPES:
-                if self.storage['csv_files'][typ] is None:
+                if self.storage["csv_files"][typ] is None:
                     continue
-                self.storage['ids'][typ][item['set']] = {}  # we add set identifier (to differentiate multiple files)
-                for item2 in self.rows(typ, item['set']):
+                self.storage["ids"][typ][item["set"]] = {}  # we add set identifier (to differentiate multiple files)
+                for item2 in self.rows(typ, item["set"]):
                     yield item2
             continue  # skip item containing set
             yield item
 
     def rows(self, typ, sett):
-        o_logger.info(u"Reading '{}' '{}' ({})".format(sett, typ, self.storage['csv_files'][typ].name))
-        reader = csv.DictReader(self.storage['csv_files'][typ], dialect=self.dialect,
-                                fieldnames=self.storage['fieldnames'][typ], restkey='_rest',
-                                restval='__NO_CO_LU_MN__', **self.fmtparam)
+        o_logger.info("Reading '{}' '{}' ({})".format(sett, typ, self.storage["csv_files"][typ].name))
+        reader = csv.DictReader(
+            self.storage["csv_files"][typ],
+            dialect=self.dialect,
+            fieldnames=self.storage["fieldnames"][typ],
+            restkey="_rest",
+            restval="__NO_CO_LU_MN__",
+            **self.fmtparam,
+        )
         for item in reader:
-            item['_type'] = typ
-            item['_set'] = sett
-            item['_ln'] = reader.line_num
+            item["_type"] = typ
+            item["_set"] = sett
+            item["_ln"] = reader.line_num
             # check fieldnames length on first line
             if reader.line_num == 1:
-                reader.restval = u''
-                if '_rest' in item:
-                    log_error(item, u'STOPPING: some columns are not defined in fieldnames: {}'.format(item['_rest']),
-                              level='critical')
+                reader.restval = ""
+                if "_rest" in item:
+                    log_error(
+                        item,
+                        "STOPPING: some columns are not defined in fieldnames: {}".format(item["_rest"]),
+                        level="critical",
+                    )
                     if self.roe:
-                        raise Exception(u'Some columns for {} are not defined in fieldnames: {}'.format(typ,
-                                                                                                        item['_rest']))
+                        raise Exception(
+                            "Some columns for {} are not defined in fieldnames: {}".format(typ, item["_rest"])
+                        )
                     break
-                extra_cols = [key for (key, val) in item.items() if val == '__NO_CO_LU_MN__']
+                extra_cols = [key for (key, val) in item.items() if val == "__NO_CO_LU_MN__"]
                 if extra_cols:
-                    log_error(item, u'STOPPING: to much columns defined in fieldnames: {}'.format(extra_cols),
-                              level='critical')
+                    log_error(
+                        item, "STOPPING: to much columns defined in fieldnames: {}".format(extra_cols), level="critical"
+                    )
                     if self.roe:
-                        raise Exception(u'To much columns for {} defined in fieldnames: {}'.format(typ, extra_cols))
+                        raise Exception("To much columns for {} defined in fieldnames: {}".format(typ, extra_cols))
                     break
                 # pass headers if any
                 if self.csv_headers(None):
                     continue
             yield item
-        self.storage['csv_files'][typ].close()
+        self.storage["csv_files"][typ].close()

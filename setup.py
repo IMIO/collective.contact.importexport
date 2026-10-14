@@ -23,6 +23,7 @@ setup(
         "Framework :: Plone",
         "Framework :: Plone :: Addon",
         "Framework :: Plone :: 6.1",
+        "Framework :: Plone :: 6.2",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.13",
@@ -35,7 +36,6 @@ setup(
     url='https://pypi.python.org/pypi/collective.contact.importexport',
     license='GPL version 2',
     packages=find_packages('src', exclude=['ez_setup']),
-    namespace_packages=['collective', 'collective.contact'],
     package_dir={'': 'src'},
     include_package_data=True,
     zip_safe=False,
@@ -56,6 +56,7 @@ setup(
         'test': [
             'collective.contact.core[test]',
             'collective.taxonomy',
+            'plone.app.robotframework',
             'plone.app.testing',
             'plone.app.contenttypes',
         ],

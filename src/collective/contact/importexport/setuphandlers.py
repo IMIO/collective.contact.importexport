@@ -1,4 +1,3 @@
-
 from plone import api
 from plone.base.interfaces import INonInstallable
 from zope.interface import implementer
@@ -10,7 +9,7 @@ class HiddenProfiles(object):
     def getNonInstallableProfiles(self):
         """Hide uninstall profile from site-creation and quickinstaller"""
         return [
-            'collective.contact.importexport:uninstall',
+            "collective.contact.importexport:uninstall",
         ]
 
 
@@ -18,9 +17,10 @@ def post_install(context):
     """Post install script"""
     # Do something at the end of the installation of this package.
 
-    if not api.portal.get_registry_record('collective.contact.importexport.interfaces.IPipelineConfiguration.pipeline'):
+    if not api.portal.get_registry_record("collective.contact.importexport.interfaces.IPipelineConfiguration.pipeline"):
         api.portal.set_registry_record(
-            'collective.contact.importexport.interfaces.IPipelineConfiguration.pipeline', u"""[transmogrifier]
+            "collective.contact.importexport.interfaces.IPipelineConfiguration.pipeline",
+            """[transmogrifier]
 pipeline =
     initialization
     csv_disk_source
@@ -162,7 +162,8 @@ condition = python:True
 [breakpoint]
 blueprint = collective.contact.importexport.breakpoint
 condition = python:item.get('_id', u'') == u'0'
-""")  # noqa: E501
+""",
+        )  # noqa: E501
 
 
 def uninstall(context):

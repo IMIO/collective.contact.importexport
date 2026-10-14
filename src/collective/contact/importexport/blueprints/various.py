@@ -1,4 +1,3 @@
-
 from collective.contact.importexport import A_S
 from collective.contact.importexport import o_logger
 from collective.contact.importexport import T_S
@@ -22,7 +21,7 @@ class BreakpointSection:
     """
 
     def __init__(self, transmogrifier, name, options, previous):
-        condition = options['condition']
+        condition = options["condition"]
         self.condition = Condition(condition, transmogrifier, name, options)
         self.previous = previous
         self.transmogrifier = transmogrifier
@@ -47,9 +46,13 @@ class ShortLog:
 
     def __iter__(self):
         for item in self.previous:
-            to_print = u"{}:{},{},{}, {}".format(item['_set'], shortcut(item['_type'], T_S), item.get('_id', ''),
-                                                 shortcut(item['_act'], A_S),
-                                                 item.get('_path', item.get('_del_path', '')))
+            to_print = "{}:{},{},{}, {}".format(
+                item["_set"],
+                shortcut(item["_type"], T_S),
+                item.get("_id", ""),
+                shortcut(item["_act"], A_S),
+                item.get("_path", item.get("_del_path", "")),
+            )
             # print(to_print, file=sys.stderr)
             o_logger.info(to_print)
             yield item
@@ -65,7 +68,7 @@ class StopSection:
     """
 
     def __init__(self, transmogrifier, name, options, previous):
-        condition = options['condition']
+        condition = options["condition"]
         self.condition = Condition(condition, transmogrifier, name, options)
         self.previous = previous
         self.transmogrifier = transmogrifier
@@ -74,5 +77,5 @@ class StopSection:
     def __iter__(self):
         for item in self.previous:
             if self.condition(item):
-                raise Exception('STOP requested')
+                raise Exception("STOP requested")
             yield item

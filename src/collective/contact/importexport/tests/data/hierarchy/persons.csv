@@ -1,0 +1,3 @@
+ID,Nom,Prénom,"Genre (M, F)",Civilité,Date naissance (AAAA/MM/JJ),Adresse du parent,Rue,Numéro,Complément d'adresse,Code postal,Localité,Tél,Tél portable,Fax,Courriel,Site web,Région,Pays,UID
+1,Dupont,Jean,M,Monsieur,1975/04/12,0,Rue de Fer,25,,5000,Namur,,0476/12.34.56,,jean.dupont@example.com,,,Belgique,
+2,Lambert,Marie,F,Madame,1982/11/03,0,Avenue Reine Astrid,10,,5000,Namur,,,,marie.lambert@example.com,,,,

@@ -1,6 +1,6 @@
 [report]
 include =
-    src/collective/*
+    src/collective/contact/importexport/*
 omit =
     */test*
     */upgrades/*

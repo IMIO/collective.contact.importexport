@@ -71,7 +71,7 @@ and then running ``bin/buildout``
 Versions
 --------
 
-- Version 2.x is for Plone 6.1+ only
+- Version 2.x is for Plone 6.2 only
 - Version 1.x is for Plone 4
 
 

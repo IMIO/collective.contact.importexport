@@ -2,11 +2,17 @@ Changelog
 =========
 
 
-1.0.1 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
-
+- Migrate to Plone 6.2 / drop Plone 4 compatibility, based on the work started by @laulaz on ``plone61``.
+  [laulaz, chris-adam]
+- Disable CSRF protection on ``@@execute-contact-pipeline`` (called by cron with GET).
+  [chris-adam]
+- Remove the Directory "Import" action (its view was removed in 1.0.0).
+  [chris-adam]
+- Dropped support for Plone versions below 6.2.
+  [chris-adam]
 
 1.0.0 (2026-10-09)
 ------------------

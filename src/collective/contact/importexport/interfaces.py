@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
 """Module where all interfaces, events and exceptions live."""
 
 from collective.contact.importexport import _
 from plone.supermodel import model
-from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope import schema
+from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 
 
 class ICollectiveContactImportexportLayer(IDefaultBrowserLayer):
@@ -16,11 +15,11 @@ class IPipelineConfiguration(model.Schema):
 
     pipeline = schema.Text(
         title=_("Pipeline to import contacts"),
-        description=_(u'Will be saved on disk as pipeline.cfg'),
+        description=_("Will be saved on disk as pipeline.cfg"),
     )
 
     emails = schema.TextLine(
         title=_("Emails list where to send report"),
-        description=_(u'Values separated by comma. If empty, no report will be send'),
+        description=_("Values separated by comma. If empty, no report will be send"),
         required=False,
     )

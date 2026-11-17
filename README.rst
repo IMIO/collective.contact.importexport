@@ -6,11 +6,11 @@
 collective.contact.importexport
 ===============================
 
-.. image:: https://travis-ci.org/IMIO/collective.contact.importexport.png
-    :target: http://travis-ci.org/IMIO/collective.contact.importexport
+.. image:: https://github.com/IMIO/collective.contact.importexport/actions/workflows/main.yml/badge.svg
+    :target: https://github.com/IMIO/collective.contact.importexport/actions/workflows/main.yml
 
-.. image:: https://coveralls.io/repos/github/IMIO/collective.contact.importexport/badge.svg?branch=master
-    :target: https://coveralls.io/github/IMIO/collective.contact.importexport?branch=master
+.. image:: https://coveralls.io/repos/github/IMIO/collective.contact.importexport/badge.svg
+    :target: https://coveralls.io/github/IMIO/collective.contact.importexport
 
 Import and export organizations and persons with csv files, there are 4 csv files:
 
@@ -66,6 +66,13 @@ Install collective.contact.importexport by adding it to your buildout::
 
 
 and then running ``bin/buildout``
+
+
+Versions
+--------
+
+- Version 2.x is for Plone 6.2 only
+- Version 1.x is for Plone 4
 
 
 Contribute

@@ -6,7 +6,7 @@
     i18n_domain="collective.contact.importexport">
 
     <browser:view
-        for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
+        for="plone.base.interfaces.siteroot.IPloneSiteRoot"
         name="execute-contact-pipeline"
         class=".views.ExecutePipeline"
         layer="collective.contact.importexport.interfaces.ICollectiveContactImportexportLayer"

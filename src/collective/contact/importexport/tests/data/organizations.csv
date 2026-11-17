@@ -1,21 +1,3 @@
-id;id_parent;title;description;activity;street;number;additional_address_details;zip_code;city;phone;cell_phone;fax;email;website;region;country
-1;;IMIO;Intercommunale de Mutualisation Informatique et Organisationnelle;L'activité d'IMIO;Rue Léon Morel;1;;5032;Isnes;081/586.100;;;contact@imio.be;http://www.imio.be;;;
-2;;Test company;My test company;Test activity;street;1;a;4000;Liège;04/123.45.67;;;no-reply@test.com;https://www.testcompany.com;;;
-3;;;;;;;;;;;;;;;;;
-4;;;;;;;;;;;;;;;;;
-5;;;;;;;;;;;;;;;;;
-6;;;;;;;;;;;;;;;;;
-7;;;;;;;;;;;;;;;;;
-8;;;;;;;;;;;;;;;;;
-9;;;;;;;;;;;;;;;;;
-10;;;;;;;;;;;;;;;;;
-11;;;;;;;;;;;;;;;;;
-12;;;;;;;;;;;;;;;;;
-13;;;;;;;;;;;;;;;;;
-14;;;;;;;;;;;;;;;;;
-15;;;;;;;;;;;;;;;;;
-16;;;;;;;;;;;;;;;;;
-17;;;;;;;;;;;;;;;;;
-18;;;;;;;;;;;;;;;;;
-19;;;;;;;;;;;;;;;;;
-20;;;;;;;;;;;;;;;;;
+id,id_parent,title,description,activity,use_parent_address,street,number,additional_address_details,zip_code,city,phone,cell_phone,fax,email,website,region,country,uid
+1,,IMIO,Intercommunale de Mutualisation Informatique et Organisationnelle,L'activité d'IMIO,False,Rue Léon Morel,1,,5032,Isnes,081/586.100,,,contact@imio.be,http://www.imio.be,,,
+2,,Test company,My test company,Test activity,False,street,1,a,4000,Liège,04/123.45.67,,,no-reply@test.com,https://www.testcompany.com,,,
